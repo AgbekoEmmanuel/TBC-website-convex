@@ -2,7 +2,6 @@ import { motion } from 'motion/react';
 import { Share2, MapPin, Smile, Instagram, Youtube, Music, Facebook, ArrowRight, Gem, Flag, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import pastorImg from '../assets/Apostle.jpg.jpeg.png';
-const storyVideo = "https://drive.google.com/uc?export=download&id=1hUMIjCGbBBre8WRzW1KGfS1Eh7tkY_j-"; 
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
 import socialsImg from '../assets/socials.jpg';
 
@@ -76,13 +75,11 @@ export function About() {
             transition={{ duration: 1 }}
             className="h-[400px] md:h-[700px] flex justify-center items-center"
           >
-            <video 
-              src={storyVideo} 
-              autoPlay 
-              loop 
-              muted 
-              playsInline 
-              className="h-full w-auto object-contain rounded-2xl border-2 border-gray-200/60"
+            <iframe 
+              src={`https://player.vimeo.com/video/1186361647?autoplay=1&loop=1&muted=1&background=1`}
+              className="w-full h-full rounded-2xl border-2 border-gray-200/60"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
             />
           </motion.div>
         </div>

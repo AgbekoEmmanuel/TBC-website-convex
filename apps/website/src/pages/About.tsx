@@ -54,24 +54,7 @@ export function About() {
   return (
     <div className="w-full font-sans">
       
-      {/* 0. Cinematic Hero Video */}
-      <section className="w-full bg-brand-900 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="relative aspect-video w-full overflow-hidden shadow-2xl bg-black"
-          >
-            <video 
-              src={introVideo} 
-              controls 
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-        </div>
-      </section>
-      
+
       {/* 1. Hero Section */}
       <section className="bg-white py-24 md:py-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">

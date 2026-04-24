@@ -73,11 +73,11 @@ export function About() {
             initial={{ opacity: 0, scale: 0.95 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ duration: 1 }}
-            className="h-[400px] md:h-[700px] flex justify-center items-center"
+            className="h-[500px] md:h-[700px] aspect-[9/16] mx-auto overflow-hidden rounded-2xl border-2 border-gray-200/60 shadow-xl"
           >
             <iframe 
               src={`https://player.vimeo.com/video/1186361647?autoplay=1&loop=1&muted=1&background=1`}
-              className="w-full h-full rounded-2xl border-2 border-gray-200/60"
+              className="w-full h-full scale-[1.01]"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
             />

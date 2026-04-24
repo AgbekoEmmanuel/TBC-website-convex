@@ -6,12 +6,18 @@ export const getPublishedUpcoming = query({
   args: {},
   handler: async (ctx) => {
     const today = new Date().toISOString().split("T")[0];
-    return await ctx.db
+    const events = await ctx.db
       .query("events")
       .withIndex("by_published", (q) => q.eq("isPublished", true))
       .filter((q) => q.gte(q.field("date"), today))
       .order("asc")
       .collect();
+    return Promise.all(
+      events.map(async (event) => ({
+        ...event,
+        imageUrl: event.imageUrl || (event.imageStorageId ? await ctx.storage.getUrl(event.imageStorageId) : undefined)
+      }))
+    );
   },
 });
 
@@ -29,12 +35,17 @@ export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
     const today = new Date().toISOString().split("T")[0];
-    return await ctx.db
+    const event = await ctx.db
       .query("events")
       .withIndex("by_published", (q) => q.eq("isPublished", true))
       .filter((q) => q.eq(q.field("isFeatured"), true))
       .filter((q) => q.gte(q.field("date"), today))
       .first();
+    if (!event) return null;
+    return {
+      ...event,
+      imageUrl: event.imageUrl || (event.imageStorageId ? await ctx.storage.getUrl(event.imageStorageId) : undefined)
+    };
   },
 });
 
@@ -43,7 +54,42 @@ export const getAll = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    return await ctx.db.query("events").order("desc").collect();
+    const events = await ctx.db.query("events").order("desc").collect();
+    return Promise.all(
+      events.map(async (event) => ({
+        ...event,
+        imageUrl: event.imageUrl || (event.imageStorageId ? await ctx.storage.getUrl(event.imageStorageId) : undefined)
+      }))
+    );
+  },
+});
+
+export const getRecentPast = query({
+  args: {},
+  handler: async (ctx) => {
+    const today = new Date().toISOString().split("T")[0];
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_published", (q) => q.eq("isPublished", true))
+      .filter((q) => q.lte(q.field("date"), today))
+      .collect();
+
+    // Sort events by date descending (newest past/today event first)
+    events.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    // Take top 3
+    const recent = events.slice(0, 3);
+
+    return Promise.all(
+      recent.map(async (event) => ({
+        ...event,
+        imageUrl: event.imageUrl || (event.imageStorageId ? await ctx.storage.getUrl(event.imageStorageId) : undefined)
+      }))
+    );
   },
 });
 
@@ -64,7 +110,11 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    return await ctx.db.insert("events", args);
+    let imageUrl = args.imageUrl;
+    if (args.imageStorageId && !imageUrl) {
+      imageUrl = await ctx.storage.getUrl(args.imageStorageId) ?? undefined;
+    }
+    return await ctx.db.insert("events", { ...args, imageUrl });
   },
 });
 
@@ -86,7 +136,11 @@ export const update = mutation({
   handler: async (ctx, { id, ...args }) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    await ctx.db.patch(id, args);
+    let imageUrl = args.imageUrl;
+    if (args.imageStorageId && !imageUrl) {
+      imageUrl = await ctx.storage.getUrl(args.imageStorageId) ?? undefined;
+    }
+    await ctx.db.patch(id, { ...args, imageUrl });
   },
 });
 

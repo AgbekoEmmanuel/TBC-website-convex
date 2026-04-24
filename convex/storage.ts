@@ -5,8 +5,6 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    // if (!userId) throw new Error("Not authenticated");
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -21,8 +19,6 @@ export const getUrl = query({
 export const deleteFile = mutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, { storageId }) => {
-    const userId = await getAuthUserId(ctx);
-    // if (!userId) throw new Error("Not authenticated");
     await ctx.storage.delete(storageId);
   },
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, Package } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -72,8 +72,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
         price: parseFloat(price),
         category,
         imageStorageId,
-        stock: parseInt(stock),
-        inStock: parseInt(stock) > 0,
+        inStock: true,
         isPublished: true,
       });
 

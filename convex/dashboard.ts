@@ -50,6 +50,12 @@ export const getStats = query({
       .order("asc")
       .first();
 
+    const featuredEvents = await ctx.db
+      .query("events")
+      .withIndex("by_published", (q) => q.eq("isPublished", true))
+      .filter((q) => q.eq(q.field("isFeatured"), true))
+      .collect();
+
     return {
       upcomingEvents: upcomingEventsCount.length,
       publishedSermons: publishedSermonsCount.length,
@@ -58,6 +64,7 @@ export const getStats = query({
       pendingOrders: pendingOrdersCount.length,
       totalDonationsThisMonth,
       nextEvent,
+      featuredEvents,
     };
   },
 });

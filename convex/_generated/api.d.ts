@@ -14,12 +14,15 @@ import type * as dashboard from "../dashboard.js";
 import type * as debugEnv from "../debugEnv.js";
 import type * as donations from "../donations.js";
 import type * as events from "../events.js";
+import type * as gallery from "../gallery.js";
 import type * as http from "../http.js";
+import type * as liveStream from "../liveStream.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as seed from "../seed.js";
 import type * as sermons from "../sermons.js";
 import type * as storage from "../storage.js";
+import type * as updateData from "../updateData.js";
 
 import type {
   ApiFromModules,
@@ -34,12 +37,15 @@ declare const fullApi: ApiFromModules<{
   debugEnv: typeof debugEnv;
   donations: typeof donations;
   events: typeof events;
+  gallery: typeof gallery;
   http: typeof http;
+  liveStream: typeof liveStream;
   orders: typeof orders;
   products: typeof products;
   seed: typeof seed;
   sermons: typeof sermons;
   storage: typeof storage;
+  updateData: typeof updateData;
 }>;
 
 /**

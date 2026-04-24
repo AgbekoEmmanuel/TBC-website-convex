@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star, Edit } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { CreateEventModal } from "../components/CreateEventModal";
 import { useQuery, useMutation } from "convex/react";
@@ -21,8 +21,8 @@ function FeaturedEventCard({ event }: { event: Doc<"events"> | null | undefined 
 
   return (
      <Card className="flex flex-col dark:bg-[#0a2744]/60 dark:backdrop-blur-xl overflow-hidden p-0 border border-slate-100 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] shadow-sm rounded-[24px] min-h-[380px] relative transition-all duration-300">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay border-none" style={{ backgroundImage: `url(${event.imageUrl || 'https://images.unsplash.com/photo-1544427920-c49ccdaf8c48?auto=format&fit=crop&q=80&w=1200'})` }}></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/60 dark:from-[#031c34]/95 dark:via-[#031c34]/80 dark:to-transparent"></div>
+        <div className="absolute inset-0 bg-cover bg-center opacity-[0.4] dark:opacity-30 dark:mix-blend-overlay border-none" style={{ backgroundImage: `url(${event.imageUrl || 'https://images.unsplash.com/photo-1544427920-c49ccdaf8c48?auto=format&fit=crop&q=80&w=1200'})` }}></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent dark:from-[#031c34]/95 dark:via-[#031c34]/80 dark:to-transparent"></div>
         
         <div className="relative z-10 p-8 flex flex-col justify-between h-full w-full sm:w-[85%] lg:w-[75%]">
            
@@ -34,9 +34,12 @@ function FeaturedEventCard({ event }: { event: Doc<"events"> | null | undefined 
              </div>
              
              <div className="flex flex-wrap items-center text-slate-500 dark:text-[#8ba4b3] font-medium mb-4 text-[13px] gap-6">
-               <div className="flex items-center"><CalendarDays className="w-3.5 h-3.5 mr-2" /> {new Date(event.date).toLocaleDateString()}</div>
-               <div className="flex items-center"><Clock className="w-3.5 h-3.5 mr-2" /> {event.time || "TBA"}</div>
-               <div className="flex items-center"><MapPin className="w-3.5 h-3.5 mr-2" /> {event.location || "TBD"}</div>
+                <div className="flex items-center">
+                  <CalendarDays className="w-3.5 h-3.5 mr-2" /> 
+                  {event.date ? new Date(event.date).toLocaleDateString() : "Date TBA"}
+                </div>
+                <div className="flex items-center"><Clock className="w-3.5 h-3.5 mr-2" /> {event.time || "TBA"}</div>
+                <div className="flex items-center"><MapPin className="w-3.5 h-3.5 mr-2" /> {event.location || "TBD"}</div>
              </div>
 
              <h2 className="text-3xl sm:text-4xl md:text-[40px] font-serif text-[#112a46] dark:text-white mb-4 leading-[1.15] tracking-tight font-bold">{event.title}</h2>
@@ -61,18 +64,34 @@ function FeaturedEventCard({ event }: { event: Doc<"events"> | null | undefined 
   )
 }
 
-function ListEventCard({ ev }: { ev: Doc<"events"> }) {
+function ListEventCard({ ev, onEdit }: { ev: Doc<"events">, onEdit: (ev: Doc<"events">) => void }) {
   const togglePublished = useMutation(api.events.togglePublished);
   const toggleFeatured = useMutation(api.events.toggleFeatured);
   const remove = useMutation(api.events.remove);
   const [showActions, setShowActions] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const date = new Date(ev.date);
-  const month = date.toLocaleString('default', { month: 'short' }).toUpperCase();
-  const day = date.getDate().toString();
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowActions(false);
+      }
+    }
+    if (showActions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showActions]);
+
+  const dateObj = ev.date ? new Date(ev.date) : null;
+  const month = dateObj && !isNaN(dateObj.getTime()) ? dateObj.toLocaleString('default', { month: 'short' }).toUpperCase() : "---";
+  const day = dateObj && !isNaN(dateObj.getTime()) ? dateObj.getDate().toString() : "--";
 
   return (
-    <Card className="flex flex-col md:flex-row md:items-center p-3 pr-4 md:p-5 dark:bg-[#0a2744]/40 dark:backdrop-blur-xl dark:border-white/5 hover:dark:bg-[#0a2744]/60 transition-all duration-300 bg-white shadow-sm hover:shadow-md border border-slate-100 rounded-[24px] gap-5 relative">
+    <Card className={cn(
+      "flex flex-col md:flex-row md:items-center p-3 pr-4 md:p-5 dark:bg-[#0a2744]/40 dark:backdrop-blur-xl dark:border-white/5 hover:dark:bg-[#0a2744]/60 transition-all duration-300 bg-white shadow-sm hover:shadow-md border border-slate-100 rounded-[24px] gap-5 relative overflow-visible",
+      showActions ? "z-30" : "z-10"
+    )}>
       <div className="w-[72px] h-[72px] flex-shrink-0 flex flex-col items-center justify-center rounded-[18px] bg-[#f8fafc] dark:bg-transparent dark:border dark:border-[#103a64]/80 border border-slate-100/60 shadow-sm">
         <span className="text-[10px] font-bold text-slate-500 dark:text-[#648496] uppercase tracking-widest mb-0.5">{month}</span>
         <span className="text-[22px] font-bold font-serif text-[#112a46] dark:text-white leading-none">{day}</span>
@@ -107,7 +126,7 @@ function ListEventCard({ ev }: { ev: Doc<"events"> }) {
          </div>
       </div>
 
-      <div className="flex items-center justify-end md:justify-center flex-shrink-0 pl-2 relative">
+      <div className="flex items-center justify-end md:justify-center flex-shrink-0 pl-2 relative" ref={dropdownRef}>
         <button 
           onClick={() => setShowActions(!showActions)}
           className="w-9 h-9 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-[#112a46] hover:bg-slate-50 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
@@ -117,6 +136,12 @@ function ListEventCard({ ev }: { ev: Doc<"events"> }) {
 
         {showActions && (
           <div className="absolute right-0 top-12 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-2 min-w-[160px] overflow-hidden">
+             <button 
+                onClick={() => { onEdit(ev); setShowActions(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+             >
+                <Edit className="w-4 h-4"/> Edit Details
+             </button>
              <button 
                 onClick={() => { togglePublished({ id: ev._id, isPublished: !ev.isPublished }); setShowActions(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
@@ -143,10 +168,28 @@ function ListEventCard({ ev }: { ev: Doc<"events"> }) {
 }
 
 export function Events() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Doc<"events"> | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState("All");
   const events = useQuery(api.events.getAll);
   const featuredEvent = useQuery(api.events.getFeatured);
   const stats = useQuery(api.dashboard.getStats);
+
+  const filteredEvents = events?.filter(ev => {
+    if (activeTab === "All") return true;
+    return ev.category?.toLowerCase() === activeTab.toLowerCase() || 
+           (activeTab === "Special Programs" && ev.category === "special");
+  });
+
+  const handleEdit = (ev: Doc<"events">) => {
+    setEditingEvent(ev);
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    setEditingEvent(undefined);
+  };
 
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto px-1 sm:px-2 md:px-0 text-[#112a46] dark:text-white mb-20 animate-in fade-in duration-300 pt-2">
@@ -161,7 +204,7 @@ export function Events() {
             <Filter className="w-4 h-4"/> Filter
           </button>
           <button 
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-[#1f4b73] hover:bg-[#153450] text-white dark:bg-[#346b85] dark:hover:bg-[#285b73] px-5 py-2.5 text-[14px] rounded-xl font-semibold transition-colors shadow-sm"
           >
              <Plus className="w-[18px] h-[18px]"/> Create Event
@@ -209,12 +252,13 @@ export function Events() {
          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-white/5 pb-5 mb-6 gap-4">
             <h2 className="text-[26px] font-serif text-[#112a46] dark:text-white font-bold leading-none tracking-tight">Upcoming List</h2>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-               {["All", "Services", "Youth", "Outreach"].map((tab, i) => (
+               {["All", "Sunday", "Midweek", "Prayers", "Special Programs"].map((tab) => (
                  <button 
                     key={tab}
+                    onClick={() => setActiveTab(tab)}
                     className={cn(
                        "text-[13px] font-semibold px-4 py-1.5 rounded-full transition-colors",
-                       i === 0 
+                       activeTab === tab 
                          ? "bg-[#112a46] text-white shadow-sm dark:border dark:border-[#103a64] dark:bg-[#103a64]/60 dark:text-[#85c9d8]"
                          : "text-slate-500 hover:text-[#112a46] hover:bg-slate-100 dark:text-[#8ba4b3] dark:hover:text-white bg-transparent border border-transparent dark:hover:bg-white/5"
                     )}
@@ -230,11 +274,13 @@ export function Events() {
               <div className="flex justify-center p-12">
                 <Loader2 className="w-8 h-8 animate-spin text-[#1f4b73]" />
               </div>
-            ) : events.length === 0 ? (
-              <div className="text-center p-12 text-slate-500">No events found.</div>
+            ) : filteredEvents?.length === 0 ? (
+              <div className="text-center p-12 text-slate-500">No events found in this category.</div>
             ) : (
-              events.map(ev => (
-                <ListEventCard key={ev._id} ev={ev} />
+              filteredEvents?.map((ev) => (
+                <React.Fragment key={ev._id}>
+                  <ListEventCard ev={ev} onEdit={handleEdit} />
+                </React.Fragment>
               ))
             )}
          </div>
@@ -246,7 +292,11 @@ export function Events() {
          </div>
       </div>
 
-      <CreateEventModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <CreateEventModal 
+        isOpen={isModalOpen} 
+        onClose={handleClose} 
+        initialEvent={editingEvent} 
+      />
     </div>
   );
 }

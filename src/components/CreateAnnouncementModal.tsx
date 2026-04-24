@@ -1,21 +1,41 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X, AlignLeft, Loader2, Link as LinkIcon, MessageSquare } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
+import { Doc } from "../../convex/_generated/dataModel";
+
 interface CreateAnnouncementModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialAnnouncement?: Doc<"announcements">;
 }
 
-export function CreateAnnouncementModal({ isOpen, onClose }: CreateAnnouncementModalProps) {
+export function CreateAnnouncementModal({ isOpen, onClose, initialAnnouncement }: CreateAnnouncementModalProps) {
   const createAnnouncement = useMutation(api.announcements.create);
+  const updateAnnouncement = useMutation(api.announcements.update);
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkLabel, setLinkLabel] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Populate form if initialAnnouncement is provided
+  useEffect(() => {
+    if (initialAnnouncement) {
+      setTitle(initialAnnouncement.title || "");
+      setBody(initialAnnouncement.body || "");
+      setLinkUrl(initialAnnouncement.linkUrl || "");
+      setLinkLabel(initialAnnouncement.linkLabel || "");
+    } else {
+      // Reset form for creation
+      setTitle("");
+      setBody("");
+      setLinkUrl("");
+      setLinkLabel("");
+    }
+  }, [initialAnnouncement, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -31,23 +51,36 @@ export function CreateAnnouncementModal({ isOpen, onClose }: CreateAnnouncementM
     setIsSubmitting(true);
 
     try {
-      await createAnnouncement({
-        title,
-        body: body || undefined,
-        linkUrl: linkUrl || undefined,
-        linkLabel: linkLabel || undefined,
-        isActive: false, // Default to inactive/draft
-      });
+      if (initialAnnouncement) {
+        await updateAnnouncement({
+          id: initialAnnouncement._id,
+          title,
+          body: body || undefined,
+          linkUrl: linkUrl || undefined,
+          linkLabel: linkLabel || undefined,
+          isActive: initialAnnouncement.isActive,
+        });
+      } else {
+        await createAnnouncement({
+          title,
+          body: body || undefined,
+          linkUrl: linkUrl || undefined,
+          linkLabel: linkLabel || undefined,
+          isActive: false, // Default to inactive/draft
+        });
+      }
 
       onClose();
       // Reset form
-      setTitle("");
-      setBody("");
-      setLinkUrl("");
-      setLinkLabel("");
+      if (!initialAnnouncement) {
+        setTitle("");
+        setBody("");
+        setLinkUrl("");
+        setLinkLabel("");
+      }
     } catch (error) {
-      console.error("Failed to create announcement:", error);
-      alert("Failed to create announcement. Please try again.");
+      console.error("Failed to save announcement:", error);
+      alert("Failed to save announcement. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -62,7 +95,7 @@ export function CreateAnnouncementModal({ isOpen, onClose }: CreateAnnouncementM
       <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
-          <h2 className="text-xl font-serif font-semibold text-[#112a46]">New Announcement</h2>
+          <h2 className="text-xl font-serif font-semibold text-[#112a46]">{initialAnnouncement ? "Edit Announcement" : "New Announcement"}</h2>
           <button onClick={onClose} className="p-2 -mr-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
             <X className="w-5 h-5"/>
           </button>
@@ -117,7 +150,7 @@ export function CreateAnnouncementModal({ isOpen, onClose }: CreateAnnouncementM
           </button>
           <button type="submit" form="create-announcement-form" disabled={isSubmitting} className="px-6 py-2 text-sm font-bold text-white bg-[#1a365d] shadow-sm rounded-xl hover:bg-[#112a46] transition-all flex items-center gap-2 disabled:bg-slate-400">
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isSubmitting ? "Creating..." : "Save Announcement"}
+            {isSubmitting ? (initialAnnouncement ? "Saving..." : "Creating...") : (initialAnnouncement ? "Save Changes" : "Save Announcement")}
           </button>
         </div>
       </div>

@@ -8,17 +8,16 @@ import { Doc } from "../../convex/_generated/dataModel";
 
 const PRODUCTS_TABS = ["All Products", "Books", "Apparel", "Media", "Gifts"];
 
-function ProductCard({ product }: { product: Doc<"products"> }) {
+function ProductCard({ product }: { product: Doc<"products">, key?: any }) {
   const remove = useMutation(api.products.remove);
   const [showActions, setShowActions] = useState(false);
 
-  const getStockBadge = (stock: number) => {
-    if (stock <= 0) return { label: "Out of Stock", classes: "bg-[#1f2937]/95 text-[#9ca3af] border border-white/10 backdrop-blur-md" };
-    if (stock < 5) return { label: "Low Stock", classes: "bg-[#451a1a]/95 text-[#fca5a5] border border-red-500/30 backdrop-blur-md" };
+  const getStockBadge = (isInStock: boolean) => {
+    if (!isInStock) return { label: "Out of Stock", classes: "bg-[#1f2937]/95 text-[#9ca3af] border border-white/10 backdrop-blur-md" };
     return { label: "In Stock", classes: "bg-[#1e3c5e]/90 text-[#93c5fd] backdrop-blur-md border border-[#93c5fd]/20" };
   };
 
-  const badge = getStockBadge(product.stock);
+  const badge = getStockBadge(product.inStock);
 
   return (
     <div className="flex flex-col group cursor-pointer relative">
@@ -48,7 +47,7 @@ function ProductCard({ product }: { product: Doc<"products"> }) {
       </h3>
       
       <p className="text-[13px] text-slate-500 dark:text-[#8ba4b3] font-medium mb-4">
-        {product.category} • {product.stock} available
+        {product.category} • {product.inStock ? "Currently Available" : "Sold Out"}
       </p>
       
       <div className="flex items-center justify-between mt-auto">

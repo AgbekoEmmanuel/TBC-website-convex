@@ -1,93 +1,182 @@
-import React, { useState } from "react";
-import { useAuthActions } from "@convex-dev/auth/react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "../components/ui/card";
-import { HeartHandshake, Loader2, AlertCircle } from "lucide-react";
-import { cn } from "../lib/utils";
+import { HeartHandshake, Loader2, Delete } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+
+const KEYPAD_DATA = [
+  { num: "1", letters: "" },
+  { num: "2", letters: "A B C" },
+  { num: "3", letters: "D E F" },
+  { num: "4", letters: "G H I" },
+  { num: "5", letters: "J K L" },
+  { num: "6", letters: "M N O" },
+  { num: "7", letters: "P Q R S" },
+  { num: "8", letters: "T U V" },
+  { num: "9", letters: "W X Y Z" },
+  { num: "", letters: "" },
+  { num: "0", letters: "" },
+  { num: "delete", letters: "" },
+];
 
 export function Login() {
-  const { signIn } = useAuthActions();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@tbc.com");
-  const [password, setPassword] = useState("admin@123");
+  const [passcode, setPasscode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const CORRECT_PASSCODE = "1234";
+
+  useEffect(() => {
+    hiddenInputRef.current?.focus();
+    
+    // Maintain focus
+    const handleFocus = () => hiddenInputRef.current?.focus();
+    document.addEventListener("click", handleFocus);
+    return () => document.removeEventListener("click", handleFocus);
+  }, []);
+
+  useEffect(() => {
+    if (passcode.length === 4) {
+      handleVerify(passcode);
+    }
+  }, [passcode]);
+
+  const handleVerify = async (code: string) => {
     setIsLoading(true);
-    setError(null);
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-    try {
-      await signIn("password", { email, password, flow: "signIn" });
+    if (code === CORRECT_PASSCODE) {
       navigate("/");
-    } catch (err: any) {
-      console.error(err);
-      setError("Invalid email or password.");
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError(true);
+      setPasscode("");
+      setTimeout(() => {
+        setError(false);
+        setIsLoading(false);
+      }, 500);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setPasscode(val);
+  };
+
+  const handleKeypadPress = (val: string) => {
+    if (val === "delete") {
+      setPasscode(prev => prev.slice(0, -1));
+    } else if (val && passcode.length < 4) {
+      setPasscode(prev => prev + val);
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#011C40] p-4 text-white font-sans">
-      <Card className="w-full max-w-md border-transparent bg-[#023859] p-8 shadow-2xl rounded-[32px]">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-[#1e130c] flex items-center justify-center mb-4">
-            <HeartHandshake className="w-8 h-8 text-[#d4af37]" />
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#011C40] text-white font-sans overflow-hidden select-none">
+      {/* iOS Style Blurred Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#011C40] via-[#023859] to-[#011C40]" />
+      <div className="absolute top-1/4 left-1/4 w-[50%] h-[50%] bg-[#26658C]/20 rounded-full blur-[150px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[50%] h-[50%] bg-[#d4af37]/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
+
+      <input
+        ref={hiddenInputRef}
+        type="text"
+        inputMode="numeric"
+        value={passcode}
+        onChange={handleInputChange}
+        className="absolute opacity-0 pointer-events-none"
+        autoFocus
+      />
+
+      <div className="relative z-10 flex flex-col items-center w-full max-w-[280px] transform scale-95 sm:scale-100">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center mb-12"
+        >
+          <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-3 border border-white/20 shadow-xl">
+            <HeartHandshake className="w-6 h-6 text-[#d4af37]" />
           </div>
-          <h1 className="text-[28px] font-serif font-bold text-white tracking-tight mb-1">Balance Church</h1>
-          <p className="text-[#85c9d8] text-[14px] font-medium uppercase tracking-[0.2em]">Admin Portal</p>
+          <h2 className="text-lg font-medium tracking-tight mb-0.5">Enter Passcode</h2>
+          <p className="text-white/40 text-[11px] font-medium tracking-wide">Balance Church Admin</p>
+        </motion.div>
+
+        {/* Indicators */}
+        <motion.div 
+          animate={error ? { x: [-15, 15, -15, 15, 0] } : {}}
+          transition={{ duration: 0.4 }}
+          className="flex gap-5 mb-16"
+        >
+          {[0, 1, 2, 3].map((i) => (
+            <div 
+              key={i}
+              className={`w-2.5 h-2.5 rounded-full border border-white/40 transition-all duration-300 ${
+                passcode.length > i ? "bg-white border-white scale-110" : "bg-transparent scale-100"
+              }`}
+            />
+          ))}
+        </motion.div>
+
+        {/* Keypad */}
+        <div className="grid grid-cols-3 gap-x-5 gap-y-3.5 w-full">
+          {KEYPAD_DATA.map((item, index) => {
+            if (item.num === "") return <div key={index} />;
+            
+            const isDelete = item.num === "delete";
+            
+            return (
+              <motion.button
+                key={index}
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.25)" }}
+                whileTap={{ scale: 0.9, backgroundColor: "rgba(255,255,255,0.4)" }}
+                onClick={() => handleKeypadPress(item.num)}
+                className={`flex flex-col items-center justify-center rounded-full transition-colors duration-200 ${
+                  isDelete 
+                    ? "bg-transparent w-full aspect-square" 
+                    : "bg-white/10 backdrop-blur-md border border-white/5 w-full aspect-square"
+                }`}
+              >
+                {isDelete ? (
+                  <Delete className="w-5 h-5 text-white/60" />
+                ) : (
+                  <>
+                    <span className="text-2xl font-light leading-none">{item.num}</span>
+                    {item.letters && (
+                      <span className="text-[8px] font-bold tracking-[0.1em] mt-0.5 opacity-60">
+                        {item.letters}
+                      </span>
+                    )}
+                  </>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-200 text-[13.5px] px-4 py-3 rounded-xl flex items-center gap-3">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
+        {/* Loading Overlay */}
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-center justify-center bg-[#011C40]/40 backdrop-blur-sm rounded-[40px]"
+            >
+              <div className="flex flex-col items-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#d4af37] mb-3" />
+                <span className="text-[10px] font-medium tracking-widest uppercase opacity-60">Verifying</span>
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </div>
 
-          <div className="space-y-2">
-            <label className="text-[13px] font-bold text-[#648496] uppercase tracking-wider ml-1">Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-[#031c34] border-transparent rounded-xl px-4 py-3.5 text-[15px] focus:ring-2 focus:ring-[#26658C] outline-none transition-all placeholder:text-slate-600"
-              placeholder="admin@thebalancechurch.org"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[13px] font-bold text-[#648496] uppercase tracking-wider ml-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-[#031c34] border-transparent rounded-xl px-4 py-3.5 text-[15px] focus:ring-2 focus:ring-[#26658C] outline-none transition-all placeholder:text-slate-600"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#26658C] hover:bg-[#3478b5] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 mt-4"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Signing In...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </button>
-        </form>
-      </Card>
+      {/* Emergency / Cancel Links */}
+      <div className="absolute bottom-10 flex justify-between w-full max-w-[280px] px-4 text-[12px] font-medium text-white/60">
+        <button className="hover:text-white transition-colors">Emergency</button>
+        <button className="hover:text-white transition-colors" onClick={() => setPasscode("")}>Cancel</button>
+      </div>
     </div>
   );
 }

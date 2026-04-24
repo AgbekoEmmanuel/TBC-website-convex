@@ -1,16 +1,20 @@
-import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Calendar, Video, ShoppingCart, Megaphone, HeartHandshake, Settings, Menu, X, Bell, Search, Sun, Moon, Shield, LogOut } from "lucide-react";
-import { useState, ReactNode } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth, Role } from "./AuthProvider";
 import { cn } from "../lib/utils";
-import logo from "../images/logoblack.png";
+import logo from "../images/tbc_logo_full.png";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { LiveStreamModal } from "./LiveStreamModal";
+import { Radio } from "lucide-react";
 
 const NAV_ITEMS: { name: string; path: string; icon: any; roles: Role[] }[] = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard, roles: ['admin', 'editor'] },
   { name: "Events", path: "/events", icon: Calendar, roles: ['admin', 'editor'] },
-  { name: "Sermons", path: "/sermons", icon: Video, roles: ['admin', 'editor'] },
+  { name: "Media", path: "/media", icon: Video, roles: ['admin', 'editor'] },
   { name: "Store", path: "/store", icon: ShoppingCart, roles: ['admin'] },
   { name: "Announcements", path: "/announcements", icon: Megaphone, roles: ['admin', 'editor'] },
   { name: "Donations", path: "/donations", icon: HeartHandshake, roles: ['admin'] },
@@ -50,14 +54,11 @@ function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (val: bool
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col items-center mb-4 mt-2 px-4 w-full">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-2">
-             <img src={logo} className="w-5 h-5 object-contain" />
-          </div>
-          <Link to="/" className="Poppins-Black text-white tracking-wide text-[20px] leading-tight font-medium my-1 text-center font-bold">
-             The<br/>Balance Church
+        <div className="flex flex-col items-center mb-1 mt-2 px-4 w-full">
+          <Link to="/" className="flex items-center justify-center w-full mb-1">
+             <img src={logo} className="w-[180px] h-auto object-contain invert brightness-200 mix-blend-screen" />
           </Link>
-          <p className="text-[9px] text-[#648496] mt-1 uppercase tracking-widest font-bold text-center leading-tight">CHURCH<br/>ADMINISTRATION</p>
+          <p className="text-[9px] text-[#648496] mt-0.5 uppercase tracking-widest font-bold text-center leading-tight whitespace-nowrap">CHURCH ADMINISTRATION</p>
           
           <button onClick={() => setIsOpen(false)} className="md:hidden absolute top-4 right-4 p-2 rounded-md hover:bg-white/10 text-slate-400">
             <X className="w-5 h-5" />
@@ -73,7 +74,7 @@ function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (val: bool
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex items-center gap-4 px-8 py-3 text-[14px] font-medium transition-all relative group",
+                  "flex items-center gap-4 px-8 py-2.5 text-[14px] font-medium transition-all relative group",
                   isActive
                     ? "text-white bg-[#0a1e33]/50 dark:bg-[#0a1e33]"
                     : "text-slate-400 hover:text-white hover:bg-white/5"
@@ -120,6 +121,9 @@ function Topbar({ setIsSidebarOpen }: { setIsSidebarOpen: (val: boolean) => void
   const { theme, setTheme } = useTheme();
   const { user, setRole } = useAuth();
   const location = useLocation();
+  const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
+  const liveStream = useQuery(api.liveStream.get);
+  const isLive = liveStream?.isLive || false;
 
   const currentNavItem = NAV_ITEMS.find(item => item.path === location.pathname);
   // Default to the first part of the path if not in standard nav (like admin-management)
@@ -169,6 +173,28 @@ function Topbar({ setIsSidebarOpen }: { setIsSidebarOpen: (val: boolean) => void
             Switch to {theme === 'dark' ? 'light' : 'dark'} mode
           </div>
         </div>
+
+        <div className="relative flex items-center justify-center group">
+          <button
+            onClick={() => setIsLiveModalOpen(true)}
+            className={cn(
+              "p-2 rounded-full transition-all relative flex items-center gap-2 px-3 group/live",
+              isLive 
+                ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/30" 
+                : "text-red-500/70 hover:text-red-600 hover:bg-red-50/50 dark:text-red-400/50 dark:hover:bg-red-900/10 border border-transparent hover:border-red-100 dark:hover:border-red-900/20"
+            )}
+            aria-label="Toggle live stream"
+          >
+            <Radio className={cn("w-5 h-5", isLive && "animate-pulse")} />
+            <span className="text-[11px] font-bold uppercase tracking-tight">
+              {isLive ? 'Live' : 'Go Live'}
+            </span>
+            {isLive && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#031c34]"></span>}
+          </button>
+          <div className="absolute top-[120%] right-1/2 translate-x-1/2 px-2.5 py-1.5 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-[11px] font-medium rounded-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-lg border border-slate-700 dark:border-slate-200">
+            Live Stream Settings
+          </div>
+        </div>
         
         <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-[#0a2744] text-slate-500 dark:text-[#55697c] transition-colors relative mr-1">
           <Bell className="w-5 h-5 fill-current" />
@@ -191,12 +217,14 @@ function Topbar({ setIsSidebarOpen }: { setIsSidebarOpen: (val: boolean) => void
            </svg>
         </div>
       </div>
+      <LiveStreamModal isOpen={isLiveModalOpen} onClose={() => setIsLiveModalOpen(false)} />
     </header>
   );
 }
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="flex h-screen w-full bg-background font-sans text-foreground overflow-hidden">
@@ -208,13 +236,13 @@ export function Layout({ children }: { children: ReactNode }) {
         <main className="flex-1 overflow-auto p-4 sm:p-8 md:p-10">
            <AnimatePresence mode="wait">
              <motion.div
-                key={useLocation().pathname}
+                key={location.pathname}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
              >
-                {children}
+                <Outlet />
              </motion.div>
            </AnimatePresence>
         </main>

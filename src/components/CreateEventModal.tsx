@@ -1,20 +1,24 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, Clock, MapPin, AlignLeft, Tag, RefreshCw, Loader2, Image as ImageIcon } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { cn } from "../lib/utils";
 
+import { Doc } from "../../convex/_generated/dataModel";
+
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialEvent?: Doc<"events">;
 }
 
-export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
+export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventModalProps) {
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const createEvent = useMutation(api.events.create);
+  const updateEvent = useMutation(api.events.update);
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("service");
+  const [category, setCategory] = useState("sunday");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -28,6 +32,28 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const [endType, setEndType] = useState('never');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Populate form if initialEvent is provided
+  useEffect(() => {
+    if (initialEvent) {
+      setTitle(initialEvent.title || "");
+      setCategory(initialEvent.category || "sunday");
+      setLocation(initialEvent.location || "");
+      setDate(initialEvent.date || "");
+      setTime(initialEvent.time || "");
+      setDescription(initialEvent.description || "");
+      setImagePreview(initialEvent.imageUrl || null);
+    } else {
+      // Reset form for creation
+      setTitle("");
+      setCategory("sunday");
+      setLocation("");
+      setDate("");
+      setTime("");
+      setDescription("");
+      setImagePreview(null);
+    }
+  }, [initialEvent, isOpen]);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -56,7 +82,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
     setIsSubmitting(true);
 
     try {
-      let imageStorageId = undefined;
+      let imageStorageId = initialEvent?.imageStorageId;
       
       if (imageFile) {
         const postUrl = await generateUploadUrl();
@@ -71,32 +97,50 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
 
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
-      await createEvent({
-        title,
-        slug,
-        category,
-        location,
-        date,
-        time,
-        description,
-        imageStorageId,
-        isFeatured: false,
-        isPublished: true,
-      });
+      if (initialEvent) {
+        await updateEvent({
+          id: initialEvent._id,
+          title,
+          slug,
+          category,
+          location,
+          date,
+          time,
+          description,
+          imageStorageId,
+          isFeatured: initialEvent.isFeatured,
+          isPublished: initialEvent.isPublished,
+        });
+      } else {
+        await createEvent({
+          title,
+          slug,
+          category,
+          location,
+          date,
+          time,
+          description,
+          imageStorageId,
+          isFeatured: false,
+          isPublished: true,
+        });
+      }
 
       onClose();
       // Reset form
-      setTitle("");
-      setCategory("service");
-      setLocation("");
-      setDate("");
-      setTime("");
-      setDescription("");
-      setImageFile(null);
-      setImagePreview(null);
+      if (!initialEvent) {
+        setTitle("");
+        setCategory("sunday");
+        setLocation("");
+        setDate("");
+        setTime("");
+        setDescription("");
+        setImageFile(null);
+        setImagePreview(null);
+      }
     } catch (error) {
-      console.error("Failed to create event:", error);
-      alert("Failed to create event. Please try again.");
+      console.error("Failed to save event:", error);
+      alert("Failed to save event. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +161,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
-          <h2 className="text-xl font-serif font-semibold text-[#112a46]">Create New Event</h2>
+          <h2 className="text-xl font-serif font-semibold text-[#112a46]">{initialEvent ? "Edit Event" : "Create New Event"}</h2>
           <button 
             type="button"
             onClick={onClose} 
@@ -198,10 +242,10 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
                         onChange={(e) => setCategory(e.target.value)}
                         className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow bg-white pb-[11px] pt-[11px] appearance-none"
                      >
-                        <option value="service">Service</option>
-                        <option value="youth">Youth</option>
-                        <option value="outreach">Outreach</option>
-                        <option value="special">Special Event</option>
+                        <option value="sunday">Sunday</option>
+                        <option value="midweek">Midweek</option>
+                        <option value="prayers">Prayers</option>
+                        <option value="special">Special Programs</option>
                      </select>
                    </div>
                 </div>
@@ -340,7 +384,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
              className="px-6 py-2 text-sm font-bold text-white bg-[#1f4b73] shadow-sm rounded-xl hover:bg-[#153450] focus:ring-2 focus:ring-[#1f4b73] focus:ring-offset-2 outline-none transition-all flex items-center gap-2 disabled:bg-slate-400"
            >
              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-             {isSubmitting ? "Creating..." : "Publish Event"}
+             {isSubmitting ? (initialEvent ? "Saving..." : "Creating...") : (initialEvent ? "Save Changes" : "Publish Event")}
            </button>
         </div>
 

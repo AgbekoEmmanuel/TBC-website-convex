@@ -1,6 +1,4 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useConvexAuth } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 
 export type Role = 'admin' | 'editor';
 
@@ -22,11 +20,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { isLoading: convexLoading, isAuthenticated: convexAuthenticated } = useConvexAuth();
-  const { signOut } = useAuthActions();
-
   const isAuthenticated = true;
   const isLoading = false;
+  const signOut = async () => {
+    return;
+  };
 
   const user: User | null = {
     id: 'current-user',

@@ -87,4 +87,16 @@ export default defineSchema({
     paymentRef: v.optional(v.string()),
     paymentStatus: v.string(),
   }).index("by_status", ["paymentStatus"]),
+
+  liveStream: defineTable({
+    youtubeLink: v.string(),
+    isLive: v.boolean(),
+  }),
+
+  gallery: defineTable({
+    title: v.optional(v.string()),
+    category: v.string(),
+    imageStorageId: v.id("_storage"),
+    imageUrl: v.string(),
+  }).index("by_category", ["category"]),
 });

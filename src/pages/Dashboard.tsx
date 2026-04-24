@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "../components/ui/card";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { CalendarDays, PlayCircle, ShoppingBag, ClipboardList, Heart, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
+import { CalendarDays, PlayCircle, ShoppingBag, ClipboardList, Heart, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Clock, Loader2, Star } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { cn } from "../lib/utils";
@@ -56,53 +56,54 @@ function DonationsCard({ amount, isLoading }: { amount?: number, isLoading?: boo
   );
 }
 
-function NextEventCard({ event, isLoading }: { event?: any, isLoading?: boolean }) {
+function FeaturedEventFlyer({ event }: { event: any }) {
+  return (
+    <div className="relative w-full h-full rounded-[20px] overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all duration-300">
+      <img 
+        src={event.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800"} 
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+        alt={event.title} 
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+      <div className="absolute top-4 left-4 bg-white/90 dark:bg-[#8bcbd8]/90 backdrop-blur-sm text-slate-800 dark:text-[#081a30] text-[10px] font-bold px-2.5 py-1 rounded-full z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        {event.title}
+      </div>
+    </div>
+  );
+}
+
+function FeaturedEventsSection({ featuredEvents, nextEvent, isLoading }: { featuredEvents?: any[], nextEvent?: any, isLoading?: boolean }) {
   if (isLoading) {
     return (
-      <Card className="flex flex-col h-full bg-white dark:bg-[#081a30] overflow-hidden p-0 border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] relative transition-colors min-h-[364px]">
-        <div className="h-[48%] min-h-[160px] w-full bg-slate-100 dark:bg-white/5 animate-pulse" />
-        <div className="p-6 md:p-8 space-y-4">
-          <div className="h-8 w-3/4 bg-slate-100 dark:bg-white/5 animate-pulse rounded-md" />
-          <div className="h-4 w-1/2 bg-slate-100 dark:bg-white/5 animate-pulse rounded-md" />
-        </div>
-      </Card>
+      <div className="h-full min-h-[364px] w-full bg-slate-100 dark:bg-white/5 animate-pulse rounded-[20px]" />
     );
   }
 
-  if (!event) {
+  const eventsToShow = featuredEvents && featuredEvents.length > 0 
+    ? featuredEvents 
+    : nextEvent 
+      ? [nextEvent] 
+      : [];
+
+  if (eventsToShow.length === 0) {
     return (
       <Card className="flex flex-col h-full items-center justify-center bg-white dark:bg-[#081a30] p-8 border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] transition-colors min-h-[364px]">
-        <CalendarDays className="w-12 h-12 text-slate-300 dark:text-[#1a365d] mb-4" />
-        <h3 className="text-lg font-medium text-slate-800 dark:text-white">No upcoming events</h3>
-        <p className="text-sm text-slate-500 dark:text-[#8ba4b3] text-center mt-2">Check back later for new gatherings.</p>
+        <Star className="w-10 h-10 text-slate-300 dark:text-[#1a365d] mb-4" />
+        <h3 className="text-lg font-medium text-slate-800 dark:text-white">No featured events</h3>
+        <p className="text-sm text-slate-500 dark:text-[#8ba4b3] text-center mt-2">Star an event to feature it here.</p>
       </Card>
     );
   }
 
   return (
-      <Card className="flex flex-col h-full bg-white dark:bg-[#081a30] overflow-hidden p-0 border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] relative transition-colors">
-         <div className="h-[48%] min-h-[160px] w-full shrink-0 relative">
-             <img src={event.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800"} className="w-full h-full object-cover" alt={event.title} />
-             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent dark:from-[#081a30] to-transparent"></div>
-             <div className="absolute top-5 left-5 bg-white dark:bg-[#8bcbd8] text-slate-800 dark:text-[#081a30] text-[11px] font-bold px-3.5 py-1.5 rounded-full z-10 border border-transparent shadow-[0_2px_10px_rgba(0,0,0,0.1)]">
-                Next Event
-             </div>
-         </div>
-         <div className="p-6 md:p-8 flex flex-col flex-1 z-10 relative">
-             <h3 className="text-[26px] md:text-[30px] font-serif mb-3 text-slate-800 dark:text-white leading-[1.1] tracking-tight">{event.title}</h3>
-             <div className="flex items-center text-[13.5px] font-medium text-slate-600 dark:text-[#8ba4b3] mb-auto">
-                <Clock className="w-[15px] h-[15px] mr-2" /> {event.time || "TBA"}
-             </div>
-             
-             <div className="flex justify-between items-center mt-6 pt-5 w-full border-t border-slate-100 dark:border-white/5">
-                <div className="text-[13.5px] text-slate-500 dark:text-[#8ba4b3]">
-                  {event.location || "Online / TBD"}
-                </div>
-                <button className="text-[13.5px] font-bold text-[#112a46] dark:text-white hover:text-[#85c9d8] dark:hover:text-[#85c9d8] transition-colors">Details</button>
-             </div>
-         </div>
-      </Card>
-  )
+    <div className="flex flex-col gap-4 h-full overflow-y-auto no-scrollbar">
+      {eventsToShow.map((event) => (
+        <div key={event._id} className={cn("shrink-0 w-full", eventsToShow.length === 1 ? "h-full" : "h-[174px]")}>
+          <FeaturedEventFlyer event={event} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function CalendarWidget() {
@@ -209,8 +210,12 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full mb-6">
-         <div className="lg:row-span-2 h-full lg:h-[364px]">
-            <NextEventCard event={stats?.nextEvent} isLoading={isLoading} />
+         <div className="lg:row-span-2 h-full">
+            <FeaturedEventsSection 
+              featuredEvents={stats?.featuredEvents} 
+              nextEvent={stats?.nextEvent} 
+              isLoading={isLoading} 
+            />
          </div>
          
          <StatCard icon={CalendarDays} value={stats?.upcomingEvents.toString()} label="Upcoming Events" isLoading={isLoading} />

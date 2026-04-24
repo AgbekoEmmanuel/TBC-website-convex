@@ -103,16 +103,16 @@ function RecentGifts({ donations }: { donations: Doc<"donations">[] | undefined 
                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-[#081a30] text-[#112a46] dark:text-white flex items-center justify-center text-[13px] font-medium shrink-0 uppercase">
                         {gift.donorName?.slice(0, 2) || "AN"}
                      </div>
-                     <div>
+                      <div>
                         <h4 className="text-[14px] font-medium text-[#112a46] dark:text-white mb-0.5">{gift.donorName || "Anonymous"}</h4>
-                        <p className="text-[12px] text-slate-500 dark:text-[#8ba4b3]">{gift.fund || "General Fund"}</p>
-                     </div>
+                        <p className="text-[12px] text-slate-500 dark:text-[#8ba4b3]">General Fund</p>
+                      </div>
                   </div>
                   <div className="text-right">
                      <h4 className="text-[14px] font-bold text-[#112a46] dark:text-white mb-0.5">GH₵ {gift.amount}</h4>
-                     <p className="text-[12px] text-slate-400 dark:text-[#648496]">
-                        {new Date(gift.date).toLocaleDateString()}
-                     </p>
+                      <p className="text-[12px] text-slate-400 dark:text-[#648496]">
+                        {new Date(gift._creationTime).toLocaleDateString()}
+                      </p>
                   </div>
                </div>
             ))
@@ -204,10 +204,10 @@ export function Donations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-6">
          <StatCard 
-            title="Total Giving YTD" 
-            value={`GH₵ ${stats?.totalRevenue?.toLocaleString() || "0"}`}
+            title="Total Giving This Month" 
+            value={`GH₵ ${stats?.totalDonationsThisMonth?.toLocaleString() || "0"}`}
             highlight="0%" 
-            subtitle="vs last year" 
+            subtitle="vs last month" 
             icon={Banknote} 
          />
          <StatCard 

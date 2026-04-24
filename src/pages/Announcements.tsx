@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Mail, Clock, FileEdit, Radio, Smartphone, MessageSquare, Search, Filter, MailPlus, Users, Circle, PlayCircle, Plus, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Mail, Clock, FileEdit, Radio, Smartphone, MessageSquare, Search, Filter, MailPlus, Users, Circle, PlayCircle, Plus, Loader2, MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -14,21 +14,49 @@ export function Announcements() {
   const stats = useQuery(api.dashboard.getStats);
   const remove = useMutation(api.announcements.remove);
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Doc<"announcements"> | undefined>(undefined);
+
+  const handleEdit = (announcement: Doc<"announcements">) => {
+    setEditingAnnouncement(announcement);
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    setEditingAnnouncement(undefined);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-dropdown]')) {
+        setShowActionsId(null);
+      }
+    }
+    if (showActionsId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showActionsId]);
 
   const filteredAnnouncements = announcements?.filter(a => {
     if (activeTopTab === "All") return true;
-    if (activeTopTab === "Scheduled") return a.status === "scheduled";
-    if (activeTopTab === "Drafts") return a.status === "draft";
+    if (activeTopTab === "Scheduled") return false; // Schema doesn't support scheduled yet
+    if (activeTopTab === "Drafts") return !a.isActive;
     return true;
   });
 
-  const scheduledCount = announcements?.filter(a => a.status === "scheduled").length || 0;
-  const draftCount = announcements?.filter(a => a.status === "draft").length || 0;
+  const scheduledCount = 0;
+  const draftCount = announcements?.filter(a => !a.isActive).length || 0;
 
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto px-1 sm:px-2 md:px-0 text-[#112a46] dark:text-white mb-20 animate-in fade-in duration-300 pt-2">
       
-      <CreateAnnouncementModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateAnnouncementModal 
+        isOpen={isModalOpen} 
+        onClose={handleClose} 
+        initialAnnouncement={editingAnnouncement} 
+      />
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
@@ -66,8 +94,8 @@ export function Announcements() {
             </div>
             <div>
                <div className="flex items-end gap-3 mb-1.5">
-                  <span className="text-[36px] font-serif font-bold text-[#112a46] dark:text-white leading-none">
-                    {announcements?.filter(a => a.status === "sent").length || 0}
+                   <span className="text-[36px] font-serif font-bold text-[#112a46] dark:text-white leading-none">
+                    {announcements?.filter(a => a.isActive).length || 0}
                   </span>
                   <span className="text-[13px] font-medium text-emerald-600 dark:text-emerald-400 mb-1">↑ 0%</span>
                </div>
@@ -135,7 +163,7 @@ export function Announcements() {
          </Card>
       </div>
 
-      <Card className="flex flex-col dark:bg-[#0a2744]/40 dark:backdrop-blur-xl dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] bg-white border-slate-100 shadow-sm rounded-3xl transition-all duration-300 min-h-[500px]">
+      <Card className="flex flex-col dark:bg-[#0a2744]/40 dark:backdrop-blur-xl dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] bg-white border-slate-100 shadow-sm rounded-3xl transition-all duration-300 min-h-[500px] overflow-visible">
          
          <div className="flex items-center justify-between p-6 md:p-8 border-b border-slate-100 dark:border-white/5">
             <h2 className="text-[24px] font-serif text-[#112a46] dark:text-white font-bold leading-none tracking-tight">Recent Communications</h2>
@@ -166,65 +194,47 @@ export function Announcements() {
               <div className="text-center p-12 text-slate-500">No announcements found.</div>
             ) : (
               filteredAnnouncements?.map((item) => (
-                <div key={item._id} className="grid grid-cols-12 gap-4 px-6 md:px-8 py-6 border-b border-slate-100 dark:border-white/5 min-w-[800px] hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group relative">
+                <div key={item._id} className={cn(
+                  "grid grid-cols-12 gap-4 px-6 md:px-8 py-6 border-b border-slate-100 dark:border-white/5 min-w-[800px] hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group relative",
+                  showActionsId === item._id ? "z-30" : "z-10"
+                )}>
                    
                    <div className="col-span-4 flex items-start gap-4 pl-2 pr-4">
-                      <div className="flex items-center gap-1.5 mt-1 text-[#288096] dark:text-[#85c9d8]">
-                         {(!item.channels || item.channels.includes('email')) && <Mail className="w-3.5 h-3.5" />}
-                         {item.channels?.includes('mobile') && <Smartphone className="w-3.5 h-3.5" />}
-                         {item.channels?.includes('sms') && <MessageSquare className="w-3.5 h-3.5" />}
-                      </div>
                       <div>
                          <h4 className={cn(
                             "text-[16px] font-serif font-bold text-[#112a46] dark:text-white mb-1.5 leading-tight",
-                            item.status === 'draft' && "italic"
+                            !item.isActive && "italic opacity-70"
                          )}>{item.title}</h4>
-                         <p className="text-[13px] font-medium text-slate-500 dark:text-[#648496] line-clamp-1">{item.content}</p>
+                         <p className="text-[13px] font-medium text-slate-500 dark:text-[#648496] line-clamp-1">{item.body}</p>
                       </div>
                    </div>
 
                    <div className="col-span-3 flex flex-col justify-center pr-4">
                       <div className={cn(
                          "text-[14px] font-medium text-[#112a46] dark:text-white mb-1",
-                         item.status === 'draft' && "text-slate-400 dark:text-[#648496]"
-                      )}>{item.date ? new Date(item.date).toLocaleDateString() : "Not set"}</div>
-                      <div className="text-[13px] font-medium text-slate-500 dark:text-[#648496]">
-                         {item.date ? new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
-                      </div>
+                         !item.isActive && "text-slate-400 dark:text-[#648496]"
+                      )}>Active</div>
                    </div>
 
                    <div className="col-span-2 flex items-center">
-                      {!item.audience ? (
-                         <span className="text-[13px] italic font-medium text-slate-400 dark:text-[#648496]">Unassigned</span>
-                      ) : (
-                         <div className="inline-flex items-center gap-2 border border-slate-200 dark:border-[#103a64]/80 bg-slate-50 dark:bg-transparent px-3 py-1.5 rounded-full">
-                            <Users className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ba4b3]" />
-                            <span className="text-[13px] font-semibold text-[#112a46] dark:text-white">{item.audience}</span>
-                         </div>
-                      )}
+                      <span className="text-[13px] italic font-medium text-slate-400 dark:text-[#648496]">Broadcasting</span>
                    </div>
 
                    <div className="col-span-2 flex items-center">
-                      {item.status === 'sent' && (
+                      {item.isActive ? (
                          <div className="flex items-center gap-2 text-[#0f172a] dark:text-white font-bold text-[14px]">
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
-                            Sent
+                            Active
                          </div>
-                      )}
-                      {item.status === 'scheduled' && (
-                         <div className="inline-flex items-center gap-1.5 bg-[#f0f9ff] text-[#0284c7] dark:bg-[#103a64]/50 dark:text-[#85c9d8] dark:border dark:border-[#85c9d8]/30 px-3 py-1.5 rounded-sm text-[11px] font-bold tracking-widest uppercase">
-                            <PlayCircle className="w-3 h-3" /> SCHEDULED
-                         </div>
-                      )}
-                      {item.status === 'draft' && (
+                      ) : (
                          <div className="flex items-center gap-2 text-slate-500 dark:text-[#8ba4b3] font-medium text-[14px]">
                             <Circle className="w-2.5 h-2.5" />
-                            Draft
+                            Inactive
                          </div>
                       )}
                    </div>
 
-                   <div className="col-span-1 flex items-center justify-end relative">
+                   <div className="col-span-1 flex items-center justify-end relative" data-dropdown>
                       <button 
                          onClick={() => setShowActionsId(showActionsId === item._id ? null : item._id)}
                          className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center text-slate-400 transition-colors"
@@ -234,6 +244,12 @@ export function Announcements() {
 
                       {showActionsId === item._id && (
                         <div className="absolute right-0 top-12 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-1 min-w-[140px] overflow-hidden">
+                           <button 
+                              onClick={() => { handleEdit(item); setShowActionsId(null); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                           >
+                              <Edit className="w-3.5 h-3.5" /> Edit Details
+                           </button>
                            <button 
                               onClick={() => { if(confirm("Delete this announcement?")) remove({ id: item._id }); setShowActionsId(null); }}
                               className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"

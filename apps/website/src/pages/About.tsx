@@ -55,16 +55,16 @@ export function About() {
       
 
       {/* 1. Hero Section */}
-      <section className="bg-white py-24 md:py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
+      <section className="bg-white py-16 md:py-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-2 gap-4 md:gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -30 }} 
             animate={{ opacity: 1, x: 0 }} 
             transition={{ duration: 0.8 }}
           >
-            <p className="uppercase text-[10px] tracking-[0.2em] text-accent-gold font-bold mb-6">Our Journey</p>
-            <h1 className="font-serif text-4xl md:text-6xl lg:text-[80px] text-brand-900 mb-8 leading-[1.1]">Our Story</h1>
-            <p className="text-gray-500 text-lg md:text-xl leading-relaxed max-w-md">
+            <p className="uppercase text-[8px] md:text-[10px] tracking-[0.2em] text-accent-gold font-bold mb-3 md:mb-6">Our Journey</p>
+            <h1 className="font-serif text-2xl md:text-6xl lg:text-[80px] text-brand-900 mb-4 md:mb-8 leading-[1.1]">Our Story</h1>
+            <p className="text-gray-500 text-[13px] md:text-xl leading-relaxed max-w-md">
               Founded on the belief that life has both the spiritual and physical principles that when balanced leads to dominion. The Balance Church has dedicated itself to raising a generation of young people who are grounded in the word of God and equipped to make an impact in the world. 
             </p>
           </motion.div>
@@ -73,7 +73,7 @@ export function About() {
             initial={{ opacity: 0, scale: 0.95 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ duration: 1 }}
-            className="h-[500px] md:h-[700px] aspect-[9/16] mx-auto overflow-hidden rounded-2xl border-2 border-gray-200/60 shadow-xl"
+            className="h-[250px] md:h-[700px] aspect-[9/16] ml-auto overflow-hidden rounded-xl md:rounded-2xl border border-gray-200/60 shadow-lg"
           >
             <iframe 
               src={`https://player.vimeo.com/video/1186361647?autoplay=1&loop=1&muted=1&background=1`}

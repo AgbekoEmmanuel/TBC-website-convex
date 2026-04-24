@@ -6,7 +6,7 @@ import { Media } from './pages/Media';
 import { Events } from './pages/Events';
 import { Communities } from './pages/Communities';
 import { Contact } from './pages/Contact';
-import { Give } from './pages/Give';
+
 import { Library } from './pages/Library';
 import { WeeklyTeachings } from './pages/WeeklyTeachings';
 import { FullGallery } from './pages/Gallery';
@@ -33,7 +33,7 @@ export default function App() {
           <Route path="events" element={<Events />} />
           <Route path="communities" element={<Communities />} />
           <Route path="contact" element={<Contact />} />
-          <Route path="give" element={<Give />} />
+
           <Route path="library" element={<Library />} />
           <Route path="weekly-teachings" element={<WeeklyTeachings />} />
           <Route path="gallery" element={<FullGallery />} />

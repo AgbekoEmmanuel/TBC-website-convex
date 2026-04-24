@@ -1,21 +1,42 @@
 import React from "react";
 import { Card } from "../components/ui/card";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { CalendarDays, PlayCircle, ShoppingBag, ClipboardList, Heart, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Clock, Loader2, Star } from "lucide-react";
+import { CalendarDays, PlayCircle, ShoppingBag, ClipboardList, ChevronDown, ChevronLeft, ChevronRight, Clock, Loader2, Star } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
 
 const monthlyData = [
-  { name: "Jan", events: 20, donations: 30 },
-  { name: "Feb", events: 35, donations: 20 },
-  { name: "Mar", events: 25, donations: 40 },
-  { name: "Apr", events: 39, donations: 28 },
-  { name: "May", events: 19, donations: 48 },
-  { name: "Jun", events: 24, donations: 38 }
+  { name: "Jan", events: 20 },
+  { name: "Feb", events: 35 },
+  { name: "Mar", events: 25 },
+  { name: "Apr", events: 39 },
+  { name: "May", events: 19 },
+  { name: "Jun", events: 24 }
 ];
 
-function StatCard({ value, label, icon: Icon, isLoading }: { value: string | React.ReactNode, label: string, icon: any, isLoading?: boolean }) {
+function StatCard({ value, label, icon: Icon, isLoading, variant = "default" }: { value: string | React.ReactNode, label: string, icon: any, isLoading?: boolean, variant?: "default" | "dark" }) {
+  if (variant === "dark") {
+    return (
+      <Card className="flex flex-col p-6 h-[170px] overflow-hidden relative bg-[#1f5f8b] dark:bg-[#123956] border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] justify-center text-white transition-colors">
+          <div className="absolute right-[-20px] top-4 text-white/5 pointer-events-none">
+              <Icon className="w-[150px] h-[150px] fill-current opacity-20" />
+          </div>
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-5 relative z-10 text-white">
+              <Icon className="w-5 h-5" />
+          </div>
+          <div className="relative z-10">
+              {isLoading ? (
+                <div className="h-9 w-16 bg-white/10 animate-pulse rounded-md mb-1.5" />
+              ) : (
+                <div className="text-[32px] md:text-[34px] font-serif leading-none mb-1.5 text-white">{value}</div>
+              )}
+              <div className="text-[13px] font-medium tracking-wide text-blue-100">{label}</div>
+          </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex flex-col p-6 h-[170px] bg-white dark:bg-[#081a30] border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] justify-center transition-colors">
         <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-[#0e2c45] flex items-center justify-center mb-5">
@@ -33,28 +54,7 @@ function StatCard({ value, label, icon: Icon, isLoading }: { value: string | Rea
   );
 }
 
-function DonationsCard({ amount, isLoading }: { amount?: number, isLoading?: boolean }) {
-  return (
-      <Card className="flex flex-col p-6 h-[170px] overflow-hidden relative bg-[#1f5f8b] dark:bg-[#123956] border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] justify-center text-white transition-colors">
-          <div className="absolute right-[-20px] top-4 text-white/5 pointer-events-none transition-transform hover:scale-105 duration-700">
-              <Heart className="w-[150px] h-[150px] fill-current" />
-          </div>
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mb-5 relative z-10 text-white">
-              <Heart className="w-4 h-4 fill-current" />
-          </div>
-          <div className="relative z-10 pt-1">
-              {isLoading ? (
-                <div className="h-9 w-32 bg-white/10 animate-pulse rounded-md mb-1.5" />
-              ) : (
-                <div className="text-[32px] md:text-[34px] font-serif leading-none mb-1.5 text-white">
-                  GH₵ {amount?.toLocaleString() ?? "0"}
-                </div>
-              )}
-              <div className="text-[13px] font-medium tracking-wide text-blue-100">Donations</div>
-          </div>
-      </Card>
-  );
-}
+
 
 function FeaturedEventFlyer({ event }: { event: any }) {
   return (
@@ -153,7 +153,7 @@ function GraphWidget() {
   return (
     <Card className="p-6 md:p-8 flex flex-col h-full bg-white dark:bg-[#081a30] border border-transparent dark:border-[#1a365d] shadow-sm dark:shadow-none rounded-[20px] min-h-[380px] transition-colors w-full">
       <div className="flex items-center justify-between mb-8">
-         <h3 className="font-serif text-[20px] md:text-[22px] text-slate-800 dark:text-white font-medium tracking-tight">Monthly Events & Donations</h3>
+         <h3 className="font-serif text-[20px] md:text-[22px] text-slate-800 dark:text-white font-medium tracking-tight">Monthly Events</h3>
          <button className="flex items-center text-[13px] font-medium text-slate-600 hover:text-slate-900 dark:text-[#8ba4b3] dark:hover:text-white transition-colors border-none bg-transparent">
             This Year <ChevronDown className="w-[14px] h-[14px] ml-1.5" />
          </button>
@@ -162,12 +162,17 @@ function GraphWidget() {
       <div className="flex-1 w-full min-h-[220px] mt-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={monthlyData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorEvents" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#7bc0cf" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#7bc0cf" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="stroke-slate-200 dark:stroke-[#103a64]" strokeOpacity={0.4} />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8ba4b3' }} dy={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#8ba4b3' }} tickFormatter={(val) => `${val}%`} />
             
-            <Area type="monotone" dataKey="events" stroke="#7bc0cf" strokeWidth={2} fillOpacity={0} />
-            <Area type="monotone" dataKey="donations" stroke="#bae6fd" strokeWidth={2} fillOpacity={0} />
+            <Area type="monotone" dataKey="events" stroke="#7bc0cf" strokeWidth={2} fillOpacity={1} fill="url(#colorEvents)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -176,10 +181,6 @@ function GraphWidget() {
          <div className="flex items-center gap-2">
             <div className="w-[10px] h-[10px] rounded-full bg-[#7bc0cf]"></div>
             <span className="text-[13px] font-medium text-slate-600 dark:text-[#8ba4b3]">Events</span>
-         </div>
-         <div className="flex items-center gap-2">
-            <div className="w-[10px] h-[10px] rounded-full bg-[#bae6fd]"></div>
-            <span className="text-[13px] font-medium text-slate-600 dark:text-[#8ba4b3]">Donations</span>
          </div>
       </div>
     </Card>
@@ -209,7 +210,7 @@ export function Dashboard() {
           </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-6">
          <div className="lg:row-span-2 h-full">
             <FeaturedEventsSection 
               featuredEvents={stats?.featuredEvents} 
@@ -218,13 +219,11 @@ export function Dashboard() {
             />
          </div>
          
-         <StatCard icon={CalendarDays} value={stats?.upcomingEvents.toString()} label="Upcoming Events" isLoading={isLoading} />
+         <StatCard variant="dark" icon={CalendarDays} value={stats?.upcomingEvents.toString()} label="Upcoming Events" isLoading={isLoading} />
          <StatCard icon={PlayCircle} value={stats?.publishedSermons.toString()} label="Published Sermons" isLoading={isLoading} />
-         <StatCard icon={ShoppingBag} value={stats?.totalProducts.toString()} label="Total Products" isLoading={isLoading} />
          
+         <StatCard icon={ShoppingBag} value={stats?.totalProducts.toString()} label="Total Products" isLoading={isLoading} />
          <StatCard icon={ClipboardList} value={stats?.totalOrders.toString()} label="New Orders" isLoading={isLoading} />
-         <DonationsCard amount={stats?.totalDonationsThisMonth} isLoading={isLoading} />
-         <StatCard icon={BarChart3} value="156" label="Visitors" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 w-full">

@@ -44,7 +44,15 @@ const staticPhotos = [
 
 export function FullGallery() {
   const [activeTab, setActiveTab] = useState("All");
-  const dynamicPhotos = useQuery(api.gallery.list) || [];
+  const dynamicPhotos = useQuery(api.gallery.list);
+
+  if (dynamicPhotos === undefined) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#fcfcfc]">
+        <div className="animate-pulse text-brand-900 font-serif text-xl">Loading Gallery...</div>
+      </div>
+    );
+  }
 
   // Combine static and dynamic photos
   const allPhotos = [

@@ -9,7 +9,7 @@
     "dev:admin": "npm run dev -w apps/admin",
     "build:website": "npm run build -w apps/website",
     "build:admin": "npm run build -w apps/admin",
-    "build": "npm run build:website && npm run build:admin && node scripts/bundle.mjs",
+    "build": "npx convex deploy --cmd 'npm run build:website && npm run build:admin && node scripts/bundle.mjs'",
     "install:all": "npm install"
   },
   "devDependencies": {

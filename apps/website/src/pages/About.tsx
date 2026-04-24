@@ -2,8 +2,7 @@ import { motion } from 'motion/react';
 import { Share2, MapPin, Smile, Instagram, Youtube, Music, Facebook, ArrowRight, Gem, Flag, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import pastorImg from '../assets/Apostle.jpg.jpeg.png';
-// Using placeholder for large video (132MB) which cannot be pushed to GitHub
-const storyVideo = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"; 
+const storyVideo = "https://drive.google.com/uc?export=download&id=1hUMIjCGbBBre8WRzW1KGfS1Eh7tkY_j-"; 
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
 import socialsImg from '../assets/socials.jpg';
 

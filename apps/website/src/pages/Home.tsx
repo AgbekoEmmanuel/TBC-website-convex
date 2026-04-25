@@ -3,7 +3,7 @@ import { ArrowRight, PlayCircle, Home as HomeIcon, BookOpen, Users, MapPin, Cloc
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import yearThemeImg from '../assets/events/year_theme.jpeg';
 import congre3Img from '../assets/congre3.jpg';
 

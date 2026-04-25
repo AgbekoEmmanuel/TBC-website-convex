@@ -10,6 +10,7 @@ import { Contact } from './pages/Contact';
 import { Library } from './pages/Library';
 import { WeeklyTeachings } from './pages/WeeklyTeachings';
 import { FullGallery } from './pages/Gallery';
+import { Give } from './pages/Give';
 
 // Admin Imports
 import { ThemeProvider as AdminThemeProvider } from "./admin/components/ThemeProvider";
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="library" element={<Library />} />
           <Route path="weekly-teachings" element={<WeeklyTeachings />} />
           <Route path="gallery" element={<FullGallery />} />
+          <Route path="give" element={<Give />} />
         </Route>
 
         {/* Admin Portal Routes */}

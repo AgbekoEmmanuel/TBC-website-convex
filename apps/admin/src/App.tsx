@@ -11,6 +11,7 @@ import { Announcements } from "./pages/Announcements";
 import { Media } from "./pages/Media";
 
 import { AdminManagement } from "./pages/AdminManagement";
+import { Donations } from "./pages/Donations";
 import { Login } from "./pages/Login";
 import { Loader2 } from "lucide-react";
 
@@ -74,6 +75,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["admin", "editor"]}>
               <Announcements />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/donations"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Donations />
             </ProtectedRoute>
           }
         />

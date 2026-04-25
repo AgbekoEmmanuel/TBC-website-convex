@@ -18,6 +18,14 @@ const navLinks = [
   },
   { name: 'Events', path: '/events' },
   { name: 'Communities', path: '/communities' },
+  { 
+    name: 'Give', 
+    path: '/give',
+    subItems: [
+      { name: 'Contribute', hash: '#contribute' },
+      { name: 'Giving FAQ', hash: '#faq' }
+    ]
+  },
 
   { 
     name: 'Library', 

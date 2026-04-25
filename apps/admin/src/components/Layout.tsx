@@ -17,6 +17,7 @@ const NAV_ITEMS: { name: string; path: string; icon: any; roles: Role[] }[] = [
   { name: "Media", path: "/media", icon: Video, roles: ['admin', 'editor'] },
   { name: "Store", path: "/store", icon: ShoppingCart, roles: ['admin'] },
   { name: "Announcements", path: "/announcements", icon: Megaphone, roles: ['admin', 'editor'] },
+  { name: "Donations", path: "/donations", icon: HeartHandshake, roles: ['admin'] },
 
   { name: "Settings", path: "/settings", icon: Settings, roles: ['admin'] },
 ];

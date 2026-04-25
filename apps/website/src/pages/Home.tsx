@@ -3,8 +3,9 @@ import { ArrowRight, PlayCircle, Home as HomeIcon, BookOpen, Users, MapPin, Cloc
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 import yearThemeImg from '../assets/events/year_theme.jpeg';
+import congre3Img from '../assets/congre3.jpg';
 
 const homepicsModules = import.meta.glob('../assets/homepics/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
 const heroImages = Object.values(homepicsModules) as string[];
@@ -67,9 +68,14 @@ export function Home() {
               <Link to="/contact" className="px-8 py-3.5 bg-brand-900 hover:bg-brand-800 text-white rounded-lg font-semibold transition-colors border border-white/30">
                 Plan a Visit
               </Link>
-              <Link to="/media#live" className="px-8 py-3.5 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-lg font-semibold transition-colors">
+              <a 
+                href="https://www.youtube.com/@ApostleMichaelDadzie" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="px-8 py-3.5 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-lg font-semibold transition-colors flex items-center justify-center"
+              >
                 Watch Online
-              </Link>
+              </a>
             </div>
           </motion.div>
         </div>
@@ -135,6 +141,26 @@ export function Home() {
         </div>
       </section>
 
+      {/* Scrolling Welcome Marquee */}
+      <div className="w-full py-12 overflow-hidden bg-white border-t border-gray-50 flex items-center select-none">
+        <motion.div 
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="flex whitespace-nowrap gap-16 md:gap-24"
+        >
+          {Array(16).fill("WELCOME HOME").map((word, i) => (
+            <div 
+              key={i} 
+              className={`flex flex-col leading-[0.85] font-black tracking-tighter uppercase ${i % 2 === 0 ? "text-brand-900" : "text-transparent"}`}
+              style={i % 2 !== 0 ? { WebkitTextStroke: '1.5px #112040' } : {}}
+            >
+              <span className="text-4xl md:text-6xl">WELCOME</span>
+              <span className="text-4xl md:text-6xl">HOME</span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
       {/* 3. Featured Sermon Section */}
       <section className="py-24 bg-bg-light border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
@@ -177,9 +203,14 @@ export function Home() {
                 <button className="px-6 py-3 bg-brand-900 text-white rounded-lg font-semibold hover:bg-brand-800 transition-colors text-sm">
                   Watch Message
                 </button>
-                <Link to="/sermons" className="text-brand-900 font-semibold text-sm hover:text-link-blue transition-colors">
+                <a 
+                  href="https://www.youtube.com/@ApostleMichaelDadzie" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-brand-900 font-semibold text-sm hover:text-link-blue transition-colors"
+                >
                   All Sermons
-                </Link>
+                </a>
               </div>
             </motion.div>
 
@@ -205,8 +236,54 @@ export function Home() {
         </div>
       </section>
 
+      {/* Devotion Banner Section with Parallax Image */}
+      <section className="relative py-48 md:py-64 overflow-hidden">
+        {/* Background Image with Parallax Effect */}
+        <div 
+          className="absolute inset-0 z-0 bg-fixed bg-center bg-cover bg-no-repeat"
+          style={{ backgroundImage: `url(${congre3Img})` }}
+        >
+          {/* Dark Overlay to make text pop */}
+          <div className="absolute inset-0 bg-brand-900/60 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        </div>
+        
+        <div className="max-w-5xl mx-auto relative z-10 text-center px-6 text-white">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-serif text-5xl md:text-[64px] font-black mb-8 leading-[1.1] tracking-tight"
+          >
+            Leading people to become<br className="hidden md:block" /> fully devoted followers of Jesus
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-white/70 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+          >
+            By helping you Know God, Grow Together, Discover your Purpose, and Make a Difference.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            <Link 
+              to="/about" 
+              className="inline-flex items-center gap-2 px-10 py-4 border-2 border-[#ffd64a] bg-transparent text-white hover:bg-[#ffd64a] hover:text-brand-900 font-bold transition-all group text-[15px]"
+            >
+              What We Believe <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* 4. Upcoming Events Section */}
-      <section className="py-24 bg-white relative">
+      <section className="py-24 bg-white relative z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
         <div className="max-w-7xl mx-auto px-6">
           
           <div className="text-center mb-16">
@@ -244,13 +321,10 @@ export function Home() {
                       <p className="text-gray-500 mb-6 text-sm flex-1 line-clamp-2">
                         {event.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-brand-900 font-medium mb-6">
+                      <div className="flex items-center gap-4 text-xs text-brand-900 font-medium">
                         <div className="flex items-center gap-1.5 opacity-70"><Clock size={14} /> {event.time || "TBA"}</div>
                         {event.location && <div className="flex items-center gap-1.5 opacity-70"><MapPin size={14} /> {event.location}</div>}
                       </div>
-                      <Link to="/events" className="w-full text-center block py-3 bg-bg-light hover:bg-gray-100 text-brand-900 font-bold text-xs rounded-lg transition-colors">
-                        RSVP Now
-                      </Link>
                     </div>
                   </motion.div>
                 );

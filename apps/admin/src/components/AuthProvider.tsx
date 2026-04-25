@@ -20,25 +20,34 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const isAuthenticated = true;
-  const isLoading = false;
+  const [isAuthenticated, setIsAuthenticated] = React.useState(() => {
+    return sessionStorage.getItem('admin_authenticated') === 'true';
+  });
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const signOut = async () => {
-    return;
+    sessionStorage.removeItem('admin_authenticated');
+    setIsAuthenticated(false);
   };
 
-  const user: User | null = {
+  const login = () => {
+    sessionStorage.setItem('admin_authenticated', 'true');
+    setIsAuthenticated(true);
+  };
+
+  const user: User | null = isAuthenticated ? {
     id: 'current-user',
     name: 'Administrator',
     email: 'admin@thebalancechurch.org',
     role: 'admin'
-  };
+  } : null;
 
   const setRole = (role: Role) => {
     console.log('Role change blocked in bypass mode:', role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, signOut, setRole }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, signOut, setRole, login } as any}>
       {children}
     </AuthContext.Provider>
   );

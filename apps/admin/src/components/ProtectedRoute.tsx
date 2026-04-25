@@ -12,8 +12,9 @@ export function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) 
   const { user, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  /* Bypass authentication for now as requested */
-  return <>{children}</>;
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   if (!allowedRoles.includes(user.role)) {
     return (

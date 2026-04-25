@@ -6,34 +6,35 @@ import book2 from '../assets/books/photo_2026-04-21_22-32-55.jpg';
 import book3 from '../assets/books/photo_2026-04-21_22-33-15.jpg';
 import libraryLogo from '../assets/tbc_library_logo_trans.png';
 import wisdomArena from '../assets/wisdom arena.jpeg';
+import requestSignedBg from '../assets/books/request_signed_bg.jpg';
 
 const publications = [
   {
-    title: "The Weight of Quietness",
+    title: "Breaking Mediocrity",
     price: "GH₵ 100",
     desc: "An invitation to the contemplative life, exploring the silence that precedes the Word.",
     img: book1
   },
   {
-    title: "Rhythms of Grace",
+    title: "Come Boldly",
     price: "GH₵ 100",
     desc: "Understanding the cadence of the Spirit in our daily labor and intentional rest.",
     img: book2
   },
   {
-    title: "Modern Liturgy",
+    title: "The Leadership Principles of Jesus",
     price: "GH₵ 100",
     desc: "A deep dive into ancient practices for the digital age. Reclaiming our sacred habits.",
     img: book3
   },
   {
-    title: "Architects of Grace",
+    title: "The Force of Mentorship",
     price: "GH₵ 100",
     desc: "Building a life of impact through intentional faith and community leadership.",
     img: book1
   },
   {
-    title: "Whispers in the Sanctuary",
+    title: "Kingdom Prosperity",
     price: "GH₵ 100",
     desc: "Daily meditations for the modern seeker found in the quiet moments of dawn.",
     img: book2
@@ -252,7 +253,7 @@ export function Library() {
          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             {/* Left Image + Floating Box */}
             <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden shadow-2xl">
-               <img src="https://picsum.photos/seed/library-bookshelf/800/1000" alt="Bookshelf" className="w-full h-full object-cover" />
+               <img src={requestSignedBg} alt="Bookshelf" className="w-full h-full object-cover" />
                <div className="absolute inset-0 bg-[#112040]/50 mix-blend-multiply"></div>
                <div className="absolute inset-0 bg-gradient-to-t from-[#112040]/80 via-transparent to-transparent"></div>
                
@@ -261,7 +262,7 @@ export function Library() {
                      <h3 className="font-serif text-[32px] text-white mb-4 leading-tight">Request a Signed<br/>Copy</h3>
                      <div className="w-10 h-[1px] bg-[#fdb50d] mx-auto mb-6"></div>
                      <p className="text-blue-100/80 text-[13px] leading-relaxed">
-                        Our library team will handle your request personally. Please allow 2-3 business days for a response regarding availability and shipping.
+                        Our library team will handle your request personally. Please allow at most 24 hours for a response regarding availability and delivery.
                      </p>
                   </div>
                </div>
@@ -270,7 +271,7 @@ export function Library() {
             {/* Right Form */}
             <div className="lg:pr-8">
                <h2 className="font-serif text-[44px] text-brand-900 mb-4 tracking-tight">Purchase Inquiry</h2>
-               <p className="text-gray-500 text-[15px] mb-12">Connect with our sanctuary curators to secure your literary journey.</p>
+               <p className="text-gray-500 text-[15px] mb-12">Connect with our creative scribblers to secure your literary journey.</p>
                
                <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -279,8 +280,8 @@ export function Library() {
                         <input type="text" placeholder="Your name" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
                      </div>
                      <div className="flex flex-col gap-2">
-                        <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Email Address</label>
-                        <input type="email" placeholder="email@address.com" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
+                        <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Mobile Number</label>
+                        <input type="tel" placeholder="+233 00 000 0000" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
                      </div>
                   </div>
 

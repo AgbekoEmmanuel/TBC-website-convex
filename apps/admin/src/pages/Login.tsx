@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { HeartHandshake, Loader2, Delete } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuth } from "../components/AuthProvider";
 
 const KEYPAD_DATA = [
   { num: "1", letters: "" },
@@ -27,6 +28,8 @@ export function Login() {
 
   const CORRECT_PASSCODE = "1234";
 
+  const { login } = useAuth();
+
   useEffect(() => {
     hiddenInputRef.current?.focus();
     
@@ -47,6 +50,7 @@ export function Login() {
     await new Promise((resolve) => setTimeout(resolve, 600));
 
     if (code === CORRECT_PASSCODE) {
+      login();
       navigate("/");
     } else {
       setError(true);

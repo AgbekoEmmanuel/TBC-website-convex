@@ -14,6 +14,7 @@ import { AdminManagement } from "./pages/AdminManagement";
 import { Donations } from "./pages/Donations";
 import { Login } from "./pages/Login";
 import { Loader2 } from "lucide-react";
+import { IdleTimer } from "./components/IdleTimer";
 
 function AppRoutes() {
   const { isLoading } = useAuth();
@@ -27,7 +28,9 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
+    <>
+      <IdleTimer />
+      <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<Layout />}>
         <Route
@@ -98,6 +101,7 @@ function AppRoutes() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 

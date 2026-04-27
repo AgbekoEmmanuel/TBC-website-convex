@@ -168,7 +168,7 @@ export function About() {
             return (
               <div 
                 key={i} 
-                className={`h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${needsMovingDown ? 'translate-y-4 md:translate-y-6' : ''}`}
+                className={`h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${needsMovingDown ? 'translate-y-8 md:translate-y-12' : ''}`}
               >
                 <img 
                   src={img} 

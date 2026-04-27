@@ -155,11 +155,11 @@ export function About() {
 
         </div>
       {/* Scrolling LED Images Marquee */}
-      <div className="w-full py-12 overflow-hidden bg-white flex items-center select-none">
+      <div className="w-full py-16 overflow-hidden bg-white flex items-center select-none">
         <motion.div 
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-          className="flex whitespace-nowrap"
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="flex items-center whitespace-nowrap"
         >
           {/* Duplicate the array to create a seamless loop */}
           {[...ledImages, ...ledImages].map((img, i) => (
@@ -167,7 +167,7 @@ export function About() {
               key={i} 
               src={img} 
               alt={`LED ${i}`} 
-              className="h-[120px] md:h-[180px] w-auto mx-3 md:mx-4 object-contain transition-opacity duration-300 hover:opacity-80" 
+              className="h-[200px] md:h-[320px] w-auto mx-8 md:mx-12 object-contain transition-opacity duration-300 hover:opacity-80" 
             />
           ))}
         </motion.div>

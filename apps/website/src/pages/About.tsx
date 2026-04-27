@@ -5,6 +5,9 @@ import pastorImg from '../assets/Apostle.jpg.jpeg.png';
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
 import socialsImg from '../assets/socials.jpg';
 
+const ledImagesModules = import.meta.glob('../assets/LED things/*.{png,jpg,jpeg,webp}', { eager: true, query: '?url', import: 'default' });
+const ledImages = Object.values(ledImagesModules) as string[];
+
 const modelsOfEmphasis = [
   "Jesus",
   "The Holy Spirit",
@@ -151,7 +154,28 @@ export function About() {
           </div>
 
         </div>
-      </section>
+      {/* Scrolling LED Images Marquee */}
+      <div className="w-full py-16 overflow-hidden bg-white border-y border-gray-50 flex items-center select-none">
+        <motion.div 
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          className="flex whitespace-nowrap gap-6 md:gap-8"
+        >
+          {/* Duplicate the array to create a seamless loop */}
+          {[...ledImages, ...ledImages].map((img, i) => (
+            <div 
+              key={i} 
+              className="w-[280px] md:w-[400px] aspect-[4/5] rounded-3xl overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.12)] shrink-0 border border-gray-100 group"
+            >
+              <img 
+                src={img} 
+                alt={`LED ${i}`} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              />
+            </div>
+          ))}
+        </motion.div>
+      </div>
 
       {/* 3. Mission / Vision Section */}
       <section id="mission" className="bg-[#f7f8f9] pt-20 md:pt-28 pb-32">

@@ -63,12 +63,12 @@ export function Give() {
             whileInView={{ opacity: 1, y: 0 }} 
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="group relative overflow-hidden rounded-[32px] shadow-2xl shadow-black/10 aspect-[4/5] md:aspect-auto"
+            className="group relative overflow-hidden rounded-[32px] shadow-2xl shadow-black/10"
           >
             <img 
               src={offeringImg} 
               alt="Offering" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-10">
                <div className="text-white">
@@ -83,12 +83,12 @@ export function Give() {
             whileInView={{ opacity: 1, y: 0 }} 
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="group relative overflow-hidden rounded-[32px] shadow-2xl shadow-black/10 aspect-[4/5] md:aspect-auto"
+            className="group relative overflow-hidden rounded-[32px] shadow-2xl shadow-black/10"
           >
             <img 
               src={titheImg} 
               alt="Tithe" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-10">
                <div className="text-white">

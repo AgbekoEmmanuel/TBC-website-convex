@@ -8,6 +8,7 @@ import { Communities } from './pages/Communities';
 import { Contact } from './pages/Contact';
 
 import { Library } from './pages/Library';
+import { AllBooks } from './pages/AllBooks';
 import { WeeklyTeachings } from './pages/WeeklyTeachings';
 import { FullGallery } from './pages/Gallery';
 import { Give } from './pages/Give';
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="contact" element={<Contact />} />
 
           <Route path="library" element={<Library />} />
+          <Route path="library/all" element={<AllBooks />} />
           <Route path="weekly-teachings" element={<WeeklyTeachings />} />
           <Route path="gallery" element={<FullGallery />} />
           <Route path="give" element={<Give />} />

@@ -1,9 +1,12 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Quote, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import book1 from '../assets/books/BREAKING MID.png';
 import book2 from '../assets/books/photo_2026-04-21_22-32-55.jpg';
 import book3 from '../assets/books/photo_2026-04-21_22-33-15.jpg';
+import book4 from '../assets/books/principles of life cover.jpeg';
+import book5 from '../assets/books/transformedfront.jpeg';
 import libraryLogo from '../assets/tbc_library_logo_trans.png';
 import wisdomArena from '../assets/wisdom arena.jpeg';
 import requestSignedBg from '../assets/books/request_signed_bg.jpg';
@@ -105,13 +108,18 @@ export function Library() {
                 <div className="z-10 text-white flex flex-col justify-center flex-1">
                   <span className="bg-[#fdb50d] text-[#112040] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max mb-5">New</span>
                   <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 mb-3 font-bold">Hardcover Collection</p>
-                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">The Weight of<br/>Quietness</h3>
+                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">Breaking<br/>Mediocrity</h3>
                   <p className="text-[13px] text-white/70 leading-relaxed mb-8">
                     A monumental exploration into the silence of the soul and the whispers of the divine. This limited edition features gold foil detailing.
                   </p>
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-[26px] font-serif text-[#fdb50d]">GH₵ 100.00</span>
-                    <button className="bg-transparent border border-white/30 hover:bg-white/10 hover:border-white text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors">Pre-Order</button>
+                    <button 
+                      onClick={() => window.open('https://wa.me/233509955970?text=Hello, I would like to Pre-Order "Breaking Mediocrity"', '_blank')}
+                      className="bg-transparent border border-white/30 hover:bg-white/10 hover:border-white text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer"
+                    >
+                      Pre-Order
+                    </button>
                   </div>
                 </div>
               </div>
@@ -124,13 +132,18 @@ export function Library() {
                 <div className="flex flex-col justify-center text-brand-900 flex-1">
                   <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max mb-5">Featured</span>
                   <p className="text-[9px] uppercase tracking-[0.2em] text-gray-500 mb-3 font-bold">Pastoral Insights</p>
-                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">Rhythms of<br/>Grace</h3>
+                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">Come<br/>Boldly</h3>
                   <p className="text-[13px] text-gray-600 leading-relaxed mb-8">
                     Discover the cadence of spiritual endurance in an age of constant noise. A transformative guide for modern seekers.
                   </p>
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-[26px] font-serif text-brand-900">GH₵ 100.00</span>
-                    <button className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md">Order Now</button>
+                    <button 
+                      onClick={() => window.open('https://wa.me/233509955970?text=Hello, I would like to order "Come Boldly"', '_blank')}
+                      className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer"
+                    >
+                      Order Now
+                    </button>
                   </div>
                 </div>
               </div>
@@ -147,14 +160,11 @@ export function Library() {
                 </div>
                 <div className="flex flex-col justify-center items-start text-brand-900">
                   <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">Bestseller</span>
-                  <h3 className="font-serif text-[44px] leading-tight mb-5">The Balanced<br/>Heart</h3>
+                  <h3 className="font-serif text-[44px] leading-tight mb-5">The Leadership<br/>Principles of Jesus</h3>
                   <p className="text-[14px] text-gray-500 leading-relaxed mb-10 max-w-sm">
                     An exploration of emotional equilibrium through the lens of scripture, guiding readers toward a sanctuary within.
                   </p>
-                  <button className="flex items-center gap-4 group/btn hover:opacity-80 transition-opacity">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-[#112040] uppercase">View Details</span>
-                    <div className="w-12 h-[2px] bg-[#fdb50d] transition-all group-hover/btn:w-16"></div>
-                  </button>
+
                 </div>
               </div>
 
@@ -164,7 +174,7 @@ export function Library() {
                    <img src={book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <h3 className="font-serif text-[24px] mb-3 text-brand-900 px-4 leading-tight">Whispers in the Sanctuary</h3>
+                  <h3 className="font-serif text-[24px] mb-3 text-brand-900 px-4 leading-tight">Come Boldly</h3>
                   <p className="text-[12px] text-gray-500 leading-relaxed mb-6 px-4">
                     Daily meditations for the modern seeker found in the quiet moments of dawn.
                   </p>
@@ -182,7 +192,15 @@ export function Library() {
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-16 gap-6">
              <div>
                <p className="uppercase text-[10px] tracking-[0.2em] text-gray-400 font-bold mb-3">The Collection</p>
-               <h2 className="font-serif italic text-[44px] text-brand-900 leading-none">All Publications</h2>
+               <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                 <h2 className="font-serif italic text-[44px] text-brand-900 leading-none">All Publications</h2>
+                 <Link 
+                   to="/library/all" 
+                   className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a78b30] hover:text-brand-900 transition-colors border border-[#a78b30]/30 hover:border-brand-900/30 px-4 py-2 rounded-full"
+                 >
+                   See All Books <ArrowRight size={12} />
+                 </Link>
+               </div>
              </div>
              <p className="text-[14px] text-gray-500 max-w-[320px] leading-relaxed lg:text-right">
                A comprehensive archive of pastoral insights, theological explorations, and daily devotionals.
@@ -203,9 +221,13 @@ export function Library() {
                  <p className="text-gray-500 text-[13.5px] leading-relaxed mb-5 flex-1">
                    {pub.desc}
                  </p>
-                 <div className="text-[#a0aabf] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 group-hover:text-brand-900 transition-colors">
-                   View Details <ArrowRight size={12} className="ml-1 transition-transform group-hover:translate-x-1" />
-                 </div>
+                 <button 
+                   onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to order "${pub.title}"`, '_blank')}
+                   className="w-max bg-[#112040] hover:bg-brand-900 text-white px-5 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-md cursor-pointer flex items-center gap-2"
+                 >
+                   <BookOpen size={12} />
+                   Place Order
+                 </button>
               </div>
             ))}
             
@@ -304,8 +326,12 @@ export function Library() {
                   </div>
 
                   <div className="flex justify-start mt-4">
-                     <button className="bg-[#fdb50d] hover:bg-[#e5a00a] text-white font-bold tracking-[0.2em] uppercase text-[11px] px-10 py-4 rounded-xl transition-colors shadow-md">
-                        Send Inquiry
+                     <button 
+                        type="button"
+                        onClick={() => window.open('https://wa.me/233509955970?text=Hello, I have an inquiry regarding the books.', '_blank')}
+                        className="bg-[#fdb50d] hover:bg-[#e5a00a] text-white font-bold tracking-[0.2em] uppercase text-[11px] px-10 py-4 rounded-xl transition-colors shadow-md cursor-pointer"
+                     >
+                        Inquire Now
                      </button>
                   </div>
                </form>

@@ -155,7 +155,7 @@ export function About() {
 
         </div>
       {/* Scrolling LED Images Marquee */}
-      <div className="w-full py-16 overflow-hidden bg-white flex items-center select-none">
+      <div className="w-full py-4 overflow-hidden bg-white flex items-center select-none">
         <motion.div 
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}

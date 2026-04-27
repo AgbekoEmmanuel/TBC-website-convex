@@ -89,7 +89,7 @@ export function About() {
       </section>
 
       {/* 2. Models of Emphasis Section */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-8 md:pb-12">
+      <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-0">
         {/* Background glow & graphics */}
         <div className="absolute top-1/4 right-[20%] w-[600px] h-[600px] bg-[#8d2a6a]/20 blur-[130px] rounded-full pointer-events-none" />
         
@@ -174,7 +174,7 @@ export function About() {
       </div>
 
       {/* 3. Mission / Vision Section */}
-      <section id="mission" className="bg-[#f7f8f9] pt-8 md:pt-12 pb-32">
+      <section id="mission" className="bg-[#f7f8f9] pt-0 pb-32">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div 
             initial={{ opacity: 0, y: 30 }} 

@@ -63,7 +63,15 @@ export function Footer() {
           <motion.div variants={itemVariants} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="flex flex-col items-center">
             <Phone className="w-6 h-6 text-white mb-4" />
             <h3 className="font-bold text-lg mb-2">The Balance Church Office</h3>
-            <p className="text-white/60 text-[13px]">+233 00 000 0000</p>
+            <p className="text-white/60 text-[13px] mb-2">+233 54 074 0816</p>
+            <div className="flex gap-3">
+              <a href="tel:+233540740816" className="text-[10px] uppercase tracking-widest font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors flex items-center gap-2">
+                <Phone size={12} /> Call
+              </a>
+              <a href="https://wa.me/233540740816" target="_blank" rel="noopener noreferrer" className="text-[10px] uppercase tracking-widest font-bold bg-green-500/20 hover:bg-green-500/30 text-green-400 px-3 py-1.5 rounded-full transition-colors flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> WhatsApp
+              </a>
+            </div>
           </motion.div>
 
           {/* Address */}

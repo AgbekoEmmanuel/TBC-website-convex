@@ -175,12 +175,20 @@ export function Communities() {
               Our community guides are here to help you navigate the different fellowships and find the one that feels like home.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button className="w-full sm:w-auto px-8 py-3.5 bg-brand-900 text-white rounded-xl font-bold text-sm hover:bg-brand-800 transition-colors shadow-lg shadow-brand-900/20">
+              <Link 
+                to="/contact"
+                className="w-full sm:w-auto px-8 py-3.5 bg-brand-900 text-white rounded-xl font-bold text-sm hover:bg-brand-800 transition-colors shadow-lg shadow-brand-900/20 flex items-center justify-center"
+              >
                 Talk to a Guide
-              </button>
-              <button className="w-full sm:w-auto px-8 py-3.5 bg-white text-brand-900 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors shadow-sm border border-gray-200">
+              </Link>
+              <a 
+                href="https://maps.app.goo.gl/RmjrT9GME6RqpXYu5"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-3.5 bg-white text-brand-900 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors shadow-sm border border-gray-200 flex items-center justify-center"
+              >
                 Community Map
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

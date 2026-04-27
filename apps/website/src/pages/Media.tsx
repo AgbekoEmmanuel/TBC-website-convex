@@ -92,9 +92,14 @@ export function Media() {
               >
                 <PlayCircle size={16} /> Watch Latest Sermon
               </button>
-              <button className="w-full sm:w-auto bg-transparent border border-white/30 hover:bg-white/10 text-white px-8 py-3.5 rounded text-[11px] font-bold tracking-widest uppercase flex items-center justify-center transition-all">
+              <a 
+                href="https://www.youtube.com/@ApostleMichaelDadzie"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto bg-transparent border border-white/30 hover:bg-white/10 text-white px-8 py-3.5 rounded text-[11px] font-bold tracking-widest uppercase flex items-center justify-center transition-all"
+              >
                 Browse Series
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

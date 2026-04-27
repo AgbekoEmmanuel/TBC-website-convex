@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { BackToTop } from './components/BackToTop';
+import { FloatingContact } from './components/FloatingContact';
 import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 
 function Layout() {
@@ -55,6 +56,7 @@ function Layout() {
 
       <Footer />
       <BackToTop />
+      <FloatingContact />
     </div>
   );
 }

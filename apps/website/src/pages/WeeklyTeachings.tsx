@@ -134,9 +134,14 @@ export function WeeklyTeachings() {
         </div>
 
         <div className="mt-16 flex justify-center">
-          <button className="px-8 py-3.5 border border-brand-900 text-brand-900 hover:bg-brand-900 hover:text-white rounded-lg text-[13px] font-bold transition-colors">
+          <a 
+            href="https://open.spotify.com/show/7yJjvVSA9mcWzgS58EqVCd?si=f1fcd3ac722a4dac"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-8 py-3.5 border border-brand-900 text-brand-900 hover:bg-brand-900 hover:text-white rounded-lg text-[13px] font-bold transition-colors"
+          >
             Discover More Teachings
-          </button>
+          </a>
         </div>
       </section>
 

@@ -281,7 +281,7 @@ export function Library() {
                      </div>
                      <div className="flex flex-col gap-2">
                         <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Mobile Number</label>
-                        <input type="tel" placeholder="+233 00 000 0000" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
+                        <input type="tel" placeholder="+233 54 074 0816" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
                      </div>
                   </div>
 

@@ -167,7 +167,7 @@ export function About() {
               '(10)': 'translate-y-2 md:translate-y-3',
               '(11)': 'translate-y-6 md:translate-y-8',
               '(14)': 'translate-y-4 md:translate-y-6',
-              '(16)': 'translate-y-4 md:translate-y-6',
+              '(16)': 'translate-y-2 md:translate-y-3',
             };
             const match = Object.keys(translationMap).find(p => img.includes(`Poster%20LED%20${p}`) || img.includes(`Poster LED ${p}`));
             const translation = match ? translationMap[match] : '';

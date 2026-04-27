@@ -167,7 +167,7 @@ export function About() {
               <img 
                 src={img} 
                 alt={`LED ${i}`} 
-                className="h-full w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
+                className="max-h-[70%] md:max-h-[80%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
               />
             </div>
           ))}

@@ -89,7 +89,7 @@ export function About() {
       </section>
 
       {/* 2. Models of Emphasis Section */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-8 md:pb-12">
+      <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-20 md:pb-28">
         {/* Background glow & graphics */}
         <div className="absolute top-1/4 right-[20%] w-[600px] h-[600px] bg-[#8d2a6a]/20 blur-[130px] rounded-full pointer-events-none" />
         

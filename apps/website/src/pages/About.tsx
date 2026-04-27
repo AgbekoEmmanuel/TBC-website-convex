@@ -164,7 +164,7 @@ export function About() {
           {/* Duplicate the array to create a seamless loop */}
           {[...ledImages, ...ledImages].map((img, i) => {
             const translationMap: Record<string, string> = {
-              '(10)': 'translate-y-4 md:translate-y-6',
+              '(10)': 'translate-y-2 md:translate-y-3',
               '(11)': 'translate-y-6 md:translate-y-8',
               '(14)': 'translate-y-4 md:translate-y-6',
             };

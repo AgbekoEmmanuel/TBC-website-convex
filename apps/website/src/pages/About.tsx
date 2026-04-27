@@ -154,6 +154,8 @@ export function About() {
           </div>
 
         </div>
+      </section>
+
       {/* Scrolling LED Images Marquee */}
       <div className="w-full py-2 overflow-hidden bg-white flex items-center select-none z-20">
         <motion.div 

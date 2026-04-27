@@ -164,11 +164,11 @@ export function About() {
           {/* Duplicate the array to create a seamless loop */}
           {[...ledImages, ...ledImages].map((img, i) => {
             const translationMap: Record<string, string> = {
-              '(10)': 'translate-y-4 md:translate-y-6',
+              '(10)': 'translate-y-2 md:translate-y-3',
               '(11)': 'translate-y-6 md:translate-y-8',
               '(14)': 'translate-y-4 md:translate-y-6',
               '(16)': 'translate-y-2 md:translate-y-3',
-              '(17)': 'translate-y-4 md:translate-y-6',
+              '(17)': 'translate-y-2 md:translate-y-3',
             };
             const match = Object.keys(translationMap).find(p => img.includes(`Poster%20LED%20${p}`) || img.includes(`Poster LED ${p}`));
             const translation = match ? translationMap[match] : '';

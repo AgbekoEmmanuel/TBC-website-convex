@@ -155,7 +155,7 @@ export function About() {
 
         </div>
       {/* Scrolling LED Images Marquee */}
-      <div className="w-full py-8 overflow-hidden bg-white flex items-center select-none z-20">
+      <div className="w-full py-2 overflow-hidden bg-white flex items-center select-none z-20">
         <motion.div 
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
@@ -177,12 +177,12 @@ export function About() {
             return (
               <div 
                 key={i} 
-                className={`h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${translation}`}
+                className={`h-[250px] md:h-[380px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${translation}`}
               >
                 <img 
                   src={img} 
                   alt={`LED ${i}`} 
-                  className="max-h-[70%] md:max-h-[80%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
+                  className="max-h-[95%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
                 />
               </div>
             );

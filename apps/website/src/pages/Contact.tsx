@@ -77,7 +77,11 @@ export function Contact() {
               </div>
               <div>
                 <h4 className="font-bold text-[10px] uppercase tracking-widest text-gold-500 mb-1">Email</h4>
-                <p className="text-brand-800 text-sm">thebalance@church.org</p>
+                <p className="text-brand-800 text-sm">
+                  <a href="mailto:thebalancechurch24@gmail.com" className="hover:text-gold-500 transition-colors">
+                    thebalancechurch24@gmail.com
+                  </a>
+                </p>
               </div>
             </div>
           </div>

@@ -56,7 +56,11 @@ export function Footer() {
           <motion.div variants={itemVariants} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="flex flex-col items-center">
             <Mail className="w-6 h-6 text-white mb-4" />
             <h3 className="font-bold text-lg mb-2">Email</h3>
-            <p className="text-white/60 text-[13px]">info@thebalancechurch.com</p>
+            <p className="text-white/60 text-[13px]">
+              <a href="mailto:thebalancechurch24@gmail.com" className="hover:text-white transition-colors">
+                thebalancechurch24@gmail.com
+              </a>
+            </p>
           </motion.div>
 
           {/* Office */}

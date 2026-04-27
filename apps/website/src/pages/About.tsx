@@ -162,15 +162,21 @@ export function About() {
           className="flex items-center whitespace-nowrap py-10"
         >
           {/* Duplicate the array to create a seamless loop */}
-          {[...ledImages, ...ledImages].map((img, i) => (
-            <div key={i} className="h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0">
-              <img 
-                src={img} 
-                alt={`LED ${i}`} 
-                className="max-h-[70%] md:max-h-[80%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
-              />
-            </div>
-          ))}
+          {[...ledImages, ...ledImages].map((img, i) => {
+            const isPoster10 = img.includes('Poster%20LED%20(10)') || img.includes('Poster LED (10)');
+            return (
+              <div 
+                key={i} 
+                className={`h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${isPoster10 ? 'translate-y-4 md:translate-y-6' : ''}`}
+              >
+                <img 
+                  src={img} 
+                  alt={`LED ${i}`} 
+                  className="max-h-[70%] md:max-h-[80%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
+                />
+              </div>
+            );
+          })}
         </motion.div>
       </div>
 

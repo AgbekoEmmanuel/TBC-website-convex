@@ -163,7 +163,7 @@ export function About() {
         >
           {/* Duplicate the array to create a seamless loop */}
           {[...ledImages, ...ledImages].map((img, i) => (
-            <div key={i} className="h-[80px] md:h-[120px] flex items-center justify-center mx-10 md:mx-16 shrink-0">
+            <div key={i} className="h-[150px] md:h-[220px] flex items-center justify-center mx-10 md:mx-16 shrink-0">
               <img 
                 src={img} 
                 alt={`LED ${i}`} 

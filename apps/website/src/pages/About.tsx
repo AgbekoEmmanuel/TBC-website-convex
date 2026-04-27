@@ -159,16 +159,17 @@ export function About() {
         <motion.div 
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="flex items-center whitespace-nowrap"
+          className="flex items-center whitespace-nowrap py-10"
         >
           {/* Duplicate the array to create a seamless loop */}
           {[...ledImages, ...ledImages].map((img, i) => (
-            <img 
-              key={i} 
-              src={img} 
-              alt={`LED ${i}`} 
-              className="h-[200px] md:h-[320px] w-auto mx-8 md:mx-12 object-contain transition-opacity duration-300 hover:opacity-80" 
-            />
+            <div key={i} className="h-[250px] md:h-[400px] flex items-center justify-center mx-10 md:mx-16 shrink-0">
+              <img 
+                src={img} 
+                alt={`LED ${i}`} 
+                className="h-full w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
+              />
+            </div>
           ))}
         </motion.div>
       </div>

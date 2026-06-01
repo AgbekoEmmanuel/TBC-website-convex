@@ -92,20 +92,7 @@ function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (val: bool
 
         <div className="mt-auto px-6 pb-3 pt-3 flex flex-col gap-1 w-full relative shrink-0">
           <div className="absolute top-0 left-0 right-0 h-px bg-white/5" />
-          {user?.role === 'admin' && (
-             <Link 
-               to="/admin-management" 
-               className={cn(
-                 "flex w-full items-center gap-4 px-2 py-3 text-[14px] font-medium transition-colors rounded-lg mt-2",
-                 location.pathname === '/admin-management' 
-                   ? "text-white bg-[#0a1e33]/50 dark:bg-[#0a1e33]" 
-                   : "text-slate-400 hover:text-white hover:bg-white/5"
-               )}
-               onClick={() => setIsOpen(false)}
-             >
-                <Shield className={cn("w-5 h-5", location.pathname === '/admin-management' ? "text-[#85c9d8]" : "text-[#55697c]")} /> Admin Management
-             </Link>
-           )}
+
            <button 
              onClick={handleSignOut}
              className="flex w-full items-center gap-4 px-2 py-3 text-[14px] font-medium text-slate-400 hover:text-red-400 dark:hover:bg-transparent transition-colors rounded-lg group"
@@ -197,26 +184,7 @@ function Topbar({ setIsSidebarOpen }: { setIsSidebarOpen: (val: boolean) => void
           </div>
         </div>
         
-        <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-[#0a2744] text-slate-500 dark:text-[#55697c] transition-colors relative mr-1">
-          <Bell className="w-5 h-5 fill-current" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#1aa1c9] border-2 border-slate-100 dark:border-[#031c34]"></span>
-        </button>
 
-        <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-[#0a2744] text-slate-500 dark:text-[#55697c] transition-colors mr-2">
-          <div className="flex items-center justify-center w-5 h-5 font-serif font-bold text-[16px] text-center italic">
-             ?
-          </div>
-        </button>
-
-        <div className="flex items-center gap-2 pl-4 border-l border-slate-300 dark:border-white/5">
-           <div className="h-8 w-8 rounded-full overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm shrink-0">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=100&h=100&q=80" alt="David H." referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-           </div>
-           <span className="text-[13px] font-medium text-slate-800 dark:text-white hidden md:block">David H.</span>
-           <svg className="w-3.5 h-3.5 text-slate-400 dark:text-[#55697c] hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-           </svg>
-        </div>
       </div>
       <LiveStreamModal isOpen={isLiveModalOpen} onClose={() => setIsLiveModalOpen(false)} />
     </header>

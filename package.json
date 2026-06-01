@@ -23,5 +23,8 @@
     "@rollup/rollup-linux-x64-gnu": "*",
     "@tailwindcss/oxide-linux-x64-gnu": "*",
     "@tailwindcss/oxide-linux-x64-musl": "*"
+  },
+  "dependencies": {
+    "resend": "^6.12.4"
   }
 }

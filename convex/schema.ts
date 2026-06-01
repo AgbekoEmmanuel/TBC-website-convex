@@ -49,6 +49,7 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     inStock: v.boolean(),
     isPublished: v.boolean(),
+    isComingSoon: v.optional(v.boolean()),
   })
     .index("by_published", ["isPublished"])
     .index("by_category", ["category"])
@@ -105,4 +106,9 @@ export default defineSchema({
     imageUrl: v.string(),
     description: v.optional(v.string()),
   }),
+
+  subscriptions: defineTable({
+    email: v.string(),
+    source: v.string(), // e.g., "Weekly Teachings", "Events Newsletter"
+  }).index("by_email", ["email"]),
 });

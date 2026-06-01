@@ -23,6 +23,7 @@ import type * as seed from "../seed.js";
 import type * as sermons from "../sermons.js";
 import type * as siteBanners from "../siteBanners.js";
 import type * as storage from "../storage.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as updateData from "../updateData.js";
 
 import type {
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   sermons: typeof sermons;
   siteBanners: typeof siteBanners;
   storage: typeof storage;
+  subscriptions: typeof subscriptions;
   updateData: typeof updateData;
 }>;
 

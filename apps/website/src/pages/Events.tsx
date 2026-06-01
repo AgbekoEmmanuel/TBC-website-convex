@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
-import { Search, Clock, ArrowRight, Share2, CalendarDays } from 'lucide-react';
+import { Search, Clock, ArrowRight, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
 
 const fadeIn = {
@@ -14,6 +15,11 @@ const fadeIn = {
 export function Events() {
   const events = useQuery(api.events.getPublishedUpcoming);
   const isLoading = events === undefined;
+
+  const subscribe = useAction(api.subscriptions.subscribe);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   return (
     <div className="w-full bg-[#fcfcfc] min-h-screen pt-16 pb-24 font-sans">
@@ -148,15 +154,47 @@ export function Events() {
             </p>
           </div>
           <div className="lg:w-1/2 w-full">
-            <form className="flex flex-col sm:flex-row gap-4" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Your email address" 
-                className="flex-1 px-6 py-4 rounded-xl border border-transparent shadow-[0_4px_20px_rgb(0,0,0,0.03)] focus:border-white focus:ring-4 focus:ring-brand-900/10 transition-all outline-none" 
-              />
-              <button type="submit" className="bg-brand-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-brand-800 transition-colors shadow-lg shadow-brand-900/20 whitespace-nowrap">
-                Subscribe
-              </button>
+            <form 
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!email) return;
+                setIsSubmitting(true);
+                try {
+                  await subscribe({ email, source: "Events Newsletter" });
+                  setSuccess(true);
+                  setEmail("");
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+              className="flex flex-col sm:flex-row gap-4 w-full"
+            >
+              {success ? (
+                <div className="bg-brand-900/50 border border-brand-900/30 rounded-lg p-4 px-6 flex items-center justify-center gap-3 text-center w-full">
+                  <CheckCircle2 className="w-5 h-5 text-accent-gold" />
+                  <p className="text-brand-900 font-bold text-[13px]">You're Subscribed!</p>
+                </div>
+              ) : (
+                <>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="Your email address" 
+                    className="flex-1 px-6 py-4 rounded-xl border border-transparent shadow-[0_4px_20px_rgb(0,0,0,0.03)] focus:border-brand-900/20 focus:ring-4 focus:ring-brand-900/10 transition-all outline-none" 
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting || !email}
+                    className="bg-brand-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-brand-800 transition-colors shadow-lg shadow-brand-900/20 whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                  >
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Subscribe"}
+                  </button>
+                </>
+              )}
             </form>
           </div>
         </motion.div>

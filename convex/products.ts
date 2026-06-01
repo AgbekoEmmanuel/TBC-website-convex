@@ -54,6 +54,7 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
     inStock: v.boolean(),
     isPublished: v.boolean(),
+    isComingSoon: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -74,6 +75,7 @@ export const update = mutation({
     imageUrl: v.optional(v.string()),
     inStock: v.boolean(),
     isPublished: v.boolean(),
+    isComingSoon: v.optional(v.boolean()),
   },
   handler: async (ctx, { id, ...args }) => {
     const userId = await getAuthUserId(ctx);

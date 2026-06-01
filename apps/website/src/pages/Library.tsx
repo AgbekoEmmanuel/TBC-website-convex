@@ -1,6 +1,9 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Quote, BookOpen } from 'lucide-react';
+import { ArrowRight, Quote, BookOpen, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 import book1 from '../assets/books/BREAKING MID.png';
 import book2 from '../assets/books/photo_2026-04-21_22-32-55.jpg';
@@ -45,6 +48,40 @@ const publications = [
 ];
 
 export function Library() {
+  const [mobile, setMobile] = useState('');
+  const [book, setBook] = useState('');
+
+  const dbProducts = useQuery(api.products.getPublished);
+  const isLoading = dbProducts === undefined;
+  
+  // Filter only books just in case there are other products
+  let allBooks = dbProducts?.filter(p => p.category === 'Books' || p.category === 'Book') || [];
+  
+  // Fallback to hardcoded publications if DB is empty and finished loading
+  if (!isLoading && allBooks.length === 0) {
+    allBooks = publications.map((p, idx) => ({
+      _id: `fallback-${idx}` as any,
+      _creationTime: Date.now(),
+      title: p.title,
+      slug: p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: p.desc,
+      price: parseFloat(p.price.replace('GH₵ ', '')),
+      category: 'Books',
+      imageUrl: p.img,
+      inStock: true,
+      isPublished: true,
+      isComingSoon: false
+    }));
+  }
+
+  const books = allBooks.filter(p => !p.isComingSoon);
+  const comingSoonBooks = allBooks.filter(p => p.isComingSoon);
+
+  const b1 = books[0];
+  const b2 = books[1];
+  const b3 = books[2];
+  const b4 = books[3];
+
   return (
     <div className="w-full bg-[#fdfdfc] font-sans overflow-hidden">
       
@@ -97,92 +134,146 @@ export function Library() {
         <h2 className="font-serif italic text-[28px] mb-8 text-brand-900">New Releases</h2>
         
         <div className="flex flex-col gap-6">
-           {/* Top Row */}
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Card 1: Navy */}
-              <div className="bg-[#112040] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-lg relative overflow-hidden group">
-                <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 z-10 transition-transform duration-500 group-hover:-translate-y-2">
-                   <img src={book1} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.3)]" />
-                </div>
-                <div className="z-10 text-white flex flex-col justify-center flex-1">
-                  <span className="bg-[#fdb50d] text-[#112040] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max mb-5">New</span>
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 mb-3 font-bold">Hardcover Collection</p>
-                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">Breaking<br/>Mediocrity</h3>
-                  <p className="text-[13px] text-white/70 leading-relaxed mb-8">
-                    A monumental exploration into the silence of the soul and the whispers of the divine. This limited edition features gold foil detailing.
-                  </p>
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-[26px] font-serif text-[#fdb50d]">GH₵ 100.00</span>
-                    <button 
-                      onClick={() => window.open('https://wa.me/233509955970?text=Hello, I would like to Pre-Order "Breaking Mediocrity"', '_blank')}
-                      className="bg-transparent border border-white/30 hover:bg-white/10 hover:border-white text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer"
-                    >
-                      Pre-Order
-                    </button>
+           {isLoading ? (
+             <div className="flex justify-center items-center py-20">
+               <Loader2 className="w-10 h-10 animate-spin text-brand-900" />
+             </div>
+           ) : books.length === 0 ? (
+             <div className="text-center py-20 text-gray-500">
+               No books available at the moment.
+             </div>
+           ) : (
+             <>
+               {/* Top Row */}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  
+                  {/* Card 1: Navy */}
+                  {b1 && (
+                  <div className="bg-[#112040] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-lg relative overflow-hidden group h-full">
+                    <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 z-10 transition-transform duration-500 group-hover:-translate-y-2">
+                       <img src={b1.imageUrl || book1} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.3)]" />
+                    </div>
+                    <div className="z-10 text-white flex flex-col justify-center flex-1">
+                      <div className="flex gap-2 mb-5">
+                        <span className="bg-[#fdb50d] text-[#112040] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max">New</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max ${b1.inStock ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {b1.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
+                      <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 mb-3 font-bold">Hardcover Collection</p>
+                      <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">{b1.title}</h3>
+                      <p className="text-[13px] text-white/70 leading-relaxed mb-8 line-clamp-3">
+                        {b1.description || "A monumental exploration into the silence of the soul and the whispers of the divine."}
+                      </p>
+                      <div className="flex flex-col xl:flex-row xl:items-center justify-between mt-auto gap-4">
+                        <span className="text-[26px] font-serif text-[#fdb50d]">GH₵ {b1.price.toFixed(2)}</span>
+                        <button 
+                          onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b1.inStock ? 'order' : 'pre-order'} "${b1.title}"`, '_blank')}
+                          className="bg-transparent border border-white/30 hover:bg-white/10 hover:border-white text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-max"
+                        >
+                          {b1.inStock ? 'Order Now' : 'Pre-Order'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                  )}
 
-              {/* Card 2: Gray Gradient */}
-              <div className="bg-gradient-to-br from-[#f2f4f7] to-[#e2e8f0] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-sm group">
-                <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
-                   <img src={book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
-                </div>
-                <div className="flex flex-col justify-center text-brand-900 flex-1">
-                  <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max mb-5">Featured</span>
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-gray-500 mb-3 font-bold">Pastoral Insights</p>
-                  <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">Come<br/>Boldly</h3>
-                  <p className="text-[13px] text-gray-600 leading-relaxed mb-8">
-                    Discover the cadence of spiritual endurance in an age of constant noise. A transformative guide for modern seekers.
-                  </p>
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-[26px] font-serif text-brand-900">GH₵ 100.00</span>
-                    <button 
-                      onClick={() => window.open('https://wa.me/233509955970?text=Hello, I would like to order "Come Boldly"', '_blank')}
-                      className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer"
-                    >
-                      Order Now
-                    </button>
+                  {/* Card 2: Gray Gradient */}
+                  {b2 && (
+                  <div className="bg-gradient-to-br from-[#f2f4f7] to-[#e2e8f0] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-sm group h-full">
+                    <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
+                       <img src={b2.imageUrl || book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                    </div>
+                    <div className="flex flex-col justify-center text-brand-900 flex-1">
+                      <div className="flex gap-2 mb-5">
+                        <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max">Featured</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max ${b2.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {b2.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
+                      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-500 mb-3 font-bold">Pastoral Insights</p>
+                      <h3 className="font-serif italic text-[32px] md:text-[36px] mb-4 leading-tight">{b2.title}</h3>
+                      <p className="text-[13px] text-gray-600 leading-relaxed mb-8 line-clamp-3">
+                        {b2.description || "Discover the cadence of spiritual endurance in an age of constant noise. A transformative guide."}
+                      </p>
+                      <div className="flex flex-col xl:flex-row xl:items-center justify-between mt-auto gap-4">
+                        <span className="text-[26px] font-serif text-brand-900">GH₵ {b2.price.toFixed(2)}</span>
+                        <button 
+                          onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b2.inStock ? 'order' : 'pre-order'} "${b2.title}"`, '_blank')}
+                          className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max"
+                        >
+                          {b2.inStock ? 'Order Now' : 'Pre-Order'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                  )}
 
-           </div>
+               </div>
 
-           {/* Bottom Row */}
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Card 3: White wide (spans 2) */}
-              <div className="lg:col-span-2 bg-white rounded-[24px] p-8 md:p-12 flex flex-col md:flex-row gap-10 lg:gap-16 items-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group">
-                <div className="w-full md:w-5/12 aspect-[3/4] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
-                   <img src={book3} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
-                </div>
-                <div className="flex flex-col justify-center items-start text-brand-900">
-                  <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">Bestseller</span>
-                  <h3 className="font-serif text-[44px] leading-tight mb-5">The Leadership<br/>Principles of Jesus</h3>
-                  <p className="text-[14px] text-gray-500 leading-relaxed mb-10 max-w-sm">
-                    An exploration of emotional equilibrium through the lens of scripture, guiding readers toward a sanctuary within.
-                  </p>
+               {/* Bottom Row */}
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* Card 3: White wide (spans 2) */}
+                  {b3 && (
+                  <div className="lg:col-span-2 bg-white rounded-[24px] p-8 md:p-12 flex flex-col md:flex-row gap-10 lg:gap-16 items-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group h-full">
+                    <div className="w-full md:w-5/12 aspect-[3/4] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
+                       <img src={b3.imageUrl || book3} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                    </div>
+                    <div className="flex flex-col justify-center items-start text-brand-900 flex-1">
+                      <div className="flex gap-2 mb-6">
+                        <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">Bestseller</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full ${b3.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {b3.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
+                      <h3 className="font-serif text-[40px] md:text-[44px] leading-tight mb-5">{b3.title}</h3>
+                      <p className="text-[14px] text-gray-500 leading-relaxed mb-10 max-w-sm line-clamp-3">
+                        {b3.description || "An exploration of emotional equilibrium through the lens of scripture, guiding readers toward a sanctuary within."}
+                      </p>
+                      <div className="flex items-center justify-between w-full mt-auto">
+                        <span className="text-[26px] font-serif text-brand-900 font-bold">GH₵ {b3.price.toFixed(2)}</span>
+                        <button 
+                          onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b3.inStock ? 'order' : 'pre-order'} "${b3.title}"`, '_blank')}
+                          className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max"
+                        >
+                          {b3.inStock ? 'Order Now' : 'Pre-Order'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  )}
 
-                </div>
-              </div>
+                  {/* Card 4: White tall */}
+                  {b4 && (
+                  <div className="bg-white rounded-[24px] p-8 flex flex-col items-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group justify-between h-full">
+                    <div className="w-3/5 aspect-[3/4] mb-8 mt-2 transition-transform duration-500 group-hover:-translate-y-2">
+                       <img src={b4.imageUrl || book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="flex justify-center mb-3">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${b4.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {b4.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
+                      <h3 className="font-serif text-[24px] mb-3 text-brand-900 px-4 leading-tight">{b4.title}</h3>
+                      <p className="text-[12px] text-gray-500 leading-relaxed mb-6 px-4 line-clamp-2">
+                        {b4.description || "Daily meditations for the modern seeker found in the quiet moments of dawn."}
+                      </p>
+                      <span className="text-[18px] font-serif font-bold text-[#fdb50d] tracking-wide mb-4">GH₵ {b4.price.toFixed(2)}</span>
+                      <button 
+                        onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b4.inStock ? 'order' : 'pre-order'} "${b4.title}"`, '_blank')}
+                        className="bg-transparent border border-[#112040] text-[#112040] hover:bg-[#112040] hover:text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-full"
+                      >
+                        {b4.inStock ? 'Order Now' : 'Pre-Order'}
+                      </button>
+                    </div>
+                  </div>
+                  )}
 
-              {/* Card 4: White tall */}
-              <div className="bg-white rounded-[24px] p-8 flex flex-col items-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group justify-between">
-                <div className="w-3/5 aspect-[3/4] mb-8 mt-2 transition-transform duration-500 group-hover:-translate-y-2">
-                   <img src={book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <h3 className="font-serif text-[24px] mb-3 text-brand-900 px-4 leading-tight">Come Boldly</h3>
-                  <p className="text-[12px] text-gray-500 leading-relaxed mb-6 px-4">
-                    Daily meditations for the modern seeker found in the quiet moments of dawn.
-                  </p>
-                  <span className="text-[18px] font-serif font-bold text-[#fdb50d] tracking-wide">GH₵ 100.00</span>
-                </div>
-              </div>
-
-           </div>
+               </div>
+             </>
+           )}
         </div>
       </section>
 
@@ -208,47 +299,85 @@ export function Library() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
-            {publications.map((pub, idx) => (
-              <div key={idx} className="flex flex-col group cursor-pointer">
-                 <div className="aspect-[4/5] bg-gray-100 mb-6 overflow-hidden rounded-md relative shadow-sm">
-                    <img src={pub.img} alt={pub.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+            {books.map((pub, idx) => (
+              <div key={idx} className="flex flex-col group cursor-pointer h-full">
+                 <div className="aspect-[4/5] bg-gray-100 mb-6 overflow-hidden rounded-md relative shadow-sm shrink-0">
+                    <img src={pub.imageUrl || book1} alt={pub.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
                  </div>
                  <div className="flex justify-between items-start gap-4 mb-3">
-                   <h3 className="font-serif text-[22px] text-brand-900 leading-tight">{pub.title}</h3>
-                   <span className="font-serif font-bold text-brand-900 text-[18px] shrink-0">{pub.price}</span>
+                   <div>
+                     <h3 className="font-serif text-[22px] text-brand-900 leading-tight mb-2">{pub.title}</h3>
+                     <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${pub.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                       {pub.inStock ? 'In Stock' : 'Out of Stock'}
+                     </span>
+                   </div>
+                   <span className="font-serif font-bold text-brand-900 text-[18px] shrink-0">GH₵ {pub.price.toFixed(2)}</span>
                  </div>
-                 <p className="text-gray-500 text-[13.5px] leading-relaxed mb-5 flex-1">
-                   {pub.desc}
+                 <p className="text-gray-500 text-[13.5px] leading-relaxed mb-5 flex-1 line-clamp-3">
+                   {pub.description || "An inspiring piece of literature for your spiritual journey."}
                  </p>
                  <button 
-                   onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to order "${pub.title}"`, '_blank')}
-                   className="w-max bg-[#112040] hover:bg-brand-900 text-white px-5 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-md cursor-pointer flex items-center gap-2"
+                   onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${pub.inStock ? 'order' : 'pre-order'} "${pub.title}"`, '_blank')}
+                   className="w-max bg-[#112040] hover:bg-brand-900 text-white px-5 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-md cursor-pointer flex items-center gap-2 mt-auto"
                  >
                    <BookOpen size={12} />
-                   Place Order
+                   {pub.inStock ? 'Place Order' : 'Pre-Order'}
                  </button>
               </div>
             ))}
             
-            {/* Coming Soon Box */}
-            <div className="flex flex-col">
-                 <div className="aspect-[4/5] bg-[#e2e8f0]/50 mb-6 flex items-center justify-center rounded-md border border-gray-200 border-dashed">
-                    <div className="text-center text-[#a0aabf]">
-                      <BookOpen size={32} className="mx-auto mb-4 opacity-50" strokeWidth={1.5} />
-                      <p className="font-serif italic text-xl">Coming Soon</p>
-                    </div>
-                 </div>
-                 <div className="flex justify-between items-baseline mb-2">
-                   <h3 className="font-serif text-[22px] text-brand-900/40">The Cinematic Soul</h3>
-                 </div>
-                 <p className="text-gray-500/40 text-[13.5px] leading-relaxed mb-5 flex-1">
-                   Explore the divine direction of your life's unfolding narrative.
-                 </p>
-                 <div className="text-[#a0aabf]/50 text-[9px] font-bold uppercase tracking-widest mt-auto">
-                   Fall 2024
-                 </div>
-            </div>
+            {/* Coming Soon Books */}
+            {comingSoonBooks.length > 0 ? (
+              comingSoonBooks.map((csBook, idx) => (
+                <div key={`cs-${idx}`} className="flex flex-col h-full">
+                   <div className="aspect-[4/5] bg-[#e2e8f0]/50 mb-6 flex items-center justify-center rounded-md border border-gray-200 border-dashed relative overflow-hidden">
+                      {csBook.imageUrl ? (
+                        <>
+                          <img src={csBook.imageUrl} className="w-full h-full object-cover opacity-60 grayscale mix-blend-multiply" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-[#112040]/80 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10 shadow-xl">
+                              <p className="font-serif italic text-[#fdb50d] text-lg">Coming Soon</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center text-[#a0aabf]">
+                          <BookOpen size={32} className="mx-auto mb-4 opacity-50" strokeWidth={1.5} />
+                          <p className="font-serif italic text-xl">Coming Soon</p>
+                        </div>
+                      )}
+                   </div>
+                   <div className="flex justify-between items-baseline mb-2">
+                     <h3 className="font-serif text-[22px] text-brand-900/50 leading-tight">{csBook.title}</h3>
+                   </div>
+                   <p className="text-gray-500/50 text-[13.5px] leading-relaxed mb-5 flex-1 line-clamp-3">
+                     {csBook.description || "More details on this release coming soon..."}
+                   </p>
+                   <div className="text-[#a0aabf]/60 text-[9px] font-bold uppercase tracking-widest mt-auto">
+                     Upcoming Release
+                   </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col">
+                   <div className="aspect-[4/5] bg-[#e2e8f0]/50 mb-6 flex items-center justify-center rounded-md border border-gray-200 border-dashed">
+                      <div className="text-center text-[#a0aabf]">
+                        <BookOpen size={32} className="mx-auto mb-4 opacity-50" strokeWidth={1.5} />
+                        <p className="font-serif italic text-xl">Coming Soon</p>
+                      </div>
+                   </div>
+                   <div className="flex justify-between items-baseline mb-2">
+                     <h3 className="font-serif text-[22px] text-brand-900/40">The Cinematic Soul</h3>
+                   </div>
+                   <p className="text-gray-500/40 text-[13.5px] leading-relaxed mb-5 flex-1">
+                     Explore the divine direction of your life's unfolding narrative.
+                   </p>
+                   <div className="text-[#a0aabf]/50 text-[9px] font-bold uppercase tracking-widest mt-auto">
+                     Fall 2024
+                   </div>
+              </div>
+            )}
 
           </div>
         </div>
@@ -302,17 +431,29 @@ export function Library() {
                         <input type="text" placeholder="Your name" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
                      </div>
                      <div className="flex flex-col gap-2">
-                        <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Mobile Number</label>
-                        <input type="tel" placeholder="+233 54 074 0816" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" />
+                        <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Mobile Number <span className="text-red-400">*</span></label>
+                        <input 
+                           type="tel" 
+                           value={mobile}
+                           onChange={(e) => setMobile(e.target.value)}
+                           required
+                           placeholder="+233 54 074 0816" 
+                           className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors w-full text-brand-900" 
+                        />
                      </div>
                   </div>
 
                   <div className="flex flex-col gap-2">
-                     <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Book Interest</label>
+                     <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#a0aabf]">Book Interest <span className="text-red-400">*</span></label>
                      <div className="relative">
-                        <select defaultValue="" className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors text-brand-900 appearance-none w-full cursor-pointer">
+                        <select 
+                           value={book}
+                           onChange={(e) => setBook(e.target.value)}
+                           required
+                           className="bg-[#f2f4f7] border border-transparent focus:bg-white focus:border-brand-900 focus:ring-0 rounded-xl px-5 py-4 text-sm outline-none transition-colors text-brand-900 appearance-none w-full cursor-pointer"
+                        >
                            <option value="" disabled>Select a title...</option>
-                           {publications.map(p => <option key={p.title} value={p.title}>{p.title}</option>)}
+                           {books.map(p => <option key={p.title} value={p.title}>{p.title}</option>)}
                         </select>
                         <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -328,8 +469,9 @@ export function Library() {
                   <div className="flex justify-start mt-4">
                      <button 
                         type="button"
-                        onClick={() => window.open('https://wa.me/233509955970?text=Hello, I have an inquiry regarding the books.', '_blank')}
-                        className="bg-[#fdb50d] hover:bg-[#e5a00a] text-white font-bold tracking-[0.2em] uppercase text-[11px] px-10 py-4 rounded-xl transition-colors shadow-md cursor-pointer"
+                        disabled={!mobile || !book}
+                        onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I have an inquiry regarding the book: ${book}. My mobile number is ${mobile}.`, '_blank')}
+                        className="bg-[#fdb50d] hover:bg-[#e5a00a] text-white font-bold tracking-[0.2em] uppercase text-[11px] px-10 py-4 rounded-xl transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                      >
                         Inquire Now
                      </button>

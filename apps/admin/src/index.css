@@ -111,4 +111,11 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Make sure all buttons show the hand cursor on hover */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a:not([aria-disabled="true"]):not([disabled]) {
+    cursor: pointer;
+  }
 }

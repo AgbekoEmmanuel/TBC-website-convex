@@ -1,6 +1,9 @@
 import { motion } from 'motion/react';
-import { Play, Podcast, Filter } from 'lucide-react';
+import { Play, Podcast, Filter, Loader2, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useAction } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 const fadeIn = {
   initial: { opacity: 0, y: 30 },
@@ -49,6 +52,11 @@ const messages = [
 ];
 
 export function WeeklyTeachings() {
+  const subscribe = useAction(api.subscriptions.subscribe);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   return (
     <div className="w-full font-sans bg-[#fcfcfc]">
       
@@ -155,16 +163,49 @@ export function WeeklyTeachings() {
             </p>
           </div>
           
-          <div className="flex flex-col gap-4">
-            <input 
-              type="email" 
-              placeholder="Your email address" 
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-6 py-4 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors"
-            />
-            <button className="w-full bg-[#ffc342] hover:bg-[#e0a830] text-brand-900 rounded-lg py-4 font-bold text-[14px] transition-colors">
-              Subscribe to Grace
-            </button>
-          </div>
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!email) return;
+              setIsSubmitting(true);
+              try {
+                await subscribe({ email, source: "Weekly Journal Newsletter" });
+                setSuccess(true);
+                setEmail("");
+              } catch (error) {
+                console.error(error);
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
+            className="flex flex-col gap-4"
+          >
+            {success ? (
+              <div className="bg-[#102353]/50 border border-[#ffc342]/30 rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                <CheckCircle2 className="w-8 h-8 text-[#ffc342] mb-3" />
+                <h3 className="text-white font-bold mb-1">You're Subscribed!</h3>
+                <p className="text-blue-100/70 text-[13px]">Check your inbox for a confirmation email.</p>
+              </div>
+            ) : (
+              <>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="Your email address" 
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-6 py-4 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors"
+                />
+                <button 
+                  type="submit"
+                  disabled={isSubmitting || !email}
+                  className="w-full flex items-center justify-center gap-2 bg-[#ffc342] hover:bg-[#e0a830] text-brand-900 rounded-lg py-4 font-bold text-[14px] transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Subscribe to Grace"}
+                </button>
+              </>
+            )}
+          </form>
         </div>
       </section>
 

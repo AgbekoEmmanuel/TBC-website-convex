@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Package, Truck, Banknote, TrendingUp, MoreHorizontal, Loader2, Trash2, Edit } from "lucide-react";
+import { Plus, Package, Truck, Banknote, TrendingUp, MoreHorizontal, Loader2, Trash2, Edit, CheckCircle, XCircle } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -8,16 +8,18 @@ import { Doc } from "@convex/_generated/dataModel";
 
 const PRODUCTS_TABS = ["All Products", "Books", "Apparel", "Media", "Gifts"];
 
-function ProductCard({ product }: { product: Doc<"products">, key?: any }) {
+function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any, onEdit: (p: Doc<"products">) => void }) {
   const remove = useMutation(api.products.remove);
+  const toggleInStock = useMutation(api.products.toggleInStock);
   const [showActions, setShowActions] = useState(false);
 
-  const getStockBadge = (isInStock: boolean) => {
-    if (!isInStock) return { label: "Out of Stock", classes: "bg-[#1f2937]/95 text-[#9ca3af] border border-white/10 backdrop-blur-md" };
+  const getStockBadge = (product: Doc<"products">) => {
+    if (product.isComingSoon) return { label: "Coming Soon", classes: "bg-[#f59e0b]/90 text-white backdrop-blur-md border border-[#f59e0b]/30 shadow-[0_4px_12px_rgba(245,158,11,0.3)]" };
+    if (!product.inStock) return { label: "Out of Stock", classes: "bg-red-500/90 text-white backdrop-blur-md border border-red-400/30 shadow-[0_4px_12px_rgba(239,68,68,0.3)]" };
     return { label: "In Stock", classes: "bg-[#1e3c5e]/90 text-[#93c5fd] backdrop-blur-md border border-[#93c5fd]/20" };
   };
 
-  const badge = getStockBadge(product.inStock);
+  const badge = getStockBadge(product);
 
   return (
     <div className="flex flex-col group cursor-pointer relative">
@@ -34,12 +36,19 @@ function ProductCard({ product }: { product: Doc<"products">, key?: any }) {
             <Package className="w-12 h-12" />
           </div>
         )}
-        <span className={cn(
-          "absolute top-4 right-4 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm",
-          badge.classes
-        )}>
+        <button 
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            toggleInStock({ id: product._id, inStock: !product.inStock }); 
+          }}
+          className={cn(
+            "absolute top-4 right-4 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm hover:opacity-80 transition-opacity cursor-pointer",
+            badge.classes
+          )}
+          title={`Click to mark as ${product.inStock ? 'Out of Stock' : 'In Stock'}`}
+        >
           {badge.label}
-        </span>
+        </button>
       </div>
 
       <h3 className="font-serif text-[22px] text-[#112a46] dark:text-white font-medium leading-[1.3] line-clamp-1 mb-1.5 transition-colors group-hover:text-[#288096] dark:group-hover:text-[#85c9d8]">
@@ -65,13 +74,13 @@ function ProductCard({ product }: { product: Doc<"products">, key?: any }) {
           {showActions && (
             <div className="absolute right-0 bottom-full mb-2 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-1 min-w-[140px] overflow-hidden">
                <button 
-                  onClick={() => { setShowActions(false); }}
+                  onClick={(e) => { e.stopPropagation(); onEdit(product); setShowActions(false); }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                >
                   <Edit className="w-3.5 h-3.5" /> Edit Details
                </button>
                <button 
-                  onClick={() => { if(confirm("Delete this product?")) remove({ id: product._id }); setShowActions(false); }}
+                  onClick={(e) => { e.stopPropagation(); if(confirm("Delete this product?")) remove({ id: product._id }); setShowActions(false); }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                >
                   <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -85,10 +94,13 @@ function ProductCard({ product }: { product: Doc<"products">, key?: any }) {
 }
 
 import { CreateProductModal } from "../components/CreateProductModal";
+import { EditProductModal } from "../components/EditProductModal";
 
 export function Store() {
   const [activeTab, setActiveTab] = useState("All Products");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Doc<"products"> | null>(null);
+  
   const products = useQuery(api.products.getAll);
   const stats = useQuery(api.dashboard.getStats);
 
@@ -129,7 +141,7 @@ export function Store() {
           <p className="text-[#648496] dark:text-[#8ba4b3] text-[15px] font-medium mt-2">Manage catalog, inventory, and orders for Balance Church.</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsCreateModalOpen(true)}
           className="flex items-center gap-2 bg-[#85c9d8] hover:bg-[#72b8c9] text-[#0b2840] px-6 py-3 rounded-xl font-semibold transition-colors shadow-sm w-fit md:mb-1"
         >
            <Plus className="w-5 h-5"/> Add New Product
@@ -193,13 +205,21 @@ export function Store() {
              </div>
            ) : (
              filteredProducts?.map(product => (
-               <ProductCard key={product._id} product={product} />
+               <ProductCard key={product._id} product={product} onEdit={setProductToEdit} />
              ))
            )}
         </div>
 
       </Card>
-      <CreateProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      
+      <CreateProductModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      {productToEdit && (
+        <EditProductModal 
+          isOpen={!!productToEdit} 
+          onClose={() => setProductToEdit(null)} 
+          product={productToEdit} 
+        />
+      )}
     </div>
   );
 }

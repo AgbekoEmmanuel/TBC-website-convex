@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { HeartHandshake, Loader2, Delete } from "lucide-react";
+import { Loader2, Delete } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../components/AuthProvider";
+import logo from "../assets/logo.png";
 
 const KEYPAD_DATA = [
   { num: "1", letters: "" },
@@ -99,8 +100,8 @@ export function Login() {
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center mb-12"
         >
-          <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-3 border border-white/20 shadow-xl">
-            <HeartHandshake className="w-6 h-6 text-[#d4af37]" />
+          <div className="w-16 h-16 mb-4 flex items-center justify-center">
+            <img src={logo} alt="The Balance Church" className="w-full h-full object-contain brightness-0 invert opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
           </div>
           <h2 className="text-lg font-medium tracking-tight mb-0.5">Enter Passcode</h2>
           <p className="text-white/40 text-[11px] font-medium tracking-wide">Balance Church Admin</p>

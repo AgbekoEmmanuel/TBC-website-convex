@@ -87,14 +87,9 @@ export function WeeklyTeachings() {
 
       {/* 2. Messages Grid */}
       <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
-          <div>
-            <h2 className="font-serif text-4xl text-brand-900 mb-2">Recent Messages</h2>
-            <p className="text-gray-500 text-[14px]">Reflections from Apostle Michael Dadzie and the Balance Ministry team.</p>
-          </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 transition-colors text-brand-900 rounded-lg text-[13px] font-bold">
-            <Filter size={16} /> Sort by Date
-          </button>
+        <div className="mb-16">
+          <h2 className="font-serif text-4xl text-brand-900 mb-2">Recent Messages</h2>
+          <p className="text-gray-500 text-[14px]">Reflections from Apostle Michael Dadzie and the Balance Ministry team.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -102,9 +97,9 @@ export function WeeklyTeachings() {
             <motion.div 
               key={msg.title}
               variants={fadeIn} initial="initial" whileInView="whileInView" transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group hover:shadow-[0_10px_40px_rgb(0,0,0,0.08)] transition-all"
+              className="bg-white rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group hover:shadow-[0_10px_40px_rgb(0,0,0,0.08)] transition-all flex flex-col h-full"
             >
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-6">
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-6 shrink-0">
                 <img 
                   src={msg.img} 
                   alt={msg.title} 
@@ -116,7 +111,7 @@ export function WeeklyTeachings() {
                 </a>
               </div>
               
-              <div className="px-2 pb-4">
+              <div className="px-2 pb-4 flex flex-col flex-1">
                 <p className="text-accent-gold uppercase tracking-[0.15em] text-[10px] font-bold mb-3">{msg.date}</p>
                 <h3 className="font-serif text-[22px] text-brand-900 mb-4">{msg.title}</h3>
                 <div className="flex items-center gap-2 text-gray-500 text-[12px] mb-8">
@@ -124,7 +119,7 @@ export function WeeklyTeachings() {
                   <span>Apostle Michael Dadzie</span>
                 </div>
                 
-                <a href={msg.spotifyLink} target="_blank" rel="noopener noreferrer" className="w-full bg-[#0a1945] hover:bg-blue-900 text-white py-3.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-colors">
+                <a href={msg.spotifyLink} target="_blank" rel="noopener noreferrer" className="mt-auto w-full bg-[#0a1945] hover:bg-blue-900 text-white py-3.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-colors">
                   <Podcast size={16} /> Listen on Spotify
                 </a>
               </div>

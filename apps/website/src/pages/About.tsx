@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Share2, MapPin, Smile, Instagram, Youtube, Music, Facebook, ArrowRight, Gem, Flag, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import pastorImg from '../assets/Apostle.jpg.jpeg.png';
+import residentPastorImg from '../assets/resident_pastor.png';
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
 import socialsImg from '../assets/socials.jpg';
 
@@ -76,11 +77,11 @@ export function About() {
             initial={{ opacity: 0, scale: 0.95 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ duration: 1 }}
-            className="h-[250px] md:h-[700px] aspect-[9/16] ml-auto overflow-hidden rounded-xl md:rounded-2xl border border-gray-200/60 shadow-lg"
+            className="w-full max-w-[320px] md:max-w-[420px] aspect-[9/16] h-auto mx-auto lg:ml-auto overflow-hidden rounded-2xl md:rounded-[32px] border border-gray-200/60 shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative bg-gray-50"
           >
             <iframe 
               src={`https://player.vimeo.com/video/1186361647?autoplay=1&loop=1&muted=1&background=1`}
-              className="w-full h-full scale-[1.01]"
+              className="absolute inset-0 w-full h-full scale-[1.02]"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
             />
@@ -245,49 +246,91 @@ export function About() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-20">
             <motion.p variants={fadeIn} initial="initial" whileInView="whileInView" className="text-[#a0aabf] uppercase tracking-[0.2em] text-[10px] font-bold mb-4">
-              Meet Our Pastor
+              Meet Our Leaders
             </motion.p>
             <motion.h2 variants={fadeIn} initial="initial" whileInView="whileInView" className="font-serif text-5xl md:text-6xl text-brand-900">
               Leadership
             </motion.h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-            {/* Pastor Image */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }} 
-              whileInView={{ opacity: 1, x: 0 }} 
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-5"
-            >
-              <img 
-                src={pastorImg} 
-                alt="Apostle Michael Dadzie" 
-                className="w-full h-auto object-contain"
-              />
-            </motion.div>
+          <div className="flex flex-col gap-24">
+            {/* General Overseer */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+              {/* Pastor Image */}
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="lg:col-span-5"
+              >
+                <img 
+                  src={pastorImg} 
+                  alt="Apostle Michael Dadzie" 
+                  className="w-full h-auto object-contain"
+                />
+              </motion.div>
 
-            {/* Pastor Bio */}
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }} 
-              whileInView={{ opacity: 1, x: 0 }} 
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-col lg:col-span-7 justify-center"
-            >
-              <h3 className="font-serif text-[40px] md:text-5xl text-brand-900 mb-2">Apostle Michael Dadzie</h3>
-              <p className="text-accent-gold uppercase tracking-[0.2em] text-[11px] font-bold mb-8">Lead Pastor</p>
-              
-              <div className="text-gray-500 text-[16px] leading-relaxed flex flex-col gap-6">
-                <p>
-                  Apostle Michael Dadzie, a man set apart for the master's use whose assignment is for the liberation of young people through the incorporation of spiritual and earthly principles for dominion, succinctly the ambidextrous mandate. He is the Lead Pastor of the Balance Church. He has for the past 15 years dedicated his life to impacting the youth and ensuring that they are nourished spiritually, emotionally, psychologically and any facet of life possible.
-                </p>
-                <p>
-                  He commenced his Ministry on the land of Ghana National College and it evolved to Gathering of Champions Network in Accra, Ghana and finally established The Balance Church in Prime Accra. With the ambidextrous mandate given to him to incorporate earthly and spiritual principles for dominion, he continues to charge and challenge the youth of this generation to affect their world.
-                </p>
-              </div>
-            </motion.div>
+              {/* Pastor Bio */}
+              <motion.div 
+                initial={{ opacity: 0, x: 30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-col lg:col-span-7 justify-center"
+              >
+                <h3 className="font-serif text-[40px] md:text-5xl text-brand-900 mb-2">Apostle Michael Dadzie</h3>
+                <p className="text-accent-gold uppercase tracking-[0.2em] text-[11px] font-bold mb-8">General Overseer</p>
+                
+                <div className="text-gray-500 text-[16px] leading-relaxed flex flex-col gap-6">
+                  <p>
+                    Apostle Michael Dadzie, a man set apart for the master's use whose assignment is for the liberation of young people through the incorporation of spiritual and earthly principles for dominion, succinctly the ambidextrous mandate. He is the General Overseer of the Balance Church. He has for the past 15 years dedicated his life to impacting the youth and ensuring that they are nourished spiritually, emotionally, psychologically and any facet of life possible.
+                  </p>
+                  <p>
+                    He commenced his Ministry on the land of Ghana National College and it evolved to Gathering of Champions Network in Accra, Ghana and finally established The Balance Church in Prime Accra. With the ambidextrous mandate given to him to incorporate earthly and spiritual principles for dominion, he continues to charge and challenge the youth of this generation to affect their world.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Resident Pastor */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+              {/* Pastor Bio (Left on Desktop) */}
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-col lg:col-span-7 justify-center order-2 lg:order-1"
+              >
+                <h3 className="font-serif text-[40px] md:text-5xl text-brand-900 mb-2">Rev. Moses Obeng Mensah</h3>
+                <p className="text-accent-gold uppercase tracking-[0.2em] text-[11px] font-bold mb-8">Resident Pastor</p>
+                
+                <div className="text-gray-500 text-[16px] leading-relaxed flex flex-col gap-6">
+                  <p>
+                    Rev. Moses Obeng Mensah is the Resident Pastor of The Balance Church. His ministry and mandate is to preach servanthood, loyalty, honour and the art of following to his generation.
+                  </p>
+                  <p>
+                    Interwoven in his assignment is to communicate to the body of Christ the subject of spiritual fathers and sons and the wisdom to work the relationship, and also to teach on how the gap between spiritual fathers and sons can be bridged.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Pastor Image (Right on Desktop) */}
+              <motion.div 
+                initial={{ opacity: 0, x: 30 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="lg:col-span-5 order-1 lg:order-2"
+              >
+                <img 
+                  src={residentPastorImg} 
+                  alt="Rev. Moses Obeng Mensah" 
+                  className="w-full h-auto object-contain"
+                />
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -428,6 +471,54 @@ export function About() {
               </motion.a>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* 7. Locate Us */}
+      <section id="locate" className="bg-[#f7f8f9] py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <motion.p variants={fadeIn} initial="initial" whileInView="whileInView" className="text-accent-gold uppercase tracking-[0.2em] text-[10px] font-bold mb-4">
+              Visit Us
+            </motion.p>
+            <motion.h2 variants={fadeIn} initial="initial" whileInView="whileInView" className="font-serif text-4xl md:text-5xl lg:text-6xl text-brand-900 mb-6">
+              Locate Us
+            </motion.h2>
+            <motion.p variants={fadeIn} initial="initial" whileInView="whileInView" className="text-gray-500 max-w-lg mx-auto text-[15px] leading-relaxed">
+              Join us in person at our main auditorium. We can't wait to welcome you to the Balance family.
+            </motion.p>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full h-[400px] md:h-[600px] rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.06)] border-8 border-white relative bg-gray-200"
+          >
+            <iframe 
+              src="https://maps.google.com/maps?q=The%20Balance%20Church,%20Hawa%20Avenue,%20Accra&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0 w-full h-full"
+            />
+            
+            {/* Address Overlay Card */}
+            <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-gray-100 max-w-[280px] md:max-w-[320px]">
+               <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-brand-900/5 flex items-center justify-center text-brand-900 shrink-0">
+                    <MapPin size={22} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-brand-900 text-[16px] mb-1">The Balance Church</h4>
+                    <p className="text-gray-500 text-[14px] leading-relaxed">Hawa Avenue<br/>Accra, Ghana</p>
+                  </div>
+               </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

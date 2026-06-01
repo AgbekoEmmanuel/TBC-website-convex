@@ -270,19 +270,6 @@ export function Media() {
                 </div>
                 <ArrowRight size={20} className="text-gray-300 group-hover:text-link-blue transition-colors mr-2" />
               </Link>
-
-              <Link to="/weekly-teachings" className="bg-white p-5 rounded-2xl flex items-center justify-between group hover:shadow-lg transition-all shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-white hover:border-gray-100">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 bg-[#0d3f4a] rounded-xl flex items-center justify-center text-white p-3 shrink-0">
-                    <MessageSquare className="w-full h-full text-white fill-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-serif text-brand-900 text-[17px] mb-1">Midweek Conversations</h4>
-                    <p className="text-gray-400 text-[9px] font-bold tracking-widest uppercase">Deep dives into theology</p>
-                  </div>
-                </div>
-                <ArrowRight size={20} className="text-gray-300 group-hover:text-link-blue transition-colors mr-2" />
-              </Link>
             </div>
           </motion.div>
         </div>

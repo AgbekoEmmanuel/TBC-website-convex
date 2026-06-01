@@ -99,4 +99,10 @@ export default defineSchema({
     imageStorageId: v.id("_storage"),
     imageUrl: v.string(),
   }).index("by_category", ["category"]),
+
+  siteBanners: defineTable({
+    imageStorageId: v.id("_storage"),
+    imageUrl: v.string(),
+    description: v.optional(v.string()),
+  }),
 });

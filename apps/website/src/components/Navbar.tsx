@@ -42,7 +42,8 @@ const navLinks = [
     subItems: [
       { name: 'Mission & Vision', hash: '#mission' },
       { name: 'Leadership', hash: '#leadership' },
-      { name: 'What to Expect', hash: '#expect' }
+      { name: 'What to Expect', hash: '#expect' },
+      { name: 'Locate Us', hash: '#locate' }
     ]
   },
 ];

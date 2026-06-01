@@ -147,9 +147,6 @@ export function Communities() {
                     <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-1">
                       {fellowship.description}
                     </p>
-                    <Link to="#" className="text-accent-gold hover:text-brand-900 transition-colors text-[11px] font-bold uppercase tracking-[0.15em] flex items-center gap-2 mt-auto group-hover:gap-3 w-fit">
-                      Learn More <ArrowRight size={14} />
-                    </Link>
                   </div>
                 </motion.div>
               ))}

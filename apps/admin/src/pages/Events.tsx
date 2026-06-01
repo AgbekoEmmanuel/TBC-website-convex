@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
 import { Doc, Id } from "@convex/_generated/dataModel";
+import { ManageBanner } from "../components/ManageBanner";
 
 function FeaturedEventCard({ event }: { event: Doc<"events"> | null | undefined }) {
   const toggleFeatured = useMutation(api.events.toggleFeatured);
@@ -270,20 +271,20 @@ export function Events() {
          </div>
 
          <div className="flex flex-col gap-4">
-            {events === undefined ? (
-              <div className="flex justify-center p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-[#1f4b73]" />
-              </div>
-            ) : filteredEvents?.length === 0 ? (
-              <div className="text-center p-12 text-slate-500">No events found in this category.</div>
-            ) : (
-              filteredEvents?.map((ev) => (
-                <React.Fragment key={ev._id}>
-                  <ListEventCard ev={ev} onEdit={handleEdit} />
-                </React.Fragment>
-              ))
-            )}
-         </div>
+           {events === undefined ? (
+             <div className="flex justify-center p-12">
+               <Loader2 className="w-8 h-8 animate-spin text-[#1f4b73]" />
+             </div>
+           ) : filteredEvents?.length === 0 ? (
+             <div className="text-center p-12 text-slate-500">No events found in this category.</div>
+           ) : (
+             filteredEvents?.map((ev) => (
+               <React.Fragment key={ev._id}>
+                 <ListEventCard ev={ev} onEdit={handleEdit} />
+               </React.Fragment>
+             ))
+           )}
+        </div>
 
          <div className="flex justify-center mt-12 mb-8">
             <button className="text-[14px] font-medium text-slate-500 hover:text-[#112a46] dark:text-[#8ba4b3] dark:hover:text-white transition-colors pb-1.5 border-b-2 border-transparent hover:border-[#112a46] dark:hover:border-white">
@@ -292,10 +293,15 @@ export function Events() {
          </div>
       </div>
 
+      {/* Promotions Section */}
+      <div className="mt-8">
+        <ManageBanner />
+      </div>
+
       <CreateEventModal 
         isOpen={isModalOpen} 
         onClose={handleClose} 
-        initialEvent={editingEvent} 
+        initialEvent={editingEvent}
       />
     </div>
   );

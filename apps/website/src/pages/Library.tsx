@@ -76,11 +76,17 @@ export function Library() {
 
   const books = allBooks.filter(p => !p.isComingSoon);
   const comingSoonBooks = allBooks.filter(p => p.isComingSoon);
+  
+  // Separate into new releases and regular books
+  const newReleaseBooks = books.filter(p => p.isNewRelease);
+  const regularBooks = books.filter(p => !p.isNewRelease);
 
-  const b1 = books[0];
-  const b2 = books[1];
-  const b3 = books[2];
-  const b4 = books[3];
+  const featuredBooks = newReleaseBooks;
+
+  const b1 = featuredBooks[0];
+  const b2 = featuredBooks[1];
+  const b3 = featuredBooks[2];
+  const b4 = featuredBooks[3];
 
   return (
     <div className="w-full bg-[#fdfdfc] font-sans overflow-hidden">
@@ -130,6 +136,7 @@ export function Library() {
       </section>
 
       {/* 2. New Releases Layout */}
+      {(isLoading || featuredBooks.length > 0) && (
       <section id="new-releases" className="max-w-7xl mx-auto px-6 pb-24 border-b border-gray-100">
         <h2 className="font-serif italic text-[28px] mb-8 text-brand-900">New Releases</h2>
         
@@ -276,6 +283,7 @@ export function Library() {
            )}
         </div>
       </section>
+      )}
 
       {/* 3. All Publications */}
       <section id="publications" className="bg-[#fcfcfc] py-24">
@@ -299,7 +307,8 @@ export function Library() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
-            {books.map((pub, idx) => (
+            {/* Show all regular books, or all books if none are marked as new release */}
+            {(newReleaseBooks.length > 0 ? regularBooks : books).map((pub, idx) => (
               <div key={idx} className="flex flex-col group cursor-pointer h-full">
                  <div className="aspect-[4/5] bg-gray-100 mb-6 overflow-hidden rounded-md relative shadow-sm shrink-0">
                     <img src={pub.imageUrl || book1} alt={pub.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />

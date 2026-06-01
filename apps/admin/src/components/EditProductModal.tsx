@@ -23,6 +23,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const [imagePreview, setImagePreview] = useState<string | null>(product.imageUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComingSoon, setIsComingSoon] = useState(product.isComingSoon || false);
+  const [isNewRelease, setIsNewRelease] = useState(product.isNewRelease || false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,6 +38,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
       setImagePreview(product.imageUrl || null);
       setImageFile(null);
       setIsComingSoon(product.isComingSoon || false);
+      setIsNewRelease(product.isNewRelease || false);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -93,6 +95,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
         inStock: product.inStock,
         isPublished: product.isPublished,
         isComingSoon,
+        isNewRelease,
       });
 
       onClose();
@@ -174,17 +177,32 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <input 
-                  type="checkbox" 
-                  id="editComingSoon"
-                  checked={isComingSoon}
-                  onChange={(e) => setIsComingSoon(e.target.checked)}
-                  className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
-                />
-                <label htmlFor="editComingSoon" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
-                  Mark as "Coming Soon"
-                </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="editComingSoon"
+                    checked={isComingSoon}
+                    onChange={(e) => setIsComingSoon(e.target.checked)}
+                    className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
+                  />
+                  <label htmlFor="editComingSoon" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
+                    Mark as "Coming Soon"
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="editNewRelease"
+                    checked={isNewRelease}
+                    onChange={(e) => setIsNewRelease(e.target.checked)}
+                    className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
+                  />
+                  <label htmlFor="editNewRelease" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
+                    Mark as "New Release"
+                  </label>
+                </div>
               </div>
 
               <div>

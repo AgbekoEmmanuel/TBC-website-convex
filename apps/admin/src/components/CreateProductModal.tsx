@@ -22,6 +22,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComingSoon, setIsComingSoon] = useState(false);
+  const [isNewRelease, setIsNewRelease] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,6 +77,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
         inStock: true,
         isPublished: true,
         isComingSoon,
+        isNewRelease,
       });
 
       onClose();
@@ -88,6 +90,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
       setImageFile(null);
       setImagePreview(null);
       setIsComingSoon(false);
+      setIsNewRelease(false);
     } catch (error) {
       console.error("Failed to add product:", error);
       alert("Failed to add product. Please try again.");
@@ -176,17 +179,32 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <input 
-                  type="checkbox" 
-                  id="comingSoon"
-                  checked={isComingSoon}
-                  onChange={(e) => setIsComingSoon(e.target.checked)}
-                  className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
-                />
-                <label htmlFor="comingSoon" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
-                  Mark as "Coming Soon"
-                </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="comingSoon"
+                    checked={isComingSoon}
+                    onChange={(e) => setIsComingSoon(e.target.checked)}
+                    className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
+                  />
+                  <label htmlFor="comingSoon" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
+                    Mark as "Coming Soon"
+                  </label>
+                </div>
+                
+                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="newRelease"
+                    checked={isNewRelease}
+                    onChange={(e) => setIsNewRelease(e.target.checked)}
+                    className="w-4 h-4 text-[#85c9d8] rounded border-slate-300 focus:ring-[#85c9d8]"
+                  />
+                  <label htmlFor="newRelease" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
+                    Mark as "New Release"
+                  </label>
+                </div>
               </div>
 
               <div>

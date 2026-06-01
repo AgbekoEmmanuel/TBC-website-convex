@@ -50,6 +50,7 @@ export default defineSchema({
     inStock: v.boolean(),
     isPublished: v.boolean(),
     isComingSoon: v.optional(v.boolean()),
+    isNewRelease: v.optional(v.boolean()),
   })
     .index("by_published", ["isPublished"])
     .index("by_category", ["category"])

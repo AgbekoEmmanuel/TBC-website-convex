@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:website && npm run build:admin && node scripts/bundle.mjs",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },

@@ -22,6 +22,11 @@ export function Home() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const events = useQuery(api.events.getPublishedUpcoming);
   const recentEvents = events ? events.slice(0, 3) : undefined;
+  const featuredSermon = useQuery(api.sermons.getFeatured);
+  const banners = useQuery(api.siteBanners.getAll);
+  
+  const yearThemeBanner = banners?.find(b => b.location === 'yearTheme')?.imageUrl || yearThemeImg;
+  const devotionBanner = banners?.find(b => b.location === 'devotion')?.imageUrl || congre3Img;
 
   useEffect(() => {
     if (heroImages.length <= 1) return;
@@ -163,61 +168,67 @@ export function Home() {
       </div>
 
       {/* 3. Featured Sermon Section */}
-      <section className="py-24 bg-bg-light border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="w-full lg:w-3/5"
-            >
-              <a href="https://youtu.be/CIuIhNbxIhY" target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden relative shadow-xl group aspect-video">
-                <img 
-                  src="https://img.youtube.com/vi/CIuIhNbxIhY/maxresdefault.jpg" 
-                  alt="Featured Sermon" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-brand-900/40 flex items-center justify-center transition-colors group-hover:bg-brand-900/50">
-                  <div className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer border border-white/20">
-                    <PlayCircle className="text-white w-8 h-8" />
+      {featuredSermon && (
+        <section className="py-24 bg-bg-light border-y border-gray-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="w-full lg:w-3/5"
+              >
+                <a href={featuredSermon.videoUrl || "#"} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden relative shadow-xl group aspect-video bg-gray-100">
+                  {featuredSermon.thumbnailUrl ? (
+                    <img 
+                      src={featuredSermon.thumbnailUrl} 
+                      alt="Featured Sermon" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-brand-900/10">
+                       <PlayCircle className="text-brand-900/30 w-16 h-16" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-brand-900/40 flex items-center justify-center transition-colors group-hover:bg-brand-900/50">
+                    <div className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer border border-white/20">
+                      <PlayCircle className="text-white w-8 h-8" />
+                    </div>
                   </div>
-                </div>
-              </a>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="w-full lg:w-2/5"
-            >
-              <p className="text-accent-gold font-bold tracking-[0.1em] uppercase text-xs mb-3">Featured Sermon</p>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-brand-900 leading-[1.1] mb-6">
-                Invading the <br/>Mountains
-              </h2>
-              <p className="text-gray-500 text-lg leading-relaxed mb-8">
-                Join Apostle Michael Dadzie as he explores the seven mountains of influence and how to have dominion over them.
-              </p>
-              <div className="flex flex-wrap items-center gap-6">
-                <button className="px-6 py-3 bg-brand-900 text-white rounded-lg font-semibold hover:bg-brand-800 transition-colors text-sm">
-                  Watch Message
-                </button>
-                <a 
-                  href="https://www.youtube.com/@ApostleMichaelDadzie" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-brand-900 font-semibold text-sm hover:text-link-blue transition-colors"
-                >
-                  All Sermons
                 </a>
-              </div>
-            </motion.div>
+              </motion.div>
 
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="w-full lg:w-2/5"
+              >
+                <p className="text-accent-gold font-bold tracking-[0.1em] uppercase text-xs mb-3">Featured Sermon</p>
+                <h2 className="font-serif text-4xl lg:text-5xl font-bold text-brand-900 leading-[1.1] mb-6">
+                  {featuredSermon.title}
+                </h2>
+                <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                  {featuredSermon.description || `Join ${featuredSermon.speaker} for this featured message.`}
+                </p>
+                <div className="flex flex-wrap items-center gap-6">
+                  <a href={featuredSermon.videoUrl || "#"} target="_blank" rel="noopener noreferrer" className="px-6 py-3 bg-brand-900 text-white rounded-lg font-semibold hover:bg-brand-800 transition-colors text-sm">
+                    Watch Message
+                  </a>
+                  <Link 
+                    to="/sermons" 
+                    className="text-brand-900 font-semibold text-sm hover:text-link-blue transition-colors"
+                  >
+                    All Sermons
+                  </Link>
+                </div>
+              </motion.div>
+
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Year Theme Banner Section */}
       <section className="w-full bg-bg-light relative pb-12">
@@ -229,7 +240,7 @@ export function Home() {
             className="w-full rounded-[2rem] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] bg-brand-900 group cursor-pointer"
           >
             <img 
-              src={yearThemeImg} 
+              src={yearThemeBanner} 
               alt="Year Theme" 
               className="w-full h-auto object-cover max-h-[85vh] transition-transform duration-700 ease-in-out group-hover:scale-105"
             />
@@ -242,7 +253,7 @@ export function Home() {
         {/* Background Image with Parallax Effect */}
         <div 
           className="absolute inset-0 z-0 bg-fixed bg-center bg-cover bg-no-repeat"
-          style={{ backgroundImage: `url(${congre3Img})` }}
+          style={{ backgroundImage: `url(${devotionBanner})` }}
         >
           {/* Dark Overlay to make text pop */}
           <div className="absolute inset-0 bg-brand-900/60 mix-blend-multiply" />

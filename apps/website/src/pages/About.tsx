@@ -1,6 +1,8 @@
 import { motion } from 'motion/react';
 import { Share2, MapPin, Smile, Instagram, Youtube, Music, Facebook, ArrowRight, Gem, Flag, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import pastorImg from '../assets/Apostle.jpg.jpeg.png';
 import residentPastorImg from '../assets/resident_pastor.png';
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
@@ -54,6 +56,9 @@ const TikTokIcon = ({ size = 24 }: { size?: number }) => (
 );
 
 export function About() {
+  const banners = useQuery(api.siteBanners.getAll);
+  const aboutModelsBanner = banners?.find(b => b.location === 'aboutModels')?.imageUrl || null;
+
   return (
     <div className="w-full font-sans">
       
@@ -90,9 +95,18 @@ export function About() {
       </section>
 
       {/* 2. Models of Emphasis Section */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-20 md:pb-28">
+      <section 
+        className="relative w-full overflow-hidden bg-gradient-to-br from-[#120822] via-[#21113b] md:via-[#321741] to-[#3a1a40] pt-24 md:pt-32 pb-20 md:pb-28"
+      >
+        {aboutModelsBanner && (
+          <div 
+            className="absolute inset-0 z-0 mix-blend-overlay opacity-50"
+            style={{ backgroundImage: `url(${aboutModelsBanner})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          />
+        )}
+        
         {/* Background glow & graphics */}
-        <div className="absolute top-1/4 right-[20%] w-[600px] h-[600px] bg-[#8d2a6a]/20 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/4 right-[20%] w-[600px] h-[600px] bg-[#8d2a6a]/20 blur-[130px] rounded-full pointer-events-none z-0" />
         
         {/* Bottom Right Hand/Diamond Watermark */}
         <div className="absolute bottom-[-10%] right-[-5%] md:right-[5%] opacity-10 pointer-events-none origin-bottom-right scale-100 md:scale-125">

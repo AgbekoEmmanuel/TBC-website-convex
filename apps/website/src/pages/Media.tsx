@@ -10,7 +10,10 @@ import { api } from "@convex/_generated/api";
 const heroImages = [mediaBg1, mediaBg2];
 
 const sundayModules = import.meta.glob('../assets/gallery/sunday/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
-const sundayPhotos = Object.values(sundayModules) as string[];
+const rawSundayPhotos = Object.entries(sundayModules).map(([path, url], i) => ({
+  _id: `static-sunday-${i}`,
+  url: url as string
+}));
 
 const fadeInVariants = {
   initial: { opacity: 0, y: 20 },
@@ -18,9 +21,18 @@ const fadeInVariants = {
 };
 
 export function Media() {
+  const banners = useQuery(api.siteBanners.getAll);
+  const mediaHeroBanners = banners?.filter(b => b.location === 'mediaHero').map(b => b.imageUrl);
+  const activeHeroImages = mediaHeroBanners?.length ? mediaHeroBanners : heroImages;
+
   const [currentIdx, setCurrentIdx] = useState(0);
   const recentMessages = useQuery(api.events.getRecentPast);
   const isLoading = recentMessages === undefined;
+  const deletedStaticIds = useQuery(api.gallery.getDeletedStaticIds) || [];
+  
+  const sundayPhotos = rawSundayPhotos
+    .filter(p => !deletedStaticIds.includes(p._id))
+    .map(p => p.url);
 
   const liveStream = useQuery(api.liveStream.get);
   const isLive = liveStream?.isLive && liveStream?.youtubeLink;
@@ -35,10 +47,10 @@ export function Media() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % heroImages.length);
+      setCurrentIdx((prev) => (prev + 1) % activeHeroImages.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeHeroImages.length]);
 
   return (
     <div className="w-full font-sans">
@@ -53,7 +65,7 @@ export function Media() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 2, ease: "easeInOut" }}
-              src={heroImages[currentIdx]}
+              src={activeHeroImages[currentIdx % activeHeroImages.length]}
               alt="Background"
               className="absolute inset-0 m-auto w-full md:w-[85%] h-[80%] md:h-full object-cover mix-blend-overlay opacity-[0.65]"
               style={{

@@ -20,6 +20,7 @@ export const create = mutation({
   args: {
     imageStorageId: v.id("_storage"),
     description: v.optional(v.string()),
+    location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const imageUrl = await ctx.storage.getUrl(args.imageStorageId);
@@ -29,6 +30,7 @@ export const create = mutation({
       imageStorageId: args.imageStorageId,
       imageUrl: imageUrl,
       description: args.description,
+      location: args.location || "carousel",
     });
   },
 });

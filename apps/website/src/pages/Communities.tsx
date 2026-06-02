@@ -1,6 +1,8 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 const fellowships = [
   {
@@ -56,6 +58,9 @@ const fellowships = [
 ];
 
 export function Communities() {
+  const banners = useQuery(api.siteBanners.getAll);
+  const communityHeroBanner = banners?.find(b => b.location === 'communityHero')?.imageUrl || "https://i.pinimg.com/1200x/85/cf/7b/85cf7b4993b6519887effa15951ca46b.jpg";
+
   return (
     <div className="w-full bg-[#fdfdfd] min-h-screen font-sans">
       
@@ -63,7 +68,7 @@ export function Communities() {
       <section className="relative w-full overflow-hidden bg-brand-900 py-24 md:py-32 lg:py-40">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://i.pinimg.com/1200x/85/cf/7b/85cf7b4993b6519887effa15951ca46b.jpg" 
+            src={communityHeroBanner} 
             alt="Cathedral interior" 
             className="w-full h-full object-cover mix-blend-soft-light opacity-50"
             referrerPolicy="no-referrer"

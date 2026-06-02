@@ -1,5 +1,7 @@
 import { motion } from 'motion/react';
 import { Play, Search, ChevronDown, User, Calendar } from 'lucide-react';
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 const sermonsData = [
   {
@@ -59,6 +61,9 @@ const sermonsData = [
 ];
 
 export function Sermons() {
+  const featuredSermon = useQuery(api.sermons.getFeatured);
+  const publishedSermons = useQuery(api.sermons.getPublished);
+
   return (
     <div className="w-full bg-[#fdfdfd] min-h-screen pt-12 pb-24 font-sans">
       <div className="max-w-7xl mx-auto px-6">
@@ -83,54 +88,62 @@ export function Sermons() {
         </div>
 
         {/* Featured Sermon Hero */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="relative w-full rounded-[24px] overflow-hidden shadow-xl aspect-[16/9] md:aspect-[21/9] min-h-[400px] mb-12 group"
-        >
-          {/* Background Image & Overlays */}
-          <img 
-            src="https://picsum.photos/seed/sunriseclouds/1920/800" 
-            alt="Sunrise behind clouds" 
-            className="absolute inset-0 w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-brand-900/30 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-900/80 via-transparent to-transparent" />
+        {featuredSermon && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="relative w-full rounded-[24px] overflow-hidden shadow-xl aspect-[16/9] md:aspect-[21/9] min-h-[400px] mb-12 group bg-gray-100"
+          >
+            {/* Background Image & Overlays */}
+            {featuredSermon.thumbnailUrl ? (
+              <img 
+                src={featuredSermon.thumbnailUrl} 
+                alt={featuredSermon.title} 
+                className="absolute inset-0 w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="absolute inset-0 w-full h-full bg-brand-900/10"></div>
+            )}
+            <div className="absolute inset-0 bg-brand-900/40 mix-blend-multiply" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-900/80 via-transparent to-transparent" />
 
-          {/* Featured Content */}
-          <div className="absolute inset-0 flex flex-col md:flex-row md:items-end justify-between p-8 md:p-14 z-10">
-            <div className="max-w-2xl mt-auto md:mt-0">
-              <span className="bg-btn-sand text-brand-900 text-[10px] uppercase font-bold tracking-[0.1em] px-3 py-1.5 rounded-full inline-block mb-4">
-                Latest Message
-              </span>
-              <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white font-medium mb-4 leading-tight">
-                The Weight of Quietness
-              </h2>
-              <p className="text-gray-200 text-sm md:text-lg lg:text-xl font-light mb-6 opacity-90 leading-relaxed max-w-xl">
-                Exploring the discipline of silence in a noisy world. Part 4 of the 'Rhythms of Grace' series.
-              </p>
-              
-              <div className="flex flex-wrap items-center gap-6 text-white text-xs md:text-sm font-medium">
-                <span className="flex items-center gap-2 opacity-90">
-                  <User size={16} /> Pastor Julian Vance
+            {/* Featured Content */}
+            <div className="absolute inset-0 flex flex-col md:flex-row md:items-end justify-between p-8 md:p-14 z-10">
+              <div className="max-w-2xl mt-auto md:mt-0">
+                <span className="bg-btn-sand text-brand-900 text-[10px] uppercase font-bold tracking-[0.1em] px-3 py-1.5 rounded-full inline-block mb-4">
+                  Featured Message
                 </span>
-                <span className="flex items-center gap-2 opacity-90">
-                  <Calendar size={16} /> Oct 27, 2024
-                </span>
+                <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white font-medium mb-4 leading-tight">
+                  {featuredSermon.title}
+                </h2>
+                <p className="text-gray-200 text-sm md:text-lg lg:text-xl font-light mb-6 opacity-90 leading-relaxed max-w-xl">
+                  {featuredSermon.description || `Join ${featuredSermon.speaker} for this featured message.`}
+                </p>
+                
+                <div className="flex flex-wrap items-center gap-6 text-white text-xs md:text-sm font-medium">
+                  <span className="flex items-center gap-2 opacity-90">
+                    <User size={16} /> {featuredSermon.speaker}
+                  </span>
+                  {featuredSermon.date && (
+                    <span className="flex items-center gap-2 opacity-90">
+                      <Calendar size={16} /> {new Date(featuredSermon.date).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Play Button */}
+              <div className="mt-6 md:mt-0 self-start md:self-end pr-4 pb-2">
+                <a href={featuredSermon.videoUrl || "#"} target="_blank" rel="noopener noreferrer" className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
+                  <Play className="text-brand-900 w-6 h-6 ml-1" fill="currentColor" strokeWidth={1} />
+                </a>
               </div>
             </div>
-
-            {/* Play Button */}
-            <div className="mt-6 md:mt-0 self-start md:self-end pr-4 pb-2">
-              <button className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_15px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
-                <Play className="text-brand-900 w-6 h-6 ml-1" fill="currentColor" strokeWidth={1} />
-              </button>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Filter Section */}
         <div className="bg-[#f7f8f9] rounded-[24px] p-6 lg:p-8 flex flex-col lg:flex-row gap-6 mb-16 shadow-sm border border-gray-100/50">
@@ -188,53 +201,67 @@ export function Sermons() {
 
         {/* Sermons Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-          {sermonsData.map((sermon, i) => (
-            <motion.div 
-              key={sermon.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="group cursor-pointer flex flex-col"
-            >
-              {/* Thumbnail */}
-              <div className="relative rounded-2xl overflow-hidden aspect-video w-full mb-5 bg-gray-100 shadow-sm">
-                <img 
-                  src={sermon.image} 
-                  alt={sermon.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                {/* Duration Badge */}
-                <div className="absolute bottom-3 right-3 bg-brand-900/95 backdrop-blur-sm text-white px-2 py-1 rounded shadow-sm">
-                  <span className="text-[10px] font-bold tracking-wider">{sermon.duration}</span>
+          {publishedSermons === undefined ? (
+            <div className="col-span-full py-20 text-center text-gray-500">Loading library...</div>
+          ) : publishedSermons.length === 0 ? (
+            <div className="col-span-full py-20 text-center text-gray-500">No sermons uploaded yet.</div>
+          ) : (
+            publishedSermons.map((sermon, i) => (
+              <motion.div 
+                key={sermon._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="group cursor-pointer flex flex-col"
+              >
+                {/* Thumbnail */}
+                <div className="relative rounded-2xl overflow-hidden aspect-video w-full mb-5 bg-gray-100 shadow-sm">
+                  {sermon.thumbnailUrl ? (
+                    <img 
+                      src={sermon.thumbnailUrl} 
+                      alt={sermon.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-brand-900/5 flex items-center justify-center">
+                      <Play className="text-brand-900/20 w-12 h-12" />
+                    </div>
+                  )}
+                  {/* Duration Badge */}
+                  <div className="absolute bottom-3 right-3 bg-brand-900/95 backdrop-blur-sm text-white px-2 py-1 rounded shadow-sm">
+                    <span className="text-[10px] font-bold tracking-wider">45:00</span>
+                  </div>
+                  {/* Hover Play Overlay */}
+                  <div className="absolute inset-0 bg-brand-900/0 group-hover:bg-brand-900/20 transition-colors flex items-center justify-center">
+                    <a href={sermon.videoUrl || "#"} target="_blank" rel="noopener noreferrer">
+                      <Play className="text-white w-12 h-12 opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 group-hover:scale-100 duration-300 drop-shadow-lg" fill="currentColor" />
+                    </a>
+                  </div>
                 </div>
-                {/* Hover Play Overlay */}
-                <div className="absolute inset-0 bg-brand-900/0 group-hover:bg-brand-900/20 transition-colors flex items-center justify-center">
-                  <Play className="text-white w-12 h-12 opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 group-hover:scale-100 duration-300 drop-shadow-lg" fill="currentColor" />
-                </div>
-              </div>
 
-              {/* Content */}
-              <div className="flex flex-col flex-1 px-1">
-                <p className="text-accent-gold text-[9px] uppercase font-bold tracking-widest mb-2">
-                  {sermon.series}
-                </p>
-                <h3 className="font-serif text-2xl font-semibold text-brand-900 mb-4 group-hover:text-link-blue transition-colors leading-tight">
-                  {sermon.title}
-                </h3>
-                
-                <div className="mt-auto flex justify-between items-center text-[11px] font-medium text-gray-400">
-                  <div className="flex items-center gap-1.5">
-                    <User size={14} className="opacity-70" /> {sermon.speaker}
-                  </div>
-                  <div className="flex items-center">
-                     {sermon.date}
+                {/* Content */}
+                <div className="flex flex-col flex-1 px-1">
+                  <p className="text-accent-gold text-[9px] uppercase font-bold tracking-widest mb-2">
+                    {sermon.series || "Stand Alone"}
+                  </p>
+                  <h3 className="font-serif text-2xl font-semibold text-brand-900 mb-4 group-hover:text-link-blue transition-colors leading-tight">
+                    {sermon.title}
+                  </h3>
+                  
+                  <div className="mt-auto flex justify-between items-center text-[11px] font-medium text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      <User size={14} className="opacity-70" /> {sermon.speaker}
+                    </div>
+                    <div className="flex items-center">
+                       {sermon.date ? new Date(sermon.date).toLocaleDateString() : "TBA"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          )}
         </div>
         
         {/* Load More */}

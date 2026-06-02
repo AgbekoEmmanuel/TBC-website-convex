@@ -15,21 +15,24 @@ const categories = [
 ];
 
 const sundayModules = import.meta.glob('../assets/gallery/sunday/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
-const sundayPhotos = Object.values(sundayModules).map((src) => ({
+const sundayPhotos = Object.entries(sundayModules).map(([path, src], i) => ({
+  _id: `static-sunday-${i}`,
   cat: "Sunday service",
   src: src as string,
   height: Math.random() > 0.5 ? "h-[450px]" : "h-[350px]"
 }));
 
 const sportsModules = import.meta.glob('../assets/gallery/sports/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
-const sportsPhotos = Object.values(sportsModules).map((src) => ({
+const sportsPhotos = Object.entries(sportsModules).map(([path, src], i) => ({
+  _id: `static-sports-${i}`,
   cat: "Sports",
   src: src as string,
   height: Math.random() > 0.5 ? "h-[450px]" : "h-[350px]"
 }));
 
 const specialProgramsModules = import.meta.glob('../assets/gallery/special programs/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
-const specialProgramsPhotos = Object.values(specialProgramsModules).map((src) => ({
+const specialProgramsPhotos = Object.entries(specialProgramsModules).map(([path, src], i) => ({
+  _id: `static-special-${i}`,
   cat: "Special programs",
   src: src as string,
   height: Math.random() > 0.5 ? "h-[450px]" : "h-[350px]"
@@ -45,6 +48,7 @@ const staticPhotos = [
 export function FullGallery() {
   const [activeTab, setActiveTab] = useState("All");
   const dynamicPhotos = useQuery(api.gallery.list);
+  const deletedStaticIds = useQuery(api.gallery.getDeletedStaticIds) || [];
 
   if (dynamicPhotos === undefined) {
     return (
@@ -54,9 +58,11 @@ export function FullGallery() {
     );
   }
 
+  const activeStaticPhotos = staticPhotos.filter(p => !deletedStaticIds.includes(p._id));
+
   // Combine static and dynamic photos
   const allPhotos = [
-    ...staticPhotos,
+    ...activeStaticPhotos,
     ...dynamicPhotos.map((p, i) => ({
       cat: p.category,
       src: p.imageUrl,
@@ -103,10 +109,10 @@ export function FullGallery() {
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`px-5 py-2.5 rounded-full text-[12px] font-bold tracking-wide uppercase transition-all duration-300 ${
+              className={`px-5 py-2.5 rounded-full text-[12px] font-bold tracking-wide uppercase transition-all duration-300 border whitespace-nowrap ${
                 activeTab === cat 
-                  ? 'bg-brand-900 text-white shadow-md' 
-                  : 'bg-white text-gray-500 border border-gray-100 hover:border-brand-900/30 hover:text-brand-900'
+                  ? 'bg-brand-900 text-white border-brand-900 shadow-md' 
+                  : 'bg-white text-gray-500 border-gray-100 hover:border-brand-900/30 hover:text-brand-900'
               }`}
             >
               {cat}

@@ -1,138 +1,74 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Plus, Clock, User, Loader2, MoreHorizontal, Eye, EyeOff, Trash2, PlayCircle, Edit, Image as ImageIcon, LayoutGrid, Music, Filter, Search, Camera } from "lucide-react";
-import { Card } from "../components/ui/card";
+import React, { useState } from "react";
+import { Plus, Loader2, Trash2, Camera, Filter, Check, Square, Image as ImageIcon } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
 import { Doc } from "@convex/_generated/dataModel";
-import { CreateSermonModal } from "../components/CreateSermonModal";
 import { CreateGalleryItemModal } from "../components/CreateGalleryItemModal";
-
-// --- Sermon Components ---
-
-function SermonCard({ sermon, onEdit }: { sermon: Doc<"sermons">, onEdit: (s: Doc<"sermons">) => void }) {
-  const togglePublished = useMutation(api.sermons.togglePublished);
-  const remove = useMutation(api.sermons.remove);
-  const [showActions, setShowActions] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowActions(false);
-      }
-    }
-    if (showActions) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showActions]);
-
-  return (
-    <Card className={cn(
-      "flex flex-col h-full bg-white dark:bg-[#081a30] overflow-visible p-0 border border-slate-200 dark:border-[#1a365d] shadow-none rounded-[24px] relative transition-colors",
-      showActions ? "z-30" : "z-10"
-    )}>
-      <div className="h-[220px] w-full relative shrink-0 bg-[#f8fafc] dark:bg-[#0a2239]">
-        {sermon.thumbnailUrl ? (
-          <>
-            <img src={sermon.thumbnailUrl} alt={sermon.title} className="w-full h-full object-cover opacity-80 dark:opacity-60 mix-blend-luminosity dark:mix-blend-overlay" />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent dark:from-[#081a30] dark:via-[#081a30]/40 dark:to-transparent"></div>
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-[#0a2239]">
-             <PlayCircle className="w-12 h-12 text-slate-300 dark:text-[#1a365d]" />
-          </div>
-        )}
-        
-        <div className="absolute top-5 left-5 z-10 flex gap-2">
-          <span className={cn(
-             "text-[10px] uppercase font-bold px-3 py-1.5 rounded-full tracking-widest border shadow-sm",
-             sermon.isPublished 
-               ? "bg-[#e0f2fe] text-[#0284c7] border-[#bae6fd] dark:bg-[#85c9d8]/10 dark:text-[#85c9d8] dark:border-[#85c9d8]/20"
-               : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-transparent dark:text-[#648496] dark:border-[#1a365d]"
-          )}>
-            {sermon.isPublished ? "PUBLISHED" : "DRAFT"}
-          </span>
-        </div>
-
-        <div className="absolute top-5 right-5 z-20" ref={dropdownRef}>
-          <button 
-            onClick={() => setShowActions(!showActions)}
-            className="w-8 h-8 rounded-full bg-white/90 dark:bg-[#031c34]/80 backdrop-blur-md flex items-center justify-center text-slate-500 hover:text-[#112a46] dark:hover:text-white border border-slate-200/50 dark:border-white/10 shadow-sm"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-
-          {showActions && (
-            <div className="absolute right-0 top-10 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-1 min-w-[140px] overflow-hidden">
-               <button 
-                  onClick={() => { onEdit(sermon); setShowActions(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
-               >
-                  <Edit className="w-3.5 h-3.5" /> Edit Details
-               </button>
-               <button 
-                  onClick={() => { togglePublished({ id: sermon._id, isPublished: !sermon.isPublished }); setShowActions(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
-               >
-                  {sermon.isPublished ? <><EyeOff className="w-3.5 h-3.5"/> Draft</> : <><Eye className="w-3.5 h-3.5"/> Publish</>}
-               </button>
-               <button 
-                  onClick={() => { if(confirm("Delete this sermon?")) remove({ id: sermon._id }); setShowActions(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-               >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete
-               </button>
-            </div>
-          )}
-        </div>
-
-        <div className="absolute bottom-4 right-5 z-10 flex items-center gap-1.5 bg-white/90 dark:bg-[#031c34]/80 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] font-bold text-[#112a46] dark:text-white border border-slate-200/50 dark:border-white/10 shadow-sm">
-          <Clock className="w-3 h-3" /> 45 : 00
-        </div>
-      </div>
-
-      <div className="p-6 md:p-8 flex flex-col flex-1 relative z-10">
-        <div className="text-[10px] font-bold text-slate-500 dark:text-[#8ba4b3] uppercase tracking-widest mb-2.5">
-          {sermon.series || "STAND ALONE"}
-        </div>
-        
-        <h3 className="text-[22px] md:text-[24px] font-serif mb-6 text-[#112a46] dark:text-white leading-[1.2] cursor-pointer hover:text-[#0284c7] dark:hover:text-[#85c9d8] transition-colors">
-          {sermon.title}
-        </h3>
-        
-        <div className="flex items-center justify-between text-[13px] font-medium text-slate-500 dark:text-[#648496] pt-5 mt-auto border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center gap-2 text-[#112a46] dark:text-[#8ba4b3]">
-            <User className="w-[14px] h-[14px]" />
-            {sermon.speaker}
-          </div>
-          <div>
-            {sermon.date ? new Date(sermon.date).toLocaleDateString() : "No Date"}
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
+import { ManageBanner } from "../components/ManageBanner";
 
 // --- Gallery Components ---
 
-function GalleryCard({ item }: { item: Doc<"gallery"> }) {
+function GalleryCard({ 
+  item, 
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
+  deleteStaticItems
+}: { 
+  item: Doc<"gallery">,
+  isSelectionMode: boolean,
+  isSelected: boolean,
+  onToggleSelect: (id: string) => void,
+  deleteStaticItems: (args: { ids: string[] }) => void
+}) {
   const remove = useMutation(api.gallery.remove);
   
   return (
-    <div className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#0a2239] border border-slate-200 dark:border-[#1a365d]">
-      <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+    <div 
+      onClick={() => isSelectionMode && onToggleSelect(item._id)}
+      className={cn(
+        "group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#0a2239] border transition-all",
+        isSelectionMode ? "cursor-pointer" : "",
+        isSelected 
+          ? "border-4 border-[#288096] scale-[0.98] shadow-md" 
+          : "border-slate-200 dark:border-[#1a365d] hover:border-[#288096]/50"
+      )}
+    >
+      <img src={item.imageUrl} alt={item.title || "Gallery Item"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+      
+      {isSelectionMode && (
+        <div className="absolute top-3 left-3 z-20">
+          <div className={cn(
+            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm",
+            isSelected ? "bg-[#288096] border-[#288096]" : "bg-black/20 border-white backdrop-blur-sm"
+          )}>
+            {isSelected && <Check className="w-4 h-4 text-white" />}
+          </div>
+        </div>
+      )}
+
+      <div className={cn(
+        "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity flex flex-col justify-end p-4",
+        isSelectionMode ? (isSelected ? "opacity-30" : "opacity-0") : "opacity-0 group-hover:opacity-100"
+      )}>
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{item.category}</span>
             <span className="text-sm font-medium text-white truncate max-w-[150px]">{item.title || "Untitled"}</span>
           </div>
-          {!item._id.toString().startsWith('static-') && (
+          {!isSelectionMode && (
             <button 
-              onClick={() => { if(confirm("Delete this photo?")) remove({ id: item._id as any }); }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if(confirm("Delete this photo?")) {
+                  if (item._id.toString().startsWith('static-')) {
+                    deleteStaticItems({ ids: [item._id] });
+                  } else {
+                    remove({ id: item._id as any }); 
+                  }
+                }
+              }}
               className="p-2 rounded-full bg-red-500/20 hover:bg-red-500 text-white backdrop-blur-sm transition-all"
             >
               <Trash2 className="w-4 h-4" />
@@ -147,14 +83,19 @@ function GalleryCard({ item }: { item: Doc<"gallery"> }) {
 // --- Main Page Component ---
 
 export function Media() {
-  const [activeTab, setActiveTab] = useState<"sermons" | "gallery">("sermons");
-  const [isSermonModalOpen, setIsSermonModalOpen] = useState(false);
-  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
-  const [editingSermon, setEditingSermon] = useState<Doc<"sermons"> | undefined>(undefined);
-  const [galleryFilter, setGalleryFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState<"Gallery" | "Banners">("Gallery");
 
-  const sermons = useQuery(api.sermons.getAll);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [galleryFilter, setGalleryFilter] = useState("All");
+  
+  // Selection State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const galleryItems = useQuery(api.gallery.list);
+  const removeMany = useMutation(api.gallery.removeMany);
+  const deletedStaticIds = useQuery(api.gallery.getDeletedStaticIds);
+  const deleteStaticItems = useMutation(api.gallery.deleteStaticItems);
 
   const GALLERY_CATEGORIES = [
     "All",
@@ -197,153 +138,189 @@ export function Media() {
     ...sundayPhotos,
     ...sportsPhotos,
     ...specialPhotos,
-  ];
+  ].filter(item => !(deletedStaticIds || []).includes(item._id as string));
 
   const filteredGallery = allGalleryItems.filter(item => 
     galleryFilter === "All" || item.category === galleryFilter
   );
 
-  const handleEditSermon = (sermon: Doc<"sermons">) => {
-    setEditingSermon(sermon);
-    setIsSermonModalOpen(true);
+  const handleToggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+      if (newSelected.size === 0) {
+        setIsSelectionMode(false);
+      }
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
   };
 
-  const handleCloseSermon = () => {
-    setIsSermonModalOpen(false);
-    setEditingSermon(undefined);
+  const handleToggleSelectAll = () => {
+    if (!filteredGallery) return;
+    
+    const allFilteredIds = filteredGallery.map(i => i._id);
+    const allSelected = allFilteredIds.every(id => selectedIds.has(id));
+    
+    const newSelected = new Set(selectedIds);
+    if (allSelected) {
+      allFilteredIds.forEach(id => newSelected.delete(id));
+      if (newSelected.size === 0) setIsSelectionMode(false);
+    } else {
+      allFilteredIds.forEach(id => newSelected.add(id));
+      setIsSelectionMode(true);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedIds.size} selected photos?`)) {
+      const allSelected = Array.from(selectedIds);
+      const staticIds = allSelected.filter(id => id.startsWith('static-'));
+      const dbIds = allSelected.filter(id => !id.startsWith('static-'));
+      
+      if (dbIds.length > 0) {
+        await removeMany({ ids: dbIds as any });
+      }
+      if (staticIds.length > 0) {
+        await deleteStaticItems({ ids: staticIds });
+      }
+      
+      setSelectedIds(new Set());
+      setIsSelectionMode(false);
+    }
   };
 
   return (
     <div className="max-w-[1400px] mx-auto px-1 sm:px-2 md:px-0 text-[#112a46] dark:text-white mb-20 animate-in fade-in duration-300 pt-2 w-full">
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-white/5 pb-5 mb-8 gap-4 w-full">
          <div>
             <h1 className="text-[32px] md:text-[38px] font-serif text-[#112a46] dark:text-white tracking-tight leading-[1.1] mb-2">
                Media Manager
             </h1>
-            <p className="text-slate-500 dark:text-[#8ba4b3] text-sm font-medium">Manage your sermons and photo gallery archives.</p>
+            <p className="text-slate-500 dark:text-[#8ba4b3] text-sm font-medium">Manage your photo gallery and website banners.</p>
          </div>
-
-         <div className="flex bg-slate-100 dark:bg-[#0a2239] p-1 rounded-2xl border border-slate-200/50 dark:border-white/5">
-            <button 
-              onClick={() => setActiveTab("sermons")}
-              className={cn(
-                "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all",
-                activeTab === "sermons" 
-                  ? "bg-white dark:bg-[#1a365d] text-[#288096] dark:text-[#85c9d8] shadow-sm" 
-                  : "text-slate-500 hover:text-[#112a46] dark:text-[#648496] dark:hover:text-white"
-              )}
-            >
-              <Music className="w-4 h-4" /> Sermons
-            </button>
-            <button 
-              onClick={() => setActiveTab("gallery")}
-              className={cn(
-                "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all",
-                activeTab === "gallery" 
-                  ? "bg-white dark:bg-[#1a365d] text-[#288096] dark:text-[#85c9d8] shadow-sm" 
-                  : "text-slate-500 hover:text-[#112a46] dark:text-[#648496] dark:hover:text-white"
-              )}
-            >
-              <Camera className="w-4 h-4" /> Gallery
-            </button>
+         <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+           <button 
+             onClick={() => setActiveTab("Gallery")}
+             className={cn(
+               "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all",
+               activeTab === "Gallery" 
+                 ? "bg-white text-[#112a46] shadow-sm dark:bg-[#103a64] dark:text-white" 
+                 : "text-slate-500 hover:text-[#112a46] dark:text-[#8ba4b3] dark:hover:text-white"
+             )}
+           >
+             <Camera className="w-4 h-4" /> Gallery
+           </button>
+           <button 
+             onClick={() => setActiveTab("Banners")}
+             className={cn(
+               "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all",
+               activeTab === "Banners" 
+                 ? "bg-white text-[#112a46] shadow-sm dark:bg-[#103a64] dark:text-white" 
+                 : "text-slate-500 hover:text-[#112a46] dark:text-[#8ba4b3] dark:hover:text-white"
+             )}
+           >
+             <ImageIcon className="w-4 h-4" /> Banners
+           </button>
          </div>
       </div>
 
-      {activeTab === "sermons" ? (
+      {activeTab === "Gallery" && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-               <div className="relative">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                 <input type="text" placeholder="Search sermons..." className="pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1a365d] bg-white dark:bg-[#081a30] text-sm focus:outline-none focus:ring-2 focus:ring-[#288096]/20 w-full sm:w-[240px]" />
-               </div>
-               <button className="flex items-center justify-between min-w-[140px] bg-white dark:bg-[#081a30] border border-slate-200 dark:border-[#1a365d] px-4 py-2.5 rounded-xl text-[13.5px] font-medium text-[#112a46] dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm">
-                  All Series <ChevronDown className="w-4 h-4 ml-3 text-slate-400 dark:text-[#648496]" />
-               </button>
-            </div>
-            
-            <button 
-               onClick={() => setIsSermonModalOpen(true)}
-               className="flex items-center justify-center gap-2 bg-[#288096] hover:bg-[#1f6374] dark:bg-[#346b85] dark:hover:bg-[#285b73] text-white px-6 py-2.5 rounded-xl text-[13.5px] font-bold transition-colors shadow-sm w-full sm:w-auto"
-            >
-               <Plus className="w-[18px] h-[18px]" /> Upload Sermon
-            </button>
-          </div>
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8">
+              <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                 <div className="flex items-center gap-2 text-slate-400 mr-2">
+                   <Filter className="w-4 h-4" />
+                   <span className="text-xs font-bold uppercase tracking-wider">Filter:</span>
+                 </div>
+                 <div className="flex flex-wrap gap-2">
+                   {GALLERY_CATEGORIES.map(cat => (
+                     <button 
+                      key={cat}
+                      onClick={() => {
+                        setGalleryFilter(cat);
+                        if (isSelectionMode) {
+                          setIsSelectionMode(false);
+                          setSelectedIds(new Set());
+                        }
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest border transition-all whitespace-nowrap",
+                        galleryFilter === cat 
+                          ? "bg-[#288096] text-white border-[#288096] shadow-md"
+                          : "bg-white dark:bg-[#081a30] text-slate-500 dark:text-[#648496] border-slate-200 dark:border-[#1a365d] hover:border-[#288096] hover:text-[#288096]"
+                      )}
+                     >
+                       {cat}
+                     </button>
+                   ))}
+                 </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto">
+                 {filteredGallery.length > 0 && (
+                   <>
+                     <button 
+                       onClick={handleToggleSelectAll}
+                       className="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#081a30] dark:hover:bg-white/5 text-slate-600 dark:text-white px-3 py-2 rounded-xl text-[12px] font-bold transition-colors border border-slate-200 dark:border-[#1a365d] whitespace-nowrap"
+                     >
+                       <Square className="w-3.5 h-3.5" /> 
+                       {filteredGallery.every(i => selectedIds.has(i._id)) ? "Deselect All" : "Select All"}
+                     </button>
+                     {selectedIds.size > 0 && (
+                       <button 
+                         onClick={handleDeleteSelected}
+                         className="flex items-center justify-center gap-1.5 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-[12px] font-bold transition-colors shadow-sm whitespace-nowrap"
+                       >
+                         <Trash2 className="w-3.5 h-3.5" /> Delete ({selectedIds.size})
+                       </button>
+                     )}
+                   </>
+                 )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-12">
-            {sermons === undefined ? (
-              <div className="col-span-full flex justify-center py-20">
-                 <Loader2 className="w-10 h-10 animate-spin text-[#288096]" />
+                 <button 
+                    onClick={() => setIsGalleryModalOpen(true)}
+                    className="flex items-center justify-center gap-1.5 bg-[#288096] hover:bg-[#1f6374] dark:bg-[#346b85] dark:hover:bg-[#285b73] text-white px-4 py-2 rounded-xl text-[12px] font-bold transition-colors shadow-sm whitespace-nowrap"
+                 >
+                    <Plus className="w-3.5 h-3.5" /> Add Photo
+                 </button>
               </div>
-            ) : sermons.length === 0 ? (
-              <div className="col-span-full text-center py-20 text-slate-500">
-                 No sermons found in the library.
-              </div>
-            ) : (
-              sermons.map((sermon) => (
-                <SermonCard key={sermon._id} sermon={sermon} onEdit={handleEditSermon} />
-              ))
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-               <div className="flex items-center gap-2 text-slate-400 mr-2">
-                 <Filter className="w-4 h-4" />
-                 <span className="text-xs font-bold uppercase tracking-wider">Filter:</span>
-               </div>
-               <div className="flex flex-wrap gap-2">
-                 {GALLERY_CATEGORIES.map(cat => (
-                   <button 
-                    key={cat}
-                    onClick={() => setGalleryFilter(cat)}
-                    className={cn(
-                      "px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest border transition-all",
-                      galleryFilter === cat 
-                        ? "bg-[#288096] text-white border-[#288096] shadow-md"
-                        : "bg-white dark:bg-[#081a30] text-slate-500 dark:text-[#648496] border-slate-200 dark:border-[#1a365d] hover:border-[#288096] hover:text-[#288096]"
-                    )}
-                   >
-                     {cat}
-                   </button>
-                 ))}
-               </div>
             </div>
-            
-            <button 
-               onClick={() => setIsGalleryModalOpen(true)}
-               className="flex items-center justify-center gap-2 bg-[#288096] hover:bg-[#1f6374] dark:bg-[#346b85] dark:hover:bg-[#285b73] text-white px-6 py-2.5 rounded-xl text-[13.5px] font-bold transition-colors shadow-sm w-full sm:w-auto"
-            >
-               <Plus className="w-[18px] h-[18px]" /> Add Photo
-            </button>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full mb-12">
-            {galleryItems === undefined ? (
-              <div className="col-span-full flex justify-center py-20">
-                 <Loader2 className="w-10 h-10 animate-spin text-[#288096]" />
-              </div>
-            ) : filteredGallery?.length === 0 ? (
-              <div className="col-span-full text-center py-20 text-slate-500">
-                 No photos found in this category.
-              </div>
-            ) : (
-              filteredGallery?.map((item) => (
-                <GalleryCard key={item._id} item={item} />
-              ))
-            )}
-          </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full mb-12">
+              {galleryItems === undefined ? (
+                <div className="col-span-full flex justify-center py-20">
+                   <Loader2 className="w-10 h-10 animate-spin text-[#288096]" />
+                </div>
+              ) : filteredGallery?.length === 0 ? (
+                <div className="col-span-full text-center py-20 text-slate-500">
+                   No photos found in this category.
+                </div>
+              ) : (
+                filteredGallery?.map((item) => (
+                  <GalleryCard 
+                    key={item._id} 
+                    item={item as any} 
+                    isSelectionMode={isSelectionMode}
+                    isSelected={selectedIds.has(item._id)}
+                    onToggleSelect={handleToggleSelect}
+                    deleteStaticItems={deleteStaticItems}
+                  />
+                ))
+              )}
+            </div>
         </div>
       )}
 
-      <CreateSermonModal 
-        isOpen={isSermonModalOpen} 
-        onClose={handleCloseSermon} 
-        initialSermon={editingSermon} 
-      />
+      {activeTab === "Banners" && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <ManageBanner />
+        </div>
+      )}
 
       <CreateGalleryItemModal
         isOpen={isGalleryModalOpen}

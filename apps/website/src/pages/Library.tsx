@@ -52,6 +52,8 @@ export function Library() {
   const [book, setBook] = useState('');
 
   const dbProducts = useQuery(api.products.getPublished);
+  const banners = useQuery(api.siteBanners.getAll);
+  const libraryHeroBanner = banners?.find(b => b.location === 'libraryHero')?.imageUrl || wisdomArena;
   const isLoading = dbProducts === undefined;
   
   // Filter only books just in case there are other products
@@ -127,7 +129,7 @@ export function Library() {
           className="w-full rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] relative group cursor-pointer bg-brand-900"
         >
           <img 
-            src={wisdomArena} 
+            src={libraryHeroBanner} 
             alt="Wisdom Arena" 
             className="w-full h-auto object-contain transition-transform duration-[1.5s] group-hover:scale-105"
           />

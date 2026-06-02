@@ -34,9 +34,11 @@ export default defineSchema({
     thumbnailUrl: v.optional(v.string()),
     series: v.optional(v.string()),
     isPublished: v.boolean(),
+    isFeatured: v.optional(v.boolean()),
   })
     .index("by_date", ["date"])
     .index("by_published", ["isPublished"])
+    .index("by_featured", ["isFeatured"])
     .index("by_slug", ["slug"]),
 
   products: defineTable({
@@ -106,10 +108,15 @@ export default defineSchema({
     imageStorageId: v.id("_storage"),
     imageUrl: v.string(),
     description: v.optional(v.string()),
+    location: v.optional(v.string()), // "carousel", "yearTheme", "devotion", "mediaHero"
   }),
 
   subscriptions: defineTable({
     email: v.string(),
     source: v.string(), // e.g., "Weekly Teachings", "Events Newsletter"
   }).index("by_email", ["email"]),
+
+  deletedStaticImages: defineTable({
+    staticId: v.string(),
+  }).index("by_staticId", ["staticId"]),
 });

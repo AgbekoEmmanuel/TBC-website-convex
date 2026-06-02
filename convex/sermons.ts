@@ -45,6 +45,7 @@ export const create = mutation({
     thumbnailUrl: v.optional(v.string()),
     series: v.optional(v.string()),
     isPublished: v.boolean(),
+    isFeatured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -67,6 +68,7 @@ export const update = mutation({
     thumbnailUrl: v.optional(v.string()),
     series: v.optional(v.string()),
     isPublished: v.boolean(),
+    isFeatured: v.optional(v.boolean()),
   },
   handler: async (ctx, { id, ...args }) => {
     const userId = await getAuthUserId(ctx);
@@ -94,5 +96,38 @@ export const togglePublished = mutation({
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
     await ctx.db.patch(id, { isPublished });
+  },
+});
+
+export const getFeatured = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("sermons")
+      .withIndex("by_featured", (q) => q.eq("isFeatured", true))
+      .first();
+  },
+});
+
+export const setFeatured = mutation({
+  args: { id: v.id("sermons") },
+  handler: async (ctx, { id }) => {
+    const userId = await getAuthUserId(ctx);
+    // if (!userId) throw new Error("Not authenticated");
+    
+    // Un-feature all currently featured sermons
+    const currentlyFeatured = await ctx.db
+      .query("sermons")
+      .withIndex("by_featured", (q) => q.eq("isFeatured", true))
+      .collect();
+      
+    for (const sermon of currentlyFeatured) {
+      if (sermon._id !== id) {
+        await ctx.db.patch(sermon._id, { isFeatured: false });
+      }
+    }
+    
+    // Set the target sermon as featured
+    await ctx.db.patch(id, { isFeatured: true });
   },
 });

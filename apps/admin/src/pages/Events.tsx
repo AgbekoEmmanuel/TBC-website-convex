@@ -6,7 +6,53 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
 import { Doc, Id } from "@convex/_generated/dataModel";
-import { ManageBanner } from "../components/ManageBanner";
+import { CreateSermonModal } from "../components/CreateSermonModal";
+
+function FeaturedSermonCard({ sermon, onEdit }: { sermon: Doc<"sermons"> | null | undefined, onEdit: (s: Doc<"sermons">) => void }) {
+  if (sermon === undefined) return <div className="h-[280px] bg-slate-100 dark:bg-white/5 animate-pulse rounded-[24px]" />;
+  if (!sermon) return (
+     <Card className="flex flex-col items-center justify-center dark:bg-[#0a2744]/60 p-8 border border-slate-100 dark:border-white/5 rounded-[24px] min-h-[280px] transition-all">
+        <Star className="w-12 h-12 text-slate-300 dark:text-[#1a365d] mb-4" />
+        <h3 className="text-xl font-medium text-slate-800 dark:text-white">No featured sermon</h3>
+        <p className="text-sm text-slate-500 dark:text-[#8ba4b3] text-center mt-2">Upload and feature a sermon to show it on the homepage.</p>
+     </Card>
+  );
+
+  return (
+     <Card className="flex flex-col md:flex-row dark:bg-[#0a2744]/60 dark:backdrop-blur-xl overflow-hidden p-0 border border-slate-100 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] shadow-sm rounded-[24px] min-h-[280px] relative transition-all duration-300">
+        <div className="w-full md:w-2/5 relative shrink-0 bg-[#f8fafc] dark:bg-[#0a2239]">
+          {sermon.thumbnailUrl ? (
+            <img src={sermon.thumbnailUrl} alt={sermon.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-[#0a2239]">
+               <PlayCircle className="w-12 h-12 text-slate-300 dark:text-[#1a365d]" />
+            </div>
+          )}
+        </div>
+        
+        <div className="relative z-10 p-8 flex flex-col justify-center h-full w-full md:w-3/5">
+           <div>
+             <div className="mb-4">
+               <span className="bg-[#e0f2fe] text-[#0284c7] dark:bg-[#85c9d8]/20 dark:text-[#85c9d8] text-[10px] uppercase font-bold px-3.5 py-1.5 rounded-full tracking-widest border border-transparent dark:border-[#85c9d8]/30 shadow-sm">
+                 FEATURED SERMON
+               </span>
+             </div>
+             
+             <h2 className="text-2xl sm:text-3xl font-serif text-[#112a46] dark:text-white mb-2 leading-[1.15] tracking-tight font-bold">{sermon.title}</h2>
+             <p className="text-slate-600 dark:text-[#8ba4b3] text-[14px] font-medium leading-[1.6] mb-6">
+               {sermon.speaker} {sermon.date ? `• ${new Date(sermon.date).toLocaleDateString()}` : ""}
+             </p>
+           </div>
+           
+           <div className="mt-auto pt-6 border-t border-slate-200/60 dark:border-white/10">
+              <button onClick={() => onEdit(sermon)} className="text-[#112a46] hover:text-[#0284c7] dark:text-white dark:hover:text-[#85c9d8] text-[14px] font-semibold transition-colors flex items-center">
+                 Edit Sermon <ArrowRight className="w-4 h-4 ml-1.5" />
+              </button>
+           </div>
+        </div>
+     </Card>
+  )
+}
 
 function FeaturedEventCard({ event }: { event: Doc<"events"> | null | undefined }) {
   const toggleFeatured = useMutation(api.events.toggleFeatured);
@@ -172,8 +218,11 @@ export function Events() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Doc<"events"> | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("All");
+  const [isSermonModalOpen, setIsSermonModalOpen] = useState(false);
+  const [editingSermon, setEditingSermon] = useState<Doc<"sermons"> | undefined>(undefined);
   const events = useQuery(api.events.getAll);
   const featuredEvent = useQuery(api.events.getFeatured);
+  const featuredSermon = useQuery(api.sermons.getFeatured);
   const stats = useQuery(api.dashboard.getStats);
 
   const filteredEvents = events?.filter(ev => {
@@ -293,15 +342,32 @@ export function Events() {
          </div>
       </div>
 
-      {/* Promotions Section */}
-      <div className="mt-8">
-        <ManageBanner />
+      <div className="mt-12 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-white/5 pb-5 gap-4">
+            <div>
+               <h2 className="text-[26px] font-serif text-[#112a46] dark:text-white font-bold leading-none tracking-tight">Featured Sermon</h2>
+               <p className="text-[#648496] dark:text-[#8ba4b3] text-[14px] mt-2">This sermon is currently highlighted on the website homepage.</p>
+            </div>
+            <button 
+              onClick={() => setIsSermonModalOpen(true)}
+              className="flex items-center gap-2 bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-[#103a64]/80 dark:text-white dark:hover:bg-[#103a64]/30 px-5 text-[14px] py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+            >
+               <Plus className="w-[18px] h-[18px]"/> Upload New Sermon
+            </button>
+        </div>
+        <FeaturedSermonCard sermon={featuredSermon} onEdit={(s) => { setEditingSermon(s); setIsSermonModalOpen(true); }} />
       </div>
 
       <CreateEventModal 
         isOpen={isModalOpen} 
         onClose={handleClose} 
         initialEvent={editingEvent}
+      />
+
+      <CreateSermonModal 
+        isOpen={isSermonModalOpen} 
+        onClose={() => { setIsSermonModalOpen(false); setEditingSermon(undefined); }} 
+        initialSermon={editingSermon} 
       />
     </div>
   );

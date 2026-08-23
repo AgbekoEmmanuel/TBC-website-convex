@@ -8,8 +8,6 @@ import residentPastorImg from '../assets/resident_pastor.png';
 const introVideo = "https://drive.google.com/uc?export=download&id=0B78FI5-mZakRQ2UxS0liVV9UUzQ&resourcekey=0-EF16VX8BPj36SPny2s0MtQ";
 import socialsImg from '../assets/socials.jpg';
 
-const ledImagesModules = import.meta.glob('../assets/LED things/*.{png,jpg,jpeg,webp}', { eager: true, query: '?url', import: 'default' });
-const ledImages = Object.values(ledImagesModules) as string[];
 
 const modelsOfEmphasis = [
   "Jesus",
@@ -171,41 +169,6 @@ export function About() {
         </div>
       </section>
 
-      {/* Scrolling LED Images Marquee */}
-      <div className="w-full py-2 overflow-hidden bg-white flex items-center select-none z-20">
-        <motion.div 
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="flex items-center whitespace-nowrap py-10"
-        >
-          {/* Duplicate the array to create a seamless loop */}
-          {[...ledImages, ...ledImages].map((img, i) => {
-            const translationMap: Record<string, string> = {
-              '(10)': 'translate-y-2 md:translate-y-3',
-              '(11)': 'translate-y-6 md:translate-y-8',
-              '(14)': 'translate-y-4 md:translate-y-6',
-              '(16)': 'translate-y-2 md:translate-y-3',
-              '(17)': 'translate-y-2 md:translate-y-3',
-              '(19)': 'translate-y-4 md:translate-y-6',
-            };
-            const match = Object.keys(translationMap).find(p => img.includes(`Poster%20LED%20${p}`) || img.includes(`Poster LED ${p}`));
-            const translation = match ? translationMap[match] : '';
-            
-            return (
-              <div 
-                key={i} 
-                className={`h-[250px] md:h-[380px] flex items-center justify-center mx-10 md:mx-16 shrink-0 ${translation}`}
-              >
-                <img 
-                  src={img} 
-                  alt={`LED ${i}`} 
-                  className="max-h-[95%] w-auto object-contain mix-blend-multiply transition-opacity duration-300 hover:opacity-80" 
-                />
-              </div>
-            );
-          })}
-        </motion.div>
-      </div>
 
       {/* 3. Mission / Vision Section */}
       <section id="mission" className="bg-[#f7f8f9] pt-20 md:pt-28 pb-32">

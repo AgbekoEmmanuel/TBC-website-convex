@@ -9,7 +9,10 @@ import yearThemeImg from '../assets/events/year_theme.jpeg';
 import congre3Img from '../assets/congre3.jpg';
 
 const homepicsModules = import.meta.glob('../assets/homepics/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
-const heroImages = Object.values(homepicsModules) as string[];
+const staticHeroImages = Object.values(homepicsModules).map((src, i) => ({
+  id: `static-homeHero-${i}`,
+  url: src as string
+}));
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -24,17 +27,26 @@ export function Home() {
   const recentEvents = events ? events.slice(0, 3) : undefined;
   const featuredSermon = useQuery(api.sermons.getFeatured);
   const banners = useQuery(api.siteBanners.getAll);
+  const deletedStaticIds = useQuery(api.gallery.getDeletedStaticIds);
   
   const yearThemeBanner = banners?.find(b => b.location === 'yearTheme')?.imageUrl || yearThemeImg;
   const devotionBanner = banners?.find(b => b.location === 'devotion')?.imageUrl || congre3Img;
 
+  const dynamicHeroBanners = banners?.filter(b => b.location === "homeHero") || [];
+  const validStaticImages = staticHeroImages.filter(item => !(deletedStaticIds || []).includes(item.id));
+  
+  const allHeroImages = [
+    ...dynamicHeroBanners.map(b => b.imageUrl),
+    ...validStaticImages.map(img => img.url)
+  ];
+
   useEffect(() => {
-    if (heroImages.length <= 1) return;
+    if (allHeroImages.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % heroImages.length);
+      setCurrentIdx((prev) => (prev + 1) % allHeroImages.length);
     }, 5000); 
     return () => clearInterval(timer);
-  }, []);
+  }, [allHeroImages.length]);
 
   return (
     <div className="w-full bg-white font-sans">
@@ -43,14 +55,14 @@ export function Home() {
       <section className="relative h-[85vh] min-h-[600px] flex flex-col justify-center items-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0 bg-[#112a46]">
           <AnimatePresence>
-            {heroImages.length > 0 && (
+            {allHeroImages.length > 0 && (
               <motion.img 
                 key={currentIdx}
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.5, ease: "easeInOut" }}
-                src={heroImages[currentIdx]} 
+                src={allHeroImages[currentIdx]} 
                 alt="Church community" 
                 className="absolute inset-0 w-full h-full object-cover"
               />

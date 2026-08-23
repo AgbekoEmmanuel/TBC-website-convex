@@ -5,6 +5,15 @@ import { Card } from "./ui/card";
 import { ImageIcon, Upload, Trash2, Loader2, Plus, Image as LucideImage } from "lucide-react";
 import { Id } from "@convex/_generated/dataModel";
 
+const homepicsModules = import.meta.glob('../../../website/src/assets/homepics/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
+const staticHomepics = Object.values(homepicsModules).map((src, i) => ({
+  _id: `static-homeHero-${i}`,
+  imageUrl: src as string,
+  description: "Static Asset",
+  isStatic: true
+}));
+
+
 import yearThemeDefault from "../images/defaults/year_theme.jpeg";
 import devotionDefault from "../images/defaults/congre3.jpg";
 import mediaHeroDefault from "../images/defaults/media_bg_horizontal.jpg";
@@ -24,6 +33,9 @@ export function ManageBanner() {
   const generateUploadUrl = useMutation(api.siteBanners.generateUploadUrl);
   const createBanner = useMutation(api.siteBanners.create);
   const removeBanner = useMutation(api.siteBanners.remove);
+  const deletedStaticIds = useQuery(api.gallery.getDeletedStaticIds);
+  const deleteStaticItems = useMutation(api.gallery.deleteStaticItems);
+
 
   // Promotional Banner Upload State
   const [isUploadingPromo, setIsUploadingPromo] = useState(false);
@@ -37,7 +49,17 @@ export function ManageBanner() {
   const fixedFileInputRef = useRef<HTMLInputElement>(null);
   const [activeFixedLocation, setActiveFixedLocation] = useState<{loc: string, oldId?: Id<"siteBanners">} | null>(null);
 
+  // Home Hero Banner Upload State
+  const [isUploadingHero, setIsUploadingHero] = useState(false);
+  const heroFileInputRef = useRef<HTMLInputElement>(null);
+
   const promotionalBanners = banners?.filter(b => b.location === "carousel" || !b.location) || [];
+  const dynamicHeroBanners = banners?.filter(b => b.location === "homeHero") || [];
+  
+  const allHeroBanners = [
+    ...dynamicHeroBanners,
+    ...staticHomepics.filter(item => !(deletedStaticIds || []).includes(item._id))
+  ];
 
   // Handlers for Promotional
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +110,44 @@ export function ManageBanner() {
       await removeBanner({ id });
     }
   };
+
+  const handleHeroFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      setIsUploadingHero(true);
+      const postUrl = await generateUploadUrl();
+      const result = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      const { storageId } = await result.json();
+      
+      await createBanner({
+        imageStorageId: storageId,
+        location: "homeHero",
+      });
+    } catch (error) {
+      console.error("Error uploading hero banner:", error);
+      alert("Failed to upload hero banner");
+    } finally {
+      setIsUploadingHero(false);
+      if (heroFileInputRef.current) heroFileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteHero = async (id: string, isStatic?: boolean) => {
+    if (confirm("Remove this hero banner from the website?")) {
+      if (isStatic) {
+        await deleteStaticItems({ ids: [id] });
+      } else {
+        await removeBanner({ id: id as Id<"siteBanners"> });
+      }
+    }
+  };
+
 
   // Handlers for Fixed Banners
   const handleFixedFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,6 +316,76 @@ export function ManageBanner() {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {/* Home Hero Banners */}
+      <Card className="flex flex-col dark:bg-[#0a2744]/40 dark:backdrop-blur-xl bg-white shadow-sm border border-slate-100 dark:border-white/5 rounded-[24px] p-6 lg:p-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 border-b border-slate-200 dark:border-white/5 pb-5">
+          <div>
+            <h3 className="text-[20px] font-serif font-bold text-[#112a46] dark:text-white flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-[#0284c7] dark:text-[#85c9d8]" />
+              Home Hero Backgrounds
+              {banners !== undefined && deletedStaticIds !== undefined && (
+                <span className="text-sm font-normal text-slate-500 dark:text-[#8ba4b3] ml-1">({allHeroBanners.length})</span>
+              )}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-[#8ba4b3] mt-1">
+              Manage the slideshow backgrounds for the "Dome of Excellence" hero section.
+            </p>
+          </div>
+          <button
+            onClick={() => heroFileInputRef.current?.click()}
+            disabled={isUploadingHero}
+            className="flex items-center gap-2 bg-[#1f4b73] hover:bg-[#153450] text-white dark:bg-[#346b85] dark:hover:bg-[#285b73] px-5 py-2.5 text-[14px] rounded-xl font-semibold transition-colors shadow-sm whitespace-nowrap disabled:opacity-60"
+          >
+            {isUploadingHero ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} 
+            {isUploadingHero ? "Uploading..." : "Add Hero Background"}
+          </button>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={heroFileInputRef}
+            onChange={handleHeroFileSelect}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          {banners === undefined || deletedStaticIds === undefined ? (
+            <div className="col-span-full flex justify-center py-10">
+              <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            </div>
+          ) : allHeroBanners.length === 0 ? (
+            <div className="col-span-full text-center text-slate-400 py-12 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10">
+              <ImageIcon className="w-10 h-10 mb-3 opacity-50 mx-auto" />
+              <p className="text-sm font-medium">No hero backgrounds yet</p>
+            </div>
+          ) : (
+            allHeroBanners.map((banner) => (
+              <div key={banner._id} className="relative aspect-video rounded-xl overflow-hidden group border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/20">
+                <img
+                  src={banner.imageUrl}
+                  alt="Hero Background"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm">
+                      {('isStatic' in banner) ? "Static Asset" : "Uploaded"}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteHero(banner._id as string, ('isStatic' in banner))}
+                      className="p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg backdrop-blur-sm transition-colors"
+                      title="Delete banner"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
           )}

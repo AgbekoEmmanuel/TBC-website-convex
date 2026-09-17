@@ -59,8 +59,8 @@ export function FeaturedBanner() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
-                  // w-full makes it fill the card width; aspect ratio enforces same size for all
-                  className="w-full aspect-video md:aspect-[21/9] object-cover block"
+                  // w-full makes it fill the card width; h-auto preserves natural aspect ratio
+                  className="w-full h-auto block"
                 />
               </AnimatePresence>
 

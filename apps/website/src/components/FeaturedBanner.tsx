@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function FeaturedBanner() {
-  const banners = useQuery(api.siteBanners.getAll);
+  const allBanners = useQuery(api.siteBanners.getAll);
+  const banners = allBanners?.filter(b => b.location === "carousel" || !b.location);
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Auto-advance carousel every 6 seconds when multiple banners
@@ -58,8 +59,8 @@ export function FeaturedBanner() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
-                  // w-full makes it fill the card width; h-auto preserves natural aspect ratio
-                  className="w-full h-auto block"
+                  // w-full makes it fill the card width; aspect ratio enforces same size for all
+                  className="w-full aspect-video md:aspect-[21/9] object-cover block"
                 />
               </AnimatePresence>
 

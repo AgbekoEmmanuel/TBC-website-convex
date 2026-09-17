@@ -52,7 +52,7 @@ export function Home() {
     <div className="w-full bg-white font-sans">
       
       {/* 1. Hero Section */}
-      <section className="relative h-[85vh] min-h-[600px] flex flex-col justify-center items-center text-center overflow-hidden">
+      <section className="relative h-[100dvh] min-h-[600px] flex flex-col justify-center items-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0 bg-[#112a46]">
           <AnimatePresence>
             {allHeroImages.length > 0 && (

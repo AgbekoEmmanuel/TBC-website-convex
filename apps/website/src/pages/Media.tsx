@@ -288,93 +288,96 @@ export function Media() {
       </section>
 
       {/* 5. The Gallery Section */}
-      <section id="gallery" className="bg-white py-24 md:py-32">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section id="gallery" className="bg-[#f8f9fa] py-24 md:py-32 overflow-hidden relative">
+        {/* Background decorations */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+           <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[100px] opacity-70" />
+           <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-accent-gold/5 rounded-full blur-[100px] opacity-70" />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 relative z-20">
+          <div className="text-center mb-8 md:mb-12">
             <p className="text-brand-900 uppercase tracking-[0.2em] text-[10px] font-bold mb-4">
               Life in Community
             </p>
-            <h2 className="font-serif text-5xl md:text-6xl text-brand-900">
+            <h2 className="font-serif text-5xl md:text-6xl text-brand-900 mb-4">
               The Gallery.
             </h2>
+            <p className="text-gray-500 text-sm max-w-lg mx-auto">
+              Interact and drag the photos around to explore our beautiful community moments.
+            </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-auto lg:h-[600px]">
-            {/* Left large tall image */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="h-[400px] lg:h-full w-full overflow-hidden group"
-            >
-              <img
-                src={sundayPhotos[0] || "https://picsum.photos/seed/sunday1/600/800"}
-                alt="Sunday Service"
-                className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
+        {/* Interactive Drag Collage */}
+        <div className="w-full max-w-7xl mx-auto px-4 relative h-[500px] md:h-[750px] flex items-center justify-center pointer-events-auto">
+          {(() => {
+            const collagePlacements = [
+              // Center large
+              { left: '50%', top: '50%', width: 'min(65%, 450px)', aspect: '3/4', rotate: -2, zIndex: 10, delay: 0.1 },
+              // Top left
+              { left: '22%', top: '28%', width: 'min(45%, 280px)', aspect: '1/1', rotate: -8, zIndex: 5, delay: 0.2 },
+              // Top right
+              { left: '78%', top: '32%', width: 'min(50%, 320px)', aspect: '4/3', rotate: 6, zIndex: 8, delay: 0.3 },
+              // Bottom left
+              { left: '28%', top: '72%', width: 'min(48%, 300px)', aspect: '4/3', rotate: 5, zIndex: 12, delay: 0.4 },
+              // Bottom right
+              { left: '72%', top: '68%', width: 'min(45%, 280px)', aspect: '1/1', rotate: -5, zIndex: 7, delay: 0.5 },
+            ];
 
-            {/* Right side nested grid */}
-            <div className="flex flex-col gap-4 h-auto lg:h-full">
-              {/* Top horizontal image */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="h-[250px] lg:h-[340px] w-full overflow-hidden group"
-              >
-                <img
-                  src={sundayPhotos[1] || "https://picsum.photos/seed/sunday2/800/400"}
-                  alt="Worship"
-                  className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-              </motion.div>
-              {/* Bottom twin row */}
-              <div className="h-[250px] lg:h-[244px] w-full grid grid-cols-2 gap-4">
+            const displayPhotos = [
+              sundayPhotos[0] || "https://picsum.photos/seed/s1/600/800",
+              sundayPhotos[1] || "https://picsum.photos/seed/s2/800/800",
+              sundayPhotos[2] || "https://picsum.photos/seed/s3/800/600",
+              sundayPhotos[3] || "https://picsum.photos/seed/s4/800/600",
+              sundayPhotos[4] || sundayPhotos[0] || "https://picsum.photos/seed/s5/800/800",
+            ];
+
+            return displayPhotos.map((photo, i) => {
+              const pos = collagePlacements[i];
+              return (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="w-full h-full overflow-hidden group"
+                  key={i}
+                  drag
+                  dragConstraints={{ top: -100, left: -100, right: 100, bottom: 100 }}
+                  whileHover={{ scale: 1.05, zIndex: 50 }}
+                  whileDrag={{ scale: 1.1, zIndex: 50, cursor: "grabbing" }}
+                  initial={{ opacity: 0, scale: 0.8, x: '-50%', y: '-50%', rotate: 0 }}
+                  whileInView={{ opacity: 1, scale: 1, x: '-50%', y: '-50%', rotate: pos.rotate }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7, delay: pos.delay, type: "spring", bounce: 0.3 }}
+                  style={{
+                    position: 'absolute',
+                    left: pos.left,
+                    top: pos.top,
+                    width: pos.width,
+                    aspectRatio: pos.aspect,
+                    zIndex: pos.zIndex,
+                    cursor: 'grab',
+                  }}
+                  className="rounded-xl md:rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.15)] border-4 border-white group bg-white"
                 >
                   <img
-                    src={sundayPhotos[2] || "https://picsum.photos/seed/sunday3/400/400"}
-                    alt="Community"
-                    className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
+                    src={photo}
+                    alt={`Gallery preview ${i + 1}`}
+                    className="w-full h-full object-cover pointer-events-none"
                     referrerPolicy="no-referrer"
                   />
+                  {/* Subtle glass reflection */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="w-full h-full overflow-hidden group"
-                >
-                  <img
-                    src={sundayPhotos[3] || "https://picsum.photos/seed/sunday4/400/400"}
-                    alt="Prayer"
-                    className="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
-                    referrerPolicy="no-referrer"
-                  />
-                </motion.div>
-              </div>
-            </div>
-          </div>
+              );
+            });
+          })()}
+        </div>
 
-          <div className="mt-16 text-center">
-            <Link
-              to="/gallery"
-              className="inline-flex items-center gap-2 px-8 py-3.5 border border-brand-900 text-brand-900 hover:bg-brand-900 hover:text-white rounded-lg text-[13px] font-bold transition-colors font-sans"
-            >
-              View More Photos
-            </Link>
-          </div>
+        <div className="mt-8 md:mt-12 text-center relative z-20">
+          <Link
+            to="/gallery"
+            className="inline-flex items-center gap-3 px-10 py-4 bg-brand-900 text-white hover:bg-brand-800 rounded-full text-[13px] font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          >
+            View Full Gallery <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
 

@@ -206,29 +206,32 @@ export function Events() {
       </div>
 
       {/* Full Image Modal */}
-      <AnimatePresence>
-        {selectedImage && createPortal(
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedImage(null)}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-900/80 backdrop-blur-md cursor-pointer"
-          >
-            <motion.img
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              src={selectedImage}
-              alt="Full Event Flyer"
-              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl cursor-default"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>,
-          document.body
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedImage(null)}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-brand-900/90 backdrop-blur-md cursor-pointer"
+              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100dvh' }}
+            >
+              <motion.img
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                src={selectedImage}
+                alt="Full Event Flyer"
+                className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl cursor-default"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

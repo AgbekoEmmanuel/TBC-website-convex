@@ -23,6 +23,7 @@ const fadeIn = {
 
 export function Home() {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const events = useQuery(api.events.getPublishedUpcoming);
   const recentEvents = events ? events.slice(0, 3) : undefined;
   const featuredSermon = useQuery(api.sermons.getFeatured);
@@ -345,10 +346,16 @@ export function Home() {
                       <p className="text-gray-500 mb-6 text-sm flex-1 line-clamp-2">
                         {event.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-brand-900 font-medium">
+                      <div className="flex items-center gap-4 text-xs text-brand-900 font-medium mb-6">
                         <div className="flex items-center gap-1.5 opacity-70"><Clock size={14} /> {event.time || "TBA"}</div>
                         {event.location && <div className="flex items-center gap-1.5 opacity-70"><MapPin size={14} /> {event.location}</div>}
                       </div>
+                      <button 
+                        onClick={() => setSelectedImage(event.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800")}
+                        className="text-brand-900 text-[13px] font-bold flex items-center gap-2 hover:text-link-blue transition-colors mt-auto text-left"
+                      >
+                        View Full Image <ArrowRight size={16}/>
+                      </button>
                     </div>
                   </motion.div>
                 );
@@ -362,6 +369,29 @@ export function Home() {
       {/* 5. Featured Banner Section */}
       <FeaturedBanner />
 
+      {/* Full Image Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900/60 backdrop-blur-md cursor-pointer"
+          >
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              src={selectedImage}
+              alt="Full Event Flyer"
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

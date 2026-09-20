@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Search, Clock, ArrowRight, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -20,6 +20,7 @@ export function Events() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <div className="w-full bg-[#fcfcfc] min-h-screen pt-16 pb-24 font-sans">
@@ -116,9 +117,12 @@ export function Events() {
                 <div className="flex items-center gap-3 text-sm text-brand-900 font-semibold mb-6">
                   <Clock size={16} className="text-gray-500" /> <span className="opacity-80">{event.time || "TBA"}</span>
                 </div>
-                <Link to="#" className="text-brand-900 text-[13px] font-bold flex items-center gap-2 hover:text-link-blue transition-colors mt-auto">
-                  Learn More <ArrowRight size={16}/>
-                </Link>
+                <button 
+                  onClick={() => setSelectedImage(event.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800")}
+                  className="text-brand-900 text-[13px] font-bold flex items-center gap-2 hover:text-link-blue transition-colors mt-auto text-left"
+                >
+                  View Full Image <ArrowRight size={16}/>
+                </button>
               </div>
             </motion.div>
           ))
@@ -200,6 +204,29 @@ export function Events() {
         </motion.div>
       </div>
 
+      {/* Full Image Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900/60 backdrop-blur-md cursor-pointer"
+          >
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              src={selectedImage}
+              alt="Full Event Flyer"
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

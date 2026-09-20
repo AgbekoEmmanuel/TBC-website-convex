@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, PlayCircle, Home as HomeIcon, BookOpen, Users, MapPin, Clock, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { FeaturedBanner } from '../components/FeaturedBanner';
@@ -371,13 +372,13 @@ export function Home() {
 
       {/* Full Image Modal */}
       <AnimatePresence>
-        {selectedImage && (
+        {selectedImage && createPortal(
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedImage(null)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900/60 backdrop-blur-md cursor-pointer"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-900/80 backdrop-blur-md cursor-pointer"
           >
             <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
@@ -389,7 +390,8 @@ export function Home() {
               className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl cursor-default"
               onClick={(e) => e.stopPropagation()}
             />
-          </motion.div>
+          </motion.div>,
+          document.body
         )}
       </AnimatePresence>
     </div>

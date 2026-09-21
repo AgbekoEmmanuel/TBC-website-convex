@@ -143,33 +143,58 @@ export function Media() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="w-full aspect-video bg-brand-900 rounded-[24px] overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.1)] group flex items-center justify-center"
+            className={`w-full ${liveStream?.imageUrl ? '' : 'aspect-video'} bg-brand-900 rounded-[24px] overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.1)] group flex items-center justify-center`}
           >
             {isLive && videoId ? (
               <a
                 href={liveStream.youtubeLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute inset-0 block w-full h-full group overflow-hidden"
+                className={`${liveStream.imageUrl ? 'relative block w-full' : 'absolute inset-0 block w-full h-full'} group overflow-hidden`}
               >
-                <img 
-                  src={liveStream.imageUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : "")}
-                  alt="Live Stream"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-brand-900/40 backdrop-blur-[2px] group-hover:bg-brand-900/20 transition-all">
-                  <div className="relative z-10 w-24 h-24 bg-[#FF0000] rounded-full flex items-center justify-center border border-white/10 mb-6 shadow-[0_0_30px_rgba(255,0,0,0.4)] group-hover:scale-110 transition-transform">
-                    <Play className="text-white ml-2" size={48} fill="currentColor" />
-                  </div>
-                  <div className="text-center space-y-2">
-                    <p className="text-white font-serif text-3xl tracking-tight opacity-100 drop-shadow-md">Watch Live on YouTube</p>
-                  </div>
-                </div>
-                {/* Overlay Text */}
-                <div className="absolute bottom-10 left-10 z-10">
-                  <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-2">{liveStream.programType || "Streaming on YouTube"}</p>
-                  <p className="text-white font-serif text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
-                </div>
+                {liveStream.imageUrl ? (
+                  <>
+                    {/* Custom flyer — show full image */}
+                    <img 
+                      src={liveStream.imageUrl}
+                      alt="Live Stream"
+                      className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform duration-700"
+                    />
+                    {/* Bottom overlay bar */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-6 sm:px-10 py-6 sm:py-8 flex items-end justify-between">
+                      <div>
+                        <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-1">{liveStream.programType || "Streaming on YouTube"}</p>
+                        <p className="text-white font-serif text-xl sm:text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
+                      </div>
+                      <div className="flex items-center gap-3 bg-[#FF0000] hover:bg-[#cc0000] text-white px-5 py-2.5 rounded-full transition-colors shadow-lg shrink-0">
+                        <Play className="text-white" size={18} fill="currentColor" />
+                        <span className="text-sm font-bold uppercase tracking-wide hidden sm:inline">Watch Live</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* YouTube thumbnail fallback */}
+                    <img 
+                      src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                      alt="Live Stream"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-brand-900/40 backdrop-blur-[2px] group-hover:bg-brand-900/20 transition-all">
+                      <div className="relative z-10 w-24 h-24 bg-[#FF0000] rounded-full flex items-center justify-center border border-white/10 mb-6 shadow-[0_0_30px_rgba(255,0,0,0.4)] group-hover:scale-110 transition-transform">
+                        <Play className="text-white ml-2" size={48} fill="currentColor" />
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="text-white font-serif text-3xl tracking-tight opacity-100 drop-shadow-md">Watch Live on YouTube</p>
+                      </div>
+                    </div>
+                    {/* Overlay Text */}
+                    <div className="absolute bottom-10 left-10 z-10">
+                      <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-2">{liveStream.programType || "Streaming on YouTube"}</p>
+                      <p className="text-white font-serif text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
+                    </div>
+                  </>
+                )}
               </a>
             ) : (
               <>

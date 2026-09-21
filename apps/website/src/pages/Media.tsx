@@ -160,16 +160,16 @@ export function Media() {
                       alt="Live Stream"
                       className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform duration-700"
                     />
+                    {/* Centered play button */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FF0000]/90 group-hover:bg-[#FF0000] rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(255,0,0,0.5)] group-hover:scale-110 transition-all duration-300">
+                        <Play className="text-white ml-1.5" size={40} fill="currentColor" />
+                      </div>
+                    </div>
                     {/* Bottom overlay bar */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-6 sm:px-10 py-6 sm:py-8 flex items-end justify-between">
-                      <div>
-                        <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-1">{liveStream.programType || "Streaming on YouTube"}</p>
-                        <p className="text-white font-serif text-xl sm:text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
-                      </div>
-                      <div className="flex items-center gap-3 bg-[#FF0000] hover:bg-[#cc0000] text-white px-5 py-2.5 rounded-full transition-colors shadow-lg shrink-0">
-                        <Play className="text-white" size={18} fill="currentColor" />
-                        <span className="text-sm font-bold uppercase tracking-wide hidden sm:inline">Watch Live</span>
-                      </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-6 sm:px-10 py-5 sm:py-6">
+                      <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-1">{liveStream.programType || "Streaming on YouTube"}</p>
+                      <p className="text-white font-serif text-xl sm:text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
                     </div>
                   </>
                 ) : (

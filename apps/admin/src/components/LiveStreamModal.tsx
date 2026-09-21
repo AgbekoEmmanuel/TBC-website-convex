@@ -121,7 +121,8 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
                 <option value="Sunday Morning Gathering">Sunday Morning Gathering</option>
                 <option value="Mid-Week Service">Mid-Week Service</option>
                 <option value="Special Program">Special Program</option>
-                <option value="Streaming on YouTube">Streaming on YouTube</option>
+                <option value="Prayer Intense">Prayer Intense</option>
+                <option value="Worship Night">Worship Night</option>
               </select>
             </div>
 

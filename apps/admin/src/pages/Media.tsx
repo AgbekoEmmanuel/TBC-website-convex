@@ -20,7 +20,8 @@ function GalleryCard({
   isSelectionMode: boolean,
   isSelected: boolean,
   onToggleSelect: (id: string) => void,
-  deleteStaticItems: (args: { ids: string[] }) => void
+  deleteStaticItems: any,
+  key?: any
 }) {
   const remove = useMutation(api.gallery.remove);
   
@@ -177,7 +178,7 @@ export function Media() {
   const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
     if (confirm(`Are you sure you want to delete ${selectedIds.size} selected photos?`)) {
-      const allSelected = Array.from(selectedIds);
+      const allSelected = Array.from(selectedIds) as string[];
       const staticIds = allSelected.filter(id => id.startsWith('static-'));
       const dbIds = allSelected.filter(id => !id.startsWith('static-'));
       

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star, Edit } from "lucide-react";
+import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star, Edit, PlayCircle } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { CreateEventModal } from "../components/CreateEventModal";
 import { useQuery, useMutation } from "convex/react";

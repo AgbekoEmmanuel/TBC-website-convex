@@ -54,7 +54,7 @@ export function CreateGalleryItemModal({ isOpen, onClose }: CreateGalleryItemMod
   }, [isOpen]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target.files || []) as File[];
     if (files.length > 0) {
       setImageFiles(prev => [...prev, ...files]);
       

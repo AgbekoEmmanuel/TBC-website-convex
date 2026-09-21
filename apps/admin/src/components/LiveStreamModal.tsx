@@ -68,9 +68,9 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
         imageStorageId
       });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update live stream:", error);
-      alert("Failed to update live stream settings.");
+      alert(`Failed to update live stream settings. Error: ${error.message || error}`);
     } finally {
       setIsSubmitting(false);
     }

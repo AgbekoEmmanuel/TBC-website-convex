@@ -38,7 +38,7 @@ export function Media() {
   const isLive = liveStream?.isLive && liveStream?.youtubeLink;
 
   const getYouTubeID = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|live\/)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
   };
@@ -146,13 +146,31 @@ export function Media() {
             className="w-full aspect-video bg-brand-900 rounded-[24px] overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.1)] group flex items-center justify-center"
           >
             {isLive && videoId ? (
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`}
-                title="Live Stream"
-                className="absolute inset-0 w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              <a
+                href={liveStream.youtubeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 block w-full h-full group overflow-hidden"
+              >
+                <img 
+                  src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                  alt="Live Stream"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-brand-900/40 backdrop-blur-[2px] group-hover:bg-brand-900/20 transition-all">
+                  <div className="relative z-10 w-24 h-24 bg-[#FF0000] rounded-full flex items-center justify-center border border-white/10 mb-6 shadow-[0_0_30px_rgba(255,0,0,0.4)] group-hover:scale-110 transition-transform">
+                    <Play className="text-white ml-2" size={48} fill="currentColor" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="text-white font-serif text-3xl tracking-tight opacity-100 drop-shadow-md">Watch Live on YouTube</p>
+                  </div>
+                </div>
+                {/* Overlay Text */}
+                <div className="absolute bottom-10 left-10 z-10">
+                  <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-2">Streaming on YouTube</p>
+                  <p className="text-white font-serif text-2xl drop-shadow-md">Sunday Morning Gathering</p>
+                </div>
+              </a>
             ) : (
               <>
                 {/* Mockup / Offline State */}

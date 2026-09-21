@@ -24,10 +24,12 @@ export const update = mutation({
     }
     const existing = await ctx.db.query("liveStream").first();
     if (existing) {
-      await ctx.db.patch(existing._id, { 
-        ...args,
-        imageUrl: imageUrl ?? existing.imageUrl
-      });
+      const patchData: any = { ...args };
+      const finalImageUrl = imageUrl ?? existing.imageUrl;
+      if (finalImageUrl !== undefined) {
+        patchData.imageUrl = finalImageUrl;
+      }
+      await ctx.db.patch(existing._id, patchData);
     } else {
       await ctx.db.insert("liveStream", { ...args, imageUrl });
     }

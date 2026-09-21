@@ -95,6 +95,10 @@ export default defineSchema({
   liveStream: defineTable({
     youtubeLink: v.string(),
     isLive: v.boolean(),
+    programType: v.optional(v.string()),
+    programName: v.optional(v.string()),
+    imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()),
   }),
 
   gallery: defineTable({

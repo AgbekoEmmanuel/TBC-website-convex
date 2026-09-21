@@ -153,7 +153,7 @@ export function Media() {
                 className="absolute inset-0 block w-full h-full group overflow-hidden"
               >
                 <img 
-                  src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                  src={liveStream.imageUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : "")}
                   alt="Live Stream"
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -167,8 +167,8 @@ export function Media() {
                 </div>
                 {/* Overlay Text */}
                 <div className="absolute bottom-10 left-10 z-10">
-                  <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-2">Streaming on YouTube</p>
-                  <p className="text-white font-serif text-2xl drop-shadow-md">Sunday Morning Gathering</p>
+                  <p className="text-white/90 uppercase tracking-[0.15em] text-[9px] font-bold mb-2">{liveStream.programType || "Streaming on YouTube"}</p>
+                  <p className="text-white font-serif text-2xl drop-shadow-md">{liveStream.programName || "Sunday Morning Gathering"}</p>
                 </div>
               </a>
             ) : (

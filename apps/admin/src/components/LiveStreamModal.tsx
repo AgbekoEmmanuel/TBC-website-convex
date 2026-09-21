@@ -112,13 +112,17 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
 
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Program Type</label>
-              <input 
-                type="text" 
+              <select 
                 value={programType} 
                 onChange={(e) => setProgramType(e.target.value)} 
-                placeholder="e.g. Streaming on YouTube, Mid-Week Service" 
                 className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow" 
-              />
+              >
+                <option value="">Select Program Type...</option>
+                <option value="Sunday Morning Gathering">Sunday Morning Gathering</option>
+                <option value="Mid-Week Service">Mid-Week Service</option>
+                <option value="Special Program">Special Program</option>
+                <option value="Streaming on YouTube">Streaming on YouTube</option>
+              </select>
             </div>
 
             <div>

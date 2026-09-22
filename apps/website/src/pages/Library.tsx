@@ -5,47 +5,9 @@ import { useState } from 'react';
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
-import book1 from '../assets/books/BREAKING MID.png';
-import book2 from '../assets/books/photo_2026-04-21_22-32-55.jpg';
-import book3 from '../assets/books/photo_2026-04-21_22-33-15.jpg';
-import book4 from '../assets/books/principles of life cover.jpeg';
-import book5 from '../assets/books/transformedfront.jpeg';
 import libraryLogo from '../assets/tbc_library_logo_trans.png';
 import wisdomArena from '../assets/wisdom arena.jpeg';
 import requestSignedBg from '../assets/books/request_signed_bg.jpg';
-
-const publications = [
-  {
-    title: "Breaking Mediocrity",
-    price: "GH₵ 100",
-    desc: "An invitation to the contemplative life, exploring the silence that precedes the Word.",
-    img: book1
-  },
-  {
-    title: "Come Boldly",
-    price: "GH₵ 100",
-    desc: "Understanding the cadence of the Spirit in our daily labor and intentional rest.",
-    img: book2
-  },
-  {
-    title: "The Leadership Principles of Jesus",
-    price: "GH₵ 100",
-    desc: "A deep dive into ancient practices for the digital age. Reclaiming our sacred habits.",
-    img: book3
-  },
-  {
-    title: "The Force of Mentorship",
-    price: "GH₵ 100",
-    desc: "Building a life of impact through intentional faith and community leadership.",
-    img: book1
-  },
-  {
-    title: "Kingdom Prosperity",
-    price: "GH₵ 100",
-    desc: "Daily meditations for the modern seeker found in the quiet moments of dawn.",
-    img: book2
-  }
-];
 
 export function Library() {
   const [mobile, setMobile] = useState('');
@@ -57,24 +19,7 @@ export function Library() {
   const isLoading = dbProducts === undefined;
   
   // Filter only books just in case there are other products
-  let allBooks = dbProducts?.filter(p => p.category === 'Books' || p.category === 'Book') || [];
-  
-  // Fallback to hardcoded publications if DB is empty and finished loading
-  if (!isLoading && allBooks.length === 0) {
-    allBooks = publications.map((p, idx) => ({
-      _id: `fallback-${idx}` as any,
-      _creationTime: Date.now(),
-      title: p.title,
-      slug: p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      description: p.desc,
-      price: parseFloat(p.price.replace('GH₵ ', '')),
-      category: 'Books',
-      imageUrl: p.img,
-      inStock: true,
-      isPublished: true,
-      isComingSoon: false
-    }));
-  }
+  const allBooks = dbProducts?.filter(p => p.category === 'Books' || p.category === 'Book') || [];
 
   const books = allBooks.filter(p => !p.isComingSoon);
   const comingSoonBooks = allBooks.filter(p => p.isComingSoon);

@@ -1,65 +1,6 @@
 import { motion } from 'motion/react';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-import book1 from '../assets/books/BREAKING MID.png';
-import book2 from '../assets/books/photo_2026-04-21_22-32-55.jpg';
-import book3 from '../assets/books/photo_2026-04-21_22-33-15.jpg';
-import book4 from '../assets/books/principles of life cover.jpeg';
-import book5 from '../assets/books/transformedfront.jpeg';
-
-const allBooks = [
-  {
-    title: "Breaking Mediocrity",
-    price: "GH₵ 100.00",
-    desc: "An invitation to the contemplative life, exploring the silence that precedes the Word.",
-    img: book1,
-    tag: "Bestseller"
-  },
-  {
-    title: "Come Boldly",
-    price: "GH₵ 100.00",
-    desc: "Understanding the cadence of the Spirit in our daily labor and intentional rest.",
-    img: book2,
-    tag: "New Release"
-  },
-  {
-    title: "The Leadership Principles of Jesus",
-    price: "GH₵ 100.00",
-    desc: "A deep dive into ancient practices for the digital age. Reclaiming our sacred habits.",
-    img: book3,
-    tag: "Essential"
-  },
-  {
-    title: "The Force of Mentorship",
-    price: "GH₵ 100.00",
-    desc: "Building a life of impact through intentional faith and community leadership.",
-    img: book1,
-    tag: "Growth"
-  },
-  {
-    title: "Kingdom Prosperity",
-    price: "GH₵ 100.00",
-    desc: "Daily meditations for the modern seeker found in the quiet moments of dawn.",
-    img: book2,
-    tag: "Devotional"
-  },
-  {
-    title: "Principles of Life",
-    price: "GH₵ 100.00",
-    desc: "Foundational truths and spiritual laws that govern the pursuit of an excellent and balanced life.",
-    img: book4,
-    tag: "Wisdom"
-  },
-  {
-    title: "Transformed",
-    price: "GH₵ 100.00",
-    desc: "A journey into the metamorphic power of the Word, renewing the mind and spirit for divine purpose.",
-    img: book5,
-    tag: "Spiritual Growth"
-  }
-];
-
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -115,7 +56,7 @@ export function AllBooks() {
               >
                 <div className="aspect-[3/4] bg-[#f2f4f7] rounded-[24px] overflow-hidden relative shadow-md transition-shadow duration-500 group-hover:shadow-2xl group-hover:shadow-brand-900/10 mb-8">
                   <img 
-                    src={book.imageUrl || book1} 
+                    src={book.imageUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"} 
                     alt={book.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                   />

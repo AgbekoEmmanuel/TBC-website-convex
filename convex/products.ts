@@ -5,32 +5,49 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const getPublished = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const products = await ctx.db
       .query("products")
       .withIndex("by_published", (q) => q.eq("isPublished", true))
       .order("desc")
       .collect();
+    return Promise.all(
+      products.map(async (p) => ({
+        ...p,
+        imageUrl: p.imageUrl || (p.imageStorageId ? (await ctx.storage.getUrl(p.imageStorageId)) ?? undefined : undefined),
+      }))
+    );
   },
 });
 
 export const getByCategory = query({
   args: { category: v.string() },
   handler: async (ctx, { category }) => {
-    return await ctx.db
+    const products = await ctx.db
       .query("products")
       .withIndex("by_category", (q) => q.eq("category", category))
       .filter((q) => q.eq(q.field("isPublished"), true))
       .collect();
+    return Promise.all(
+      products.map(async (p) => ({
+        ...p,
+        imageUrl: p.imageUrl || (p.imageStorageId ? (await ctx.storage.getUrl(p.imageStorageId)) ?? undefined : undefined),
+      }))
+    );
   },
 });
 
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
-    return await ctx.db
+    const product = await ctx.db
       .query("products")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
+    if (!product) return null;
+    return {
+      ...product,
+      imageUrl: product.imageUrl || (product.imageStorageId ? (await ctx.storage.getUrl(product.imageStorageId)) ?? undefined : undefined),
+    };
   },
 });
 
@@ -39,7 +56,13 @@ export const getAll = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    return await ctx.db.query("products").order("desc").collect();
+    const products = await ctx.db.query("products").order("desc").collect();
+    return Promise.all(
+      products.map(async (p) => ({
+        ...p,
+        imageUrl: p.imageUrl || (p.imageStorageId ? (await ctx.storage.getUrl(p.imageStorageId)) ?? undefined : undefined),
+      }))
+    );
   },
 });
 
@@ -60,7 +83,11 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    return await ctx.db.insert("products", args);
+    let imageUrl = args.imageUrl;
+    if (args.imageStorageId && !imageUrl) {
+      imageUrl = (await ctx.storage.getUrl(args.imageStorageId)) ?? undefined;
+    }
+    return await ctx.db.insert("products", { ...args, imageUrl });
   },
 });
 
@@ -82,7 +109,11 @@ export const update = mutation({
   handler: async (ctx, { id, ...args }) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    await ctx.db.patch(id, args);
+    let imageUrl = args.imageUrl;
+    if (args.imageStorageId && !imageUrl) {
+      imageUrl = (await ctx.storage.getUrl(args.imageStorageId)) ?? undefined;
+    }
+    await ctx.db.patch(id, { ...args, imageUrl });
   },
 });
 

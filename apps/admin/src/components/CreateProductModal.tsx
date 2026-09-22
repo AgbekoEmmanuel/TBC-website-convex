@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, Package } from "lucide-react";
+import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, CheckCircle2, XCircle } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
+import { optimizeImageForUpload } from "../lib/imageUtils";
 
 interface CreateProductModalProps {
   isOpen: boolean;
@@ -16,11 +17,12 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Books");
   const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
+  const [inStock, setInStock] = useState(true);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const [isComingSoon, setIsComingSoon] = useState(false);
   const [isNewRelease, setIsNewRelease] = useState(false);
 
@@ -50,21 +52,25 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setStatusMessage("Preparing image...");
 
     try {
       let imageStorageId = undefined;
       
       if (imageFile) {
+        setStatusMessage("Optimizing & uploading image...");
+        const { blob, contentType } = await optimizeImageForUpload(imageFile);
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
           method: "POST",
-          headers: { "Content-Type": imageFile.type },
-          body: imageFile,
+          headers: { "Content-Type": contentType },
+          body: blob,
         });
         const { storageId } = await result.json();
         imageStorageId = storageId;
       }
 
+      setStatusMessage("Saving product...");
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
       await createProduct({
@@ -74,7 +80,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
         price: parseFloat(price),
         category,
         imageStorageId,
-        inStock: true,
+        inStock,
         isPublished: true,
         isComingSoon,
         isNewRelease,
@@ -85,17 +91,19 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
       setTitle("");
       setCategory("Books");
       setPrice("");
-      setStock("");
+      setInStock(true);
       setDescription("");
       setImageFile(null);
       setImagePreview(null);
       setIsComingSoon(false);
       setIsNewRelease(false);
+      setStatusMessage("");
     } catch (error) {
       console.error("Failed to add product:", error);
       alert("Failed to add product. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setStatusMessage("");
     }
   };
 
@@ -170,12 +178,34 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Stock Quantity</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Package className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" required className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#85c9d8] focus:ring-1 focus:ring-[#85c9d8] outline-none transition-shadow" />
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Availability</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInStock(true)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+                      inStock
+                        ? "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm ring-1 ring-emerald-500/20"
+                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    <CheckCircle2 className={cn("w-4 h-4", inStock ? "text-emerald-600" : "text-slate-400")} />
+                    In Stock
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInStock(false)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+                      !inStock
+                        ? "bg-red-50 border-red-500 text-red-700 shadow-sm ring-1 ring-red-500/20"
+                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    <XCircle className={cn("w-4 h-4", !inStock ? "text-red-600" : "text-slate-400")} />
+                    Out of Stock
+                  </button>
                 </div>
               </div>
 
@@ -221,7 +251,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
           </button>
           <button type="submit" form="create-product-form" disabled={isSubmitting} className="px-6 py-2 text-sm font-bold text-[#0b2840] bg-[#85c9d8] shadow-sm rounded-xl hover:bg-[#72b8c9] transition-all flex items-center gap-2 disabled:bg-slate-400">
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isSubmitting ? "Adding..." : "Add Product"}
+            {isSubmitting ? (statusMessage || "Adding...") : "Add Product"}
           </button>
         </div>
       </div>

@@ -9,6 +9,8 @@ import libraryLogo from '../assets/tbc_library_logo_trans.png';
 import wisdomArena from '../assets/wisdom arena.jpeg';
 import requestSignedBg from '../assets/books/request_signed_bg.jpg';
 
+const DEFAULT_BOOK_COVER = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800";
+
 export function Library() {
   const [mobile, setMobile] = useState('');
   const [book, setBook] = useState('');
@@ -105,7 +107,7 @@ export function Library() {
                   {b1 && (
                   <div className="bg-[#112040] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-lg relative overflow-hidden group h-full">
                     <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 z-10 transition-transform duration-500 group-hover:-translate-y-2">
-                       <img src={b1.imageUrl || book1} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.3)]" />
+                       <img src={b1.imageUrl || DEFAULT_BOOK_COVER} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.3)]" />
                     </div>
                     <div className="z-10 text-white flex flex-col justify-center flex-1">
                       <div className="flex gap-2 mb-5">
@@ -136,7 +138,7 @@ export function Library() {
                   {b2 && (
                   <div className="bg-gradient-to-br from-[#f2f4f7] to-[#e2e8f0] rounded-[24px] p-8 md:p-12 flex flex-col sm:flex-row gap-8 items-center shadow-sm group h-full">
                     <div className="w-full sm:w-[45%] lg:w-[40%] aspect-[2/3] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
-                       <img src={b2.imageUrl || book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                       <img src={b2.imageUrl || DEFAULT_BOOK_COVER} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
                     </div>
                     <div className="flex flex-col justify-center text-brand-900 flex-1">
                       <div className="flex gap-2 mb-5">
@@ -172,7 +174,7 @@ export function Library() {
                   {b3 && (
                   <div className="lg:col-span-2 bg-white rounded-[24px] p-8 md:p-12 flex flex-col md:flex-row gap-10 lg:gap-16 items-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group h-full">
                     <div className="w-full md:w-5/12 aspect-[3/4] shrink-0 transition-transform duration-500 group-hover:-translate-y-2">
-                       <img src={b3.imageUrl || book3} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                       <img src={b3.imageUrl || DEFAULT_BOOK_COVER} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
                     </div>
                     <div className="flex flex-col justify-center items-start text-brand-900 flex-1">
                       <div className="flex gap-2 mb-6">
@@ -202,7 +204,7 @@ export function Library() {
                   {b4 && (
                   <div className="bg-white rounded-[24px] p-8 flex flex-col items-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 group justify-between h-full">
                     <div className="w-3/5 aspect-[3/4] mb-8 mt-2 transition-transform duration-500 group-hover:-translate-y-2">
-                       <img src={b4.imageUrl || book2} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
+                       <img src={b4.imageUrl || DEFAULT_BOOK_COVER} alt="Book" className="w-full h-full object-cover rounded-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]" />
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="flex justify-center mb-3">
@@ -258,7 +260,7 @@ export function Library() {
             {(newReleaseBooks.length > 0 ? regularBooks : books).map((pub, idx) => (
               <div key={idx} className="flex flex-col group cursor-pointer h-full">
                  <div className="aspect-[4/5] bg-gray-100 mb-6 overflow-hidden rounded-md relative shadow-sm shrink-0">
-                    <img src={pub.imageUrl || book1} alt={pub.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                    <img src={pub.imageUrl || DEFAULT_BOOK_COVER} alt={pub.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
                  </div>
                  <div className="flex justify-between items-start gap-4 mb-3">

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, Package } from "lucide-react";
+import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, CheckCircle2, XCircle } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Doc } from "@convex/_generated/dataModel";
+import { cn } from "../lib/utils";
+import { optimizeImageForUpload } from "../lib/imageUtils";
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -17,11 +19,12 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const [title, setTitle] = useState(product.title);
   const [category, setCategory] = useState(product.category);
   const [price, setPrice] = useState(product.price.toString());
-  const [stock, setStock] = useState(""); // We don't have a numeric stock in schema, just inStock boolean
+  const [inStock, setInStock] = useState(product.inStock ?? true);
   const [description, setDescription] = useState(product.description || "");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(product.imageUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const [isComingSoon, setIsComingSoon] = useState(product.isComingSoon || false);
   const [isNewRelease, setIsNewRelease] = useState(product.isNewRelease || false);
 
@@ -34,11 +37,13 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
       setTitle(product.title);
       setCategory(product.category);
       setPrice(product.price.toString());
+      setInStock(product.inStock ?? true);
       setDescription(product.description || "");
       setImagePreview(product.imageUrl || null);
       setImageFile(null);
       setIsComingSoon(product.isComingSoon || false);
       setIsNewRelease(product.isNewRelease || false);
+      setStatusMessage("");
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -60,27 +65,25 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setStatusMessage("Preparing update...");
 
     try {
       let imageStorageId = product.imageStorageId;
-      let imageUrl = product.imageUrl;
       
       if (imageFile) {
+        setStatusMessage("Optimizing & uploading image...");
+        const { blob, contentType } = await optimizeImageForUpload(imageFile);
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
           method: "POST",
-          headers: { "Content-Type": imageFile.type },
-          body: imageFile,
+          headers: { "Content-Type": contentType },
+          body: blob,
         });
         const { storageId } = await result.json();
         imageStorageId = storageId;
-        // In a real app we might fetch the getUrl mutation, but convex also updates it if we just pass storageId
-        // The products.update mutation takes imageStorageId and imageUrl. 
-        // We'll leave imageUrl undefined so it might need fetching if the backend doesn't resolve it.
-        // Wait, the schema allows imageUrl. Let's not pass it or pass empty, assuming the frontend resolves it if needed.
-        // Actually, let's keep the old imageUrl if we don't have a new one.
       }
 
+      setStatusMessage("Saving changes...");
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
       await updateProduct({
@@ -92,7 +95,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
         category,
         imageStorageId,
         imageUrl: imageFile ? undefined : product.imageUrl, 
-        inStock: product.inStock,
+        inStock,
         isPublished: product.isPublished,
         isComingSoon,
         isNewRelease,
@@ -104,6 +107,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
       alert("Failed to update product. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setStatusMessage("");
     }
   };
 
@@ -177,6 +181,38 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Availability</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInStock(true)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+                      inStock
+                        ? "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm ring-1 ring-emerald-500/20"
+                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    <CheckCircle2 className={cn("w-4 h-4", inStock ? "text-emerald-600" : "text-slate-400")} />
+                    In Stock
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInStock(false)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all cursor-pointer",
+                      !inStock
+                        ? "bg-red-50 border-red-500 text-red-700 shadow-sm ring-1 ring-red-500/20"
+                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    <XCircle className={cn("w-4 h-4", !inStock ? "text-red-600" : "text-slate-400")} />
+                    Out of Stock
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
                   <input 
@@ -219,7 +255,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
           </button>
           <button type="submit" form="edit-product-form" disabled={isSubmitting} className="px-6 py-2 text-sm font-bold text-[#0b2840] bg-[#85c9d8] shadow-sm rounded-xl hover:bg-[#72b8c9] transition-all flex items-center gap-2 disabled:bg-slate-400">
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            {isSubmitting ? (statusMessage || "Saving...") : "Save Changes"}
           </button>
         </div>
       </div>

@@ -225,7 +225,13 @@ export function Events() {
   const featuredSermon = useQuery(api.sermons.getFeatured);
   const stats = useQuery(api.dashboard.getStats);
 
+  const today = new Date().toISOString().split("T")[0];
+
   const filteredEvents = events?.filter(ev => {
+    // Hide past events — only show today and future
+    if (ev.date < today) return false;
+
+    // Category filter
     if (activeTab === "All") return true;
     return ev.category?.toLowerCase() === activeTab.toLowerCase() || 
            (activeTab === "Special Programs" && ev.category === "special");

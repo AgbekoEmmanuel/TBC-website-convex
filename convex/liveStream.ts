@@ -48,3 +48,24 @@ export const toggleLive = mutation({
     }
   },
 });
+
+export const endSession = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("liveStream").first();
+    if (existing) {
+      // Delete old thumbnail from storage if it exists
+      if (existing.imageStorageId) {
+        await ctx.storage.delete(existing.imageStorageId);
+      }
+      await ctx.db.patch(existing._id, {
+        isLive: false,
+        youtubeLink: "",
+        programType: undefined,
+        programName: undefined,
+        imageStorageId: undefined,
+        imageUrl: undefined,
+      });
+    }
+  },
+});

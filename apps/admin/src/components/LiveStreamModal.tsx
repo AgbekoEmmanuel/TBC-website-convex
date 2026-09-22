@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Youtube, Loader2, Radio, ImagePlus } from "lucide-react";
+import { X, Youtube, Loader2, Radio, ImagePlus, Trash2 } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
@@ -11,6 +11,7 @@ interface LiveStreamModalProps {
 export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
   const currentLive = useQuery(api.liveStream.get);
   const updateLive = useMutation(api.liveStream.update);
+  const endSessionMutation = useMutation(api.liveStream.endSession);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   
   const [youtubeLink, setYoutubeLink] = useState("");
@@ -20,6 +21,7 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
     if (currentLive) {
@@ -186,18 +188,47 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="px-6 py-2 text-sm font-bold text-white bg-[#1f4b73] hover:bg-[#153450] rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:bg-slate-400"
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              disabled={isEnding || isSubmitting}
+              onClick={async () => {
+                if (!confirm("Are you sure you want to end this session? This will clear all live stream data (link, program info, thumbnail) and take the stream offline.")) return;
+                setIsEnding(true);
+                try {
+                  await endSessionMutation();
+                  setYoutubeLink("");
+                  setIsLive(false);
+                  setProgramType("");
+                  setProgramName("");
+                  setSelectedImage(null);
+                  setImagePreview("");
+                  onClose();
+                } catch (error: any) {
+                  console.error("Failed to end session:", error);
+                  alert(`Failed to end session. Error: ${error.message || error}`);
+                } finally {
+                  setIsEnding(false);
+                }
+              }}
+              className="px-4 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Update Stream
+              {isEnding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              End Session
             </button>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="px-6 py-2 text-sm font-bold text-white bg-[#1f4b73] hover:bg-[#153450] rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:bg-slate-400"
+              >
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Update Stream
+              </button>
+            </div>
           </div>
         </form>
       </div>

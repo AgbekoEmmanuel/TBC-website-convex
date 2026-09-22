@@ -168,9 +168,9 @@ function ListEventCard({ ev, onEdit }: { ev: Doc<"events">, onEdit: (ev: Doc<"ev
          </div>
 
          <div className="flex flex-col items-end justify-center w-[140px] lg:w-[160px] flex-shrink-0 pr-6 h-10">
-           <span className="text-[14px] font-medium text-[#112a46] dark:text-white leading-tight mb-[2px]">Service</span>
-           <span className="text-[11px] font-medium text-slate-500 dark:text-[#648496]">Category</span>
-         </div>
+            <span className="text-[14px] font-medium text-[#112a46] dark:text-white leading-tight mb-[2px]">{ev.category ? ev.category.charAt(0).toUpperCase() + ev.category.slice(1) : "Uncategorized"}</span>
+            <span className="text-[11px] font-medium text-slate-500 dark:text-[#648496]">Category</span>
+          </div>
       </div>
 
       <div className="flex items-center justify-end md:justify-center flex-shrink-0 pl-2 relative" ref={dropdownRef}>

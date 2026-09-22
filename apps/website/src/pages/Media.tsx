@@ -225,7 +225,7 @@ export function Media() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-4">
             <h2 className="font-serif text-[32px] text-brand-900">Recent Messages</h2>
-            <a href="#" className="text-gray-400 hover:text-brand-900 text-[10px] tracking-widest uppercase font-bold border-b border-transparent hover:border-brand-900 transition-colors pb-1">
+            <a href="https://www.youtube.com/@ApostleMichaelDadzie" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-brand-900 text-[10px] tracking-widest uppercase font-bold border-b border-transparent hover:border-brand-900 transition-colors pb-1">
               View All YouTube
             </a>
           </div>
@@ -242,35 +242,55 @@ export function Media() {
                 </p>
               </div>
             ) : (
-              recentMessages.map((msg, idx) => (
-                <motion.div
-                  key={msg._id}
-                  variants={fadeInVariants}
-                  initial="initial"
-                  whileInView="animate"
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * (idx + 1), duration: 0.6 }}
-                  className="group cursor-pointer"
-                >
-                  <div className="relative aspect-video rounded-lg overflow-hidden mb-5 bg-gray-100">
-                    <img
-                      src={msg.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800"}
-                      alt={msg.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      referrerPolicy="no-referrer"
-                    />
-                    {msg.time && (
-                      <div className="absolute bottom-3 right-3 bg-link-blue text-white text-[10px] font-bold px-2 py-1 rounded">
-                        {msg.time}
+              recentMessages.map((msg, idx) => {
+                const hasYouTube = !!msg.youtubeUrl;
+                const CardWrapper = hasYouTube ? 'a' : 'div';
+                const wrapperProps = hasYouTube
+                  ? { href: msg.youtubeUrl, target: "_blank", rel: "noopener noreferrer" }
+                  : {};
+
+                return (
+                  <motion.div
+                    key={msg._id}
+                    variants={fadeInVariants}
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 * (idx + 1), duration: 0.6 }}
+                  >
+                    <CardWrapper
+                      {...wrapperProps as any}
+                      className="group cursor-pointer block"
+                    >
+                      <div className="relative aspect-video rounded-lg overflow-hidden mb-5 bg-gray-100">
+                        <img
+                          src={msg.imageUrl || "https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?auto=format&fit=crop&q=80&w=800"}
+                          alt={msg.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          referrerPolicy="no-referrer"
+                        />
+                        {hasYouTube && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors duration-300">
+                            <div className="w-14 h-14 bg-[#FF0000]/90 group-hover:bg-[#FF0000] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,0,0,0.3)] group-hover:scale-110 transition-all duration-300">
+                              <Play className="text-white ml-1" size={24} fill="currentColor" />
+                            </div>
+                          </div>
+                        )}
+                        {msg.time && (
+                          <div className="absolute bottom-3 right-3 bg-link-blue text-white text-[10px] font-bold px-2 py-1 rounded">
+                            {msg.time}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <h3 className="font-serif text-[#0f172a] text-xl mb-2">{msg.title}</h3>
-                  <p className="text-[12px] text-gray-500">
-                    {msg.date ? new Date(msg.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Date TBA"} {msg.location ? `• ${msg.location}` : ""}
-                  </p>
-                </motion.div>
-              ))
+                      <h3 className="font-serif text-[#0f172a] text-xl mb-2 group-hover:text-link-blue transition-colors">{msg.title}</h3>
+                      <p className="text-[12px] text-gray-500">
+                        {msg.date ? new Date(msg.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Date TBA"} {msg.location ? `• ${msg.location}` : ""}
+                        {hasYouTube && <span className="ml-2 text-[#FF0000] font-bold">▶ Watch on YouTube</span>}
+                      </p>
+                    </CardWrapper>
+                  </motion.div>
+                );
+              })
             )}
           </div>
         </div>

@@ -15,6 +15,7 @@ export default defineSchema({
     location: v.optional(v.string()),
     imageStorageId: v.optional(v.id("_storage")),
     imageUrl: v.optional(v.string()),
+    youtubeUrl: v.optional(v.string()),
     isFeatured: v.boolean(),
     isPublished: v.boolean(),
   })

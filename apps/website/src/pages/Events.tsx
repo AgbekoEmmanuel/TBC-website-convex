@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Clock, ArrowRight, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
+import { Search, Clock, ArrowRight, CalendarDays, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -13,6 +13,14 @@ const fadeIn = {
   transition: { duration: 0.6 }
 };
 
+const CATEGORIES = [
+  { label: "All", value: "all" },
+  { label: "Sunday", value: "sunday" },
+  { label: "Midweek", value: "midweek" },
+  { label: "Prayers", value: "prayers" },
+  { label: "Special Programs", value: "special" },
+];
+
 export function Events() {
   const events = useQuery(api.events.getPublishedUpcoming);
   const isLoading = events === undefined;
@@ -22,6 +30,26 @@ export function Events() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter events by category and search query
+  const filteredEvents = events?.filter(event => {
+    // Category filter
+    const matchesCategory = activeCategory === "all" || 
+      event.category?.toLowerCase() === activeCategory;
+    
+    // Search filter
+    const query = searchQuery.toLowerCase().trim();
+    const matchesSearch = !query || 
+      event.title.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query) ||
+      event.location?.toLowerCase().includes(query);
+    
+    return matchesCategory && matchesSearch;
+  });
+
+  const activeCategoryLabel = CATEGORIES.find(c => c.value === activeCategory)?.label || "All";
 
   return (
     <div className="w-full bg-[#fcfcfc] min-h-screen pt-16 pb-24 font-sans">
@@ -57,16 +85,26 @@ export function Events() {
       <div className="max-w-7xl mx-auto px-6 mb-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto scrollbar-hide">
-            <button className="bg-brand-900 text-white px-6 py-2.5 rounded-full text-sm font-semibold shrink-0">All</button>
-            <button className="bg-[#f0f2f5] text-gray-600 hover:bg-gray-200 px-6 py-2.5 rounded-full text-sm font-medium shrink-0 transition-colors">Sunday</button>
-            <button className="bg-[#f0f2f5] text-gray-600 hover:bg-gray-200 px-6 py-2.5 rounded-full text-sm font-medium shrink-0 transition-colors">Midweek</button>
-            <button className="bg-[#f0f2f5] text-gray-600 hover:bg-gray-200 px-6 py-2.5 rounded-full text-sm font-medium shrink-0 transition-colors">Prayers</button>
-            <button className="bg-[#f0f2f5] text-gray-600 hover:bg-gray-200 px-6 py-2.5 rounded-full text-sm font-medium shrink-0 transition-colors">Special Programs</button>
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.value}
+                onClick={() => setActiveCategory(cat.value)}
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold shrink-0 transition-colors ${
+                  activeCategory === cat.value
+                    ? "bg-brand-900 text-white"
+                    : "bg-[#f0f2f5] text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input 
-              type="text" 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Find an event..." 
               className="w-full pl-11 pr-4 py-3 bg-[#f0f2f5] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-900/20 text-brand-900 placeholder:text-gray-400 transition-shadow" 
             />
@@ -82,14 +120,35 @@ export function Events() {
           [1, 2, 3].map((n) => (
             <div key={n} className="h-[450px] bg-gray-50 rounded-3xl animate-pulse" />
           ))
-        ) : events?.length === 0 ? (
-          // Empty state
+        ) : filteredEvents?.length === 0 ? (
+          // Empty state — category-specific message
           <div className="col-span-full py-20 text-center">
-            <CalendarDays className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-gray-400">No upcoming events found</h3>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-8 h-8 text-gray-300" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-400">
+                {activeCategory === "all" 
+                  ? (searchQuery ? `No events matching "${searchQuery}"` : "No upcoming events found")
+                  : `No ${activeCategoryLabel} events yet`}
+              </h3>
+              <p className="text-gray-400 text-sm max-w-md">
+                {activeCategory !== "all" 
+                  ? "Check back soon or explore other categories for upcoming gatherings."
+                  : "Stay tuned — new events are coming soon!"}
+              </p>
+              {activeCategory !== "all" && (
+                <button 
+                  onClick={() => setActiveCategory("all")}
+                  className="mt-2 text-sm font-semibold text-brand-900 hover:text-link-blue transition-colors flex items-center gap-1"
+                >
+                  View all events <ArrowRight size={14} />
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          events?.map((event, index) => (
+          filteredEvents?.map((event, index) => (
             <motion.div 
               key={event._id}
               variants={fadeIn} 
@@ -110,7 +169,7 @@ export function Events() {
                 </div>
               </div>
               <div className="px-8 pb-8 pt-4 flex flex-col flex-1">
-                <p className="text-[#3b82f6] text-[10px] font-bold uppercase tracking-[0.15em] mb-2">{event.category || "Event"}</p>
+                <p className="text-[#3b82f6] text-[10px] font-bold uppercase tracking-[0.15em] mb-2">{event.category ? event.category.charAt(0).toUpperCase() + event.category.slice(1) : "Event"}</p>
                 <h3 className="font-serif text-[22px] font-bold text-brand-900 mb-3 leading-tight">{event.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">
                   {event.description}
@@ -130,7 +189,7 @@ export function Events() {
         )}
 
         {/* CTA Card (Navy) - Keep as a fixed inspiration card if needed, or remove */}
-        {!isLoading && events && events.length > 0 && (
+        {!isLoading && filteredEvents && filteredEvents.length > 0 && (
           <motion.div variants={fadeIn} initial="initial" whileInView="whileInView" transition={{ delay: 0.3 }} className="bg-brand-900 rounded-3xl p-10 lg:p-12 flex flex-col justify-center text-white h-full shadow-xl">
             <h3 className="font-serif text-3xl md:text-4xl font-bold mb-4 leading-tight">Join our newsletter</h3>
             <p className="text-blue-100/80 mb-10 leading-relaxed text-[15px]">

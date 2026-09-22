@@ -11,6 +11,7 @@ const PRODUCTS_TABS = ["All Products", "Books", "Apparel", "Media", "Gifts"];
 function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any, onEdit: (p: Doc<"products">) => void }) {
   const remove = useMutation(api.products.remove);
   const toggleInStock = useMutation(api.products.toggleInStock);
+  const toggleComingSoon = useMutation(api.products.toggleComingSoon);
   const [showActions, setShowActions] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -22,14 +23,6 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
       : "skip"
   );
   const displayImageUrl = product.imageUrl || storageUrl;
-
-  const getStockBadge = (product: Doc<"products">) => {
-    if (product.isComingSoon) return { label: "Coming Soon", classes: "bg-[#f59e0b]/90 text-white backdrop-blur-md border border-[#f59e0b]/30 shadow-[0_4px_12px_rgba(245,158,11,0.3)]" };
-    if (!product.inStock) return { label: "Out of Stock", classes: "bg-red-500/90 text-white backdrop-blur-md border border-red-400/30 shadow-[0_4px_12px_rgba(239,68,68,0.3)]" };
-    return { label: "In Stock", classes: "bg-[#1e3c5e]/90 text-[#93c5fd] backdrop-blur-md border border-[#93c5fd]/20" };
-  };
-
-  const badge = getStockBadge(product);
 
   return (
     <div className="flex flex-col group cursor-pointer relative">
@@ -47,18 +40,30 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
             <Package className="w-12 h-12" />
           </div>
         )}
+
+        {/* Static Coming Soon Badge - NOT clickable */}
+        {product.isComingSoon && (
+          <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-[11px] font-bold bg-[#f59e0b] text-white shadow-md select-none pointer-events-none z-10 flex items-center gap-1">
+            Coming Soon
+          </div>
+        )}
+
+        {/* Dedicated Availability Toggle Button: In Stock vs Out of Stock */}
         <button 
           onClick={(e) => { 
             e.stopPropagation(); 
             toggleInStock({ id: product._id, inStock: !product.inStock }); 
           }}
           className={cn(
-            "absolute top-4 right-4 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm hover:opacity-80 transition-opacity cursor-pointer",
-            badge.classes
+            "absolute top-4 right-4 px-3.5 py-1.5 rounded-full text-[11px] font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer z-10 hover:scale-105 active:scale-95",
+            product.inStock
+              ? "bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-white/60 shadow-emerald-900/20"
+              : "bg-red-600 hover:bg-red-700 text-white ring-2 ring-white/60 shadow-red-900/20"
           )}
-          title={`Click to mark as ${product.inStock ? 'Out of Stock' : 'In Stock'}`}
+          title={product.inStock ? "Click to mark as Out of Stock" : "Click to mark as In Stock"}
         >
-          {badge.label}
+          <span className={cn("w-2 h-2 rounded-full", product.inStock ? "bg-white animate-pulse" : "bg-white/80")} />
+          {product.inStock ? "In Stock" : "Out of Stock"}
         </button>
       </div>
 
@@ -66,9 +71,29 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
         {product.title}
       </h3>
       
-      <p className="text-[13px] text-slate-500 dark:text-[#8ba4b3] font-medium mb-4">
-        {product.category} • {product.inStock ? "Currently Available" : "Sold Out"}
-      </p>
+      {/* Category and Interactive Stock Status indicator */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-[13px] text-slate-500 dark:text-[#8ba4b3] font-medium">
+          {product.category}
+        </span>
+        <span className="text-slate-300 dark:text-slate-600">•</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleInStock({ id: product._id, inStock: !product.inStock });
+          }}
+          className={cn(
+            "text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 transition-colors cursor-pointer",
+            product.inStock
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 hover:bg-emerald-100"
+              : "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400 hover:bg-red-100"
+          )}
+          title="Click to toggle In Stock / Out of Stock"
+        >
+          <span className={cn("w-1.5 h-1.5 rounded-full", product.inStock ? "bg-emerald-500" : "bg-red-500")} />
+          {product.inStock ? "Currently Available" : "Sold Out"}
+        </button>
+      </div>
       
       <div className="flex items-center justify-between mt-auto">
         <div className="text-[20px] font-bold text-[#288096] dark:text-[#85c9d8]">
@@ -83,12 +108,32 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
           </button>
           
           {showActions && (
-            <div className="absolute right-0 bottom-full mb-2 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-1 min-w-[140px] overflow-hidden">
+            <div className="absolute right-0 bottom-full mb-2 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-1 min-w-[160px] overflow-hidden">
                <button 
                   onClick={(e) => { e.stopPropagation(); onEdit(product); setShowActions(false); }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                >
                   <Edit className="w-3.5 h-3.5" /> Edit Details
+               </button>
+               <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    toggleInStock({ id: product._id, inStock: !product.inStock }); 
+                    setShowActions(false); 
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+               >
+                  <Package className="w-3.5 h-3.5" /> {product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+               </button>
+               <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    toggleComingSoon({ id: product._id, isComingSoon: !product.isComingSoon }); 
+                    setShowActions(false); 
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+               >
+                  <CheckCircle className="w-3.5 h-3.5" /> {product.isComingSoon ? "Remove Coming Soon" : "Set Coming Soon"}
                </button>
                <button 
                   onClick={(e) => { e.stopPropagation(); if(confirm("Delete this product?")) remove({ id: product._id }); setShowActions(false); }}

@@ -123,7 +123,12 @@ export function Library() {
                     <div className="z-10 text-white flex flex-col justify-center flex-1">
                       <div className="flex gap-2 mb-5">
                         <span className="bg-[#fdb50d] text-[#112040] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max">New</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max ${b1.inStock ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-flex items-center gap-1.5 w-max ${
+                          b1.inStock 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${b1.inStock ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
                           {b1.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
@@ -136,9 +141,13 @@ export function Library() {
                         <span className="text-[26px] font-serif text-[#fdb50d]">GH₵ {b1.price.toFixed(2)}</span>
                         <button 
                           onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b1.inStock ? 'order' : 'pre-order'} "${b1.title}"`, '_blank')}
-                          className="bg-transparent border border-white/30 hover:bg-white/10 hover:border-white text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-max"
+                          className={`px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-max text-white ${
+                            b1.inStock
+                              ? 'bg-transparent border border-white/30 hover:bg-white/10 hover:border-white'
+                              : 'bg-rose-600/80 hover:bg-rose-600 border border-rose-400/50'
+                          }`}
                         >
-                          {b1.inStock ? 'Order Now' : 'Pre-Order'}
+                          {b1.inStock ? 'Order Now' : 'Out of Stock (Pre-Order)'}
                         </button>
                       </div>
                     </div>
@@ -154,7 +163,12 @@ export function Library() {
                     <div className="flex flex-col justify-center text-brand-900 flex-1">
                       <div className="flex gap-2 mb-5">
                         <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max">Featured</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-block w-max ${b2.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded inline-flex items-center gap-1.5 w-max ${
+                          b2.inStock 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${b2.inStock ? 'bg-emerald-600 animate-pulse' : 'bg-rose-600'}`} />
                           {b2.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
@@ -167,9 +181,13 @@ export function Library() {
                         <span className="text-[26px] font-serif text-brand-900">GH₵ {b2.price.toFixed(2)}</span>
                         <button 
                           onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b2.inStock ? 'order' : 'pre-order'} "${b2.title}"`, '_blank')}
-                          className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max"
+                          className={`px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max text-white ${
+                            b2.inStock
+                              ? 'bg-[#112040] hover:bg-brand-900'
+                              : 'bg-rose-700 hover:bg-rose-800'
+                          }`}
                         >
-                          {b2.inStock ? 'Order Now' : 'Pre-Order'}
+                          {b2.inStock ? 'Order Now' : 'Out of Stock (Pre-Order)'}
                         </button>
                       </div>
                     </div>
@@ -190,7 +208,12 @@ export function Library() {
                     <div className="flex flex-col justify-center items-start text-brand-900 flex-1">
                       <div className="flex gap-2 mb-6">
                         <span className="bg-[#112040] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">Bestseller</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full ${b3.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
+                          b3.inStock 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${b3.inStock ? 'bg-emerald-600 animate-pulse' : 'bg-rose-600'}`} />
                           {b3.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
@@ -202,9 +225,13 @@ export function Library() {
                         <span className="text-[26px] font-serif text-brand-900 font-bold">GH₵ {b3.price.toFixed(2)}</span>
                         <button 
                           onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b3.inStock ? 'order' : 'pre-order'} "${b3.title}"`, '_blank')}
-                          className="bg-[#112040] hover:bg-brand-900 text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max"
+                          className={`px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors shadow-md cursor-pointer w-max text-white ${
+                            b3.inStock
+                              ? 'bg-[#112040] hover:bg-brand-900'
+                              : 'bg-rose-700 hover:bg-rose-800'
+                          }`}
                         >
-                          {b3.inStock ? 'Order Now' : 'Pre-Order'}
+                          {b3.inStock ? 'Order Now' : 'Out of Stock (Pre-Order)'}
                         </button>
                       </div>
                     </div>
@@ -219,7 +246,12 @@ export function Library() {
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="flex justify-center mb-3">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${b4.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1.5 ${
+                          b4.inStock 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${b4.inStock ? 'bg-emerald-600 animate-pulse' : 'bg-rose-600'}`} />
                           {b4.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </div>
@@ -230,9 +262,13 @@ export function Library() {
                       <span className="text-[18px] font-serif font-bold text-[#fdb50d] tracking-wide mb-4">GH₵ {b4.price.toFixed(2)}</span>
                       <button 
                         onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${b4.inStock ? 'order' : 'pre-order'} "${b4.title}"`, '_blank')}
-                        className="bg-transparent border border-[#112040] text-[#112040] hover:bg-[#112040] hover:text-white px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-full"
+                        className={`px-6 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer w-full text-white ${
+                          b4.inStock
+                            ? 'bg-[#112040] hover:bg-brand-900 border border-[#112040]'
+                            : 'bg-rose-700 hover:bg-rose-800 border border-rose-700'
+                        }`}
                       >
-                        {b4.inStock ? 'Order Now' : 'Pre-Order'}
+                        {b4.inStock ? 'Order Now' : 'Out of Stock (Pre-Order)'}
                       </button>
                     </div>
                   </div>
@@ -273,11 +309,27 @@ export function Library() {
                  <div className="aspect-[4/5] bg-gray-100 mb-6 overflow-hidden rounded-md relative shadow-sm shrink-0">
                     <BookCoverImage book={pub} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
+                    {/* Prominent Stock Badge Overlay on Book Cover */}
+                    <div className="absolute top-3 right-3 z-10">
+                       <span className={`text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md backdrop-blur-md inline-flex items-center gap-1.5 ${
+                         pub.inStock 
+                           ? 'bg-emerald-600/90 text-white border border-white/20' 
+                           : 'bg-rose-600/90 text-white border border-white/20'
+                       }`}>
+                         <span className={`w-1.5 h-1.5 rounded-full ${pub.inStock ? 'bg-white animate-pulse' : 'bg-white/80'}`} />
+                         {pub.inStock ? 'In Stock' : 'Out of Stock'}
+                       </span>
+                    </div>
                  </div>
                  <div className="flex justify-between items-start gap-4 mb-3">
                    <div>
                      <h3 className="font-serif text-[22px] text-brand-900 leading-tight mb-2">{pub.title}</h3>
-                     <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${pub.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                     <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 ${
+                       pub.inStock 
+                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                         : 'bg-rose-50 text-rose-700 border border-rose-200'
+                     }`}>
+                       <span className={`w-1.5 h-1.5 rounded-full ${pub.inStock ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                        {pub.inStock ? 'In Stock' : 'Out of Stock'}
                      </span>
                    </div>
@@ -288,10 +340,14 @@ export function Library() {
                  </p>
                  <button 
                    onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${pub.inStock ? 'order' : 'pre-order'} "${pub.title}"`, '_blank')}
-                   className="w-max bg-[#112040] hover:bg-brand-900 text-white px-5 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-md cursor-pointer flex items-center gap-2 mt-auto"
+                   className={`w-max px-5 py-2.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-md cursor-pointer flex items-center gap-2 mt-auto text-white ${
+                     pub.inStock 
+                       ? 'bg-[#112040] hover:bg-brand-900 shadow-slate-900/10' 
+                       : 'bg-rose-700 hover:bg-rose-800 shadow-rose-900/10'
+                   }`}
                  >
                    <BookOpen size={12} />
-                   {pub.inStock ? 'Place Order' : 'Pre-Order'}
+                   {pub.inStock ? 'Place Order' : 'Out of Stock (Pre-Order)'}
                  </button>
               </div>
             ))}

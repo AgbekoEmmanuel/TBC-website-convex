@@ -148,6 +148,15 @@ export const toggleInStock = mutation({
   },
 });
 
+export const toggleComingSoon = mutation({
+  args: { id: v.id("products"), isComingSoon: v.boolean() },
+  handler: async (ctx, { id, isComingSoon }) => {
+    const userId = await getAuthUserId(ctx);
+    // if (!userId) throw new Error("Not authenticated");
+    await ctx.db.patch(id, { isComingSoon });
+  },
+});
+
 export const backfillImageUrls = mutation({
   args: {},
   handler: async (ctx) => {

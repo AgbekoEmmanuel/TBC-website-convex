@@ -35,7 +35,12 @@ function BookCard({ book, idx }: { book: any; idx: number }) {
               Featured
             </span>
           )}
-          <span className={`backdrop-blur-sm text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm w-max ${book.inStock ? 'bg-green-100/90 text-green-700' : 'bg-red-100/90 text-red-700'}`}>
+          <span className={`backdrop-blur-md text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md w-max inline-flex items-center gap-1.5 ${
+            book.inStock 
+              ? 'bg-emerald-600/90 text-white border border-white/20' 
+              : 'bg-rose-600/90 text-white border border-white/20'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${book.inStock ? 'bg-white animate-pulse' : 'bg-white/80'}`} />
             {book.inStock ? 'In Stock' : 'Out of Stock'}
           </span>
         </div>
@@ -43,10 +48,20 @@ function BookCard({ book, idx }: { book: any; idx: number }) {
       </div>
 
       <div className="flex flex-col flex-1 px-2">
-        <div className="flex justify-between items-start gap-4 mb-3">
+        <div className="flex justify-between items-start gap-4 mb-2">
           <h3 className="font-serif text-[24px] text-brand-900 leading-tight group-hover:text-[#a78b30] transition-colors">
             {book.title}
           </h3>
+        </div>
+        <div className="mb-3">
+          <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 ${
+            book.inStock 
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+              : 'bg-rose-50 text-rose-700 border border-rose-200'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${book.inStock ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            {book.inStock ? 'In Stock' : 'Out of Stock'}
+          </span>
         </div>
         <p className="text-gray-500 text-[14px] leading-relaxed mb-6 line-clamp-2">
           {book.description}
@@ -58,10 +73,14 @@ function BookCard({ book, idx }: { book: any; idx: number }) {
           </span>
           <button 
             onClick={() => window.open(`https://wa.me/233509955970?text=Hello, I would like to ${book.inStock ? 'order' : 'pre-order'} "${book.title}"`, '_blank')}
-            className="bg-[#112040] hover:bg-brand-900 text-white px-5 py-2.5 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all shadow-lg hover:shadow-xl flex items-center gap-2 cursor-pointer"
+            className={`px-5 py-2.5 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all shadow-lg hover:shadow-xl flex items-center gap-2 cursor-pointer text-white ${
+              book.inStock
+                ? 'bg-[#112040] hover:bg-brand-900'
+                : 'bg-rose-700 hover:bg-rose-800'
+            }`}
           >
             <ShoppingBag size={14} />
-            {book.inStock ? 'Place Order' : 'Pre-Order'}
+            {book.inStock ? 'Place Order' : 'Out of Stock (Pre-Order)'}
           </button>
         </div>
       </div>

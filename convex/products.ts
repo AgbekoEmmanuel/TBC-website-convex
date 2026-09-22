@@ -147,3 +147,22 @@ export const toggleInStock = mutation({
     await ctx.db.patch(id, { inStock });
   },
 });
+
+export const backfillImageUrls = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const products = await ctx.db.query("products").collect();
+    let updated = 0;
+    for (const p of products) {
+      if (p.imageStorageId && !p.imageUrl) {
+        const url = await ctx.storage.getUrl(p.imageStorageId);
+        if (url) {
+          await ctx.db.patch(p._id, { imageUrl: url });
+          updated++;
+        }
+      }
+    }
+    return { total: products.length, updated };
+  },
+});
+

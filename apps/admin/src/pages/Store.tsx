@@ -12,6 +12,16 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
   const remove = useMutation(api.products.remove);
   const toggleInStock = useMutation(api.products.toggleInStock);
   const [showActions, setShowActions] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // Reactive fallback: if imageUrl wasn't saved on the document, query storage directly
+  const storageUrl = useQuery(
+    api.storage.getUrl,
+    !product.imageUrl && product.imageStorageId
+      ? { storageId: product.imageStorageId }
+      : "skip"
+  );
+  const displayImageUrl = product.imageUrl || storageUrl;
 
   const getStockBadge = (product: Doc<"products">) => {
     if (product.isComingSoon) return { label: "Coming Soon", classes: "bg-[#f59e0b]/90 text-white backdrop-blur-md border border-[#f59e0b]/30 shadow-[0_4px_12px_rgba(245,158,11,0.3)]" };
@@ -24,10 +34,11 @@ function ProductCard({ product, onEdit }: { product: Doc<"products">, key?: any,
   return (
     <div className="flex flex-col group cursor-pointer relative">
       <div className="aspect-square w-full rounded-[24px] overflow-hidden relative mb-5 bg-slate-100 dark:bg-[#071d33]/50">
-        {product.imageUrl ? (
+        {displayImageUrl && !imgError ? (
           <img 
-            src={product.imageUrl} 
+            src={displayImageUrl} 
             alt={product.title} 
+            onError={() => setImgError(true)}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             referrerPolicy="no-referrer"
           />

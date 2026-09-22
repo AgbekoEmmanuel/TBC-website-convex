@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, CheckCircle2, XCircle } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useConvex } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Doc } from "@convex/_generated/dataModel";
 import { cn } from "../lib/utils";
@@ -13,6 +13,7 @@ interface EditProductModalProps {
 }
 
 export function EditProductModal({ isOpen, onClose, product }: EditProductModalProps) {
+  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const updateProduct = useMutation(api.products.update);
 
@@ -65,13 +66,14 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setStatusMessage("Preparing update...");
+    setStatusMessage("Uploading...");
 
     try {
       let imageStorageId = product.imageStorageId;
+      let imageUrl = product.imageUrl;
       
       if (imageFile) {
-        setStatusMessage("Optimizing & uploading image...");
+        setStatusMessage("Uploading...");
         const { blob, contentType } = await optimizeImageForUpload(imageFile);
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
@@ -81,9 +83,13 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
         });
         const { storageId } = await result.json();
         imageStorageId = storageId;
+        const resolvedUrl = await convex.query(api.storage.getUrl, { storageId });
+        if (resolvedUrl) {
+          imageUrl = resolvedUrl;
+        }
       }
 
-      setStatusMessage("Saving changes...");
+      setStatusMessage("Saving...");
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
       await updateProduct({
@@ -94,7 +100,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
         price: parseFloat(price),
         category,
         imageStorageId,
-        imageUrl: imageFile ? undefined : product.imageUrl, 
+        imageUrl, 
         inStock,
         isPublished: product.isPublished,
         isComingSoon,

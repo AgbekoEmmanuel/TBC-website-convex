@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, CheckCircle2, XCircle } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useConvex } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
 import { optimizeImageForUpload } from "../lib/imageUtils";
@@ -11,6 +11,7 @@ interface CreateProductModalProps {
 }
 
 export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps) {
+  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const createProduct = useMutation(api.products.create);
 
@@ -52,13 +53,14 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setStatusMessage("Preparing image...");
+    setStatusMessage("Uploading...");
 
     try {
       let imageStorageId = undefined;
+      let imageUrl = undefined;
       
       if (imageFile) {
-        setStatusMessage("Optimizing & uploading image...");
+        setStatusMessage("Uploading...");
         const { blob, contentType } = await optimizeImageForUpload(imageFile);
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
@@ -68,9 +70,15 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
         });
         const { storageId } = await result.json();
         imageStorageId = storageId;
+
+        // Query storage URL directly to store the permanent URL
+        const directUrl = await convex.query(api.storage.getUrl, { storageId });
+        if (directUrl) {
+          imageUrl = directUrl;
+        }
       }
 
-      setStatusMessage("Saving product...");
+      setStatusMessage("Saving...");
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
       await createProduct({
@@ -80,6 +88,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
         price: parseFloat(price),
         category,
         imageStorageId,
+        imageUrl,
         inStock,
         isPublished: true,
         isComingSoon,

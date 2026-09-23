@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, Clock, MapPin, AlignLeft, Tag, RefreshCw, Loader2, Image as ImageIcon } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useConvex } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
+import { optimizeImageForUpload } from "../lib/imageUtils";
 
 import { Doc } from "@convex/_generated/dataModel";
 
@@ -13,12 +14,13 @@ interface CreateEventModalProps {
 }
 
 export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventModalProps) {
+  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const createEvent = useMutation(api.events.create);
   const updateEvent = useMutation(api.events.update);
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("sunday");
+  const [category, setCategory] = useState("Sunday");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -27,6 +29,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState('weekly');
@@ -38,7 +41,8 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
   useEffect(() => {
     if (initialEvent) {
       setTitle(initialEvent.title || "");
-      setCategory(initialEvent.category || "sunday");
+      const cat = initialEvent.category || "Sunday";
+      setCategory(cat.toLowerCase() === "special" ? "Special Programs" : (cat.charAt(0).toUpperCase() + cat.slice(1)));
       setLocation(initialEvent.location || "");
       setDate(initialEvent.date || "");
       setTime(initialEvent.time || "");
@@ -48,12 +52,13 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
     } else {
       // Reset form for creation
       setTitle("");
-      setCategory("sunday");
+      setCategory("Sunday");
       setLocation("");
       setDate("");
       setTime("");
       setDescription("");
       setYoutubeUrl("");
+      setImageFile(null);
       setImagePreview(null);
     }
   }, [initialEvent, isOpen]);
@@ -86,19 +91,36 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
 
     try {
       let imageStorageId = initialEvent?.imageStorageId;
+      let imageUrl = initialEvent?.imageUrl;
       
       if (imageFile) {
+        setStatusMessage("Optimizing image...");
+        const { blob, contentType } = await optimizeImageForUpload(imageFile);
+
+        setStatusMessage("Uploading flyer...");
         const postUrl = await generateUploadUrl();
         const result = await fetch(postUrl, {
           method: "POST",
-          headers: { "Content-Type": imageFile.type },
-          body: imageFile,
+          headers: { "Content-Type": contentType },
+          body: blob,
         });
+
+        if (!result.ok) {
+          throw new Error(`Upload failed with status ${result.status}`);
+        }
+
         const { storageId } = await result.json();
         imageStorageId = storageId;
+
+        // Query storage URL directly to store the permanent URL
+        const directUrl = await convex.query(api.storage.getUrl, { storageId });
+        if (directUrl) {
+          imageUrl = directUrl;
+        }
       }
 
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      setStatusMessage("Saving event...");
+      const slug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `event-${Date.now()}`;
 
       if (initialEvent) {
         await updateEvent({
@@ -112,6 +134,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
           description,
           youtubeUrl: youtubeUrl || undefined,
           imageStorageId,
+          imageUrl,
           isFeatured: initialEvent.isFeatured,
           isPublished: initialEvent.isPublished,
         });
@@ -126,6 +149,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
           description,
           youtubeUrl: youtubeUrl || undefined,
           imageStorageId,
+          imageUrl,
           isFeatured: false,
           isPublished: true,
         });
@@ -135,7 +159,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       // Reset form
       if (!initialEvent) {
         setTitle("");
-        setCategory("sunday");
+        setCategory("Sunday");
         setLocation("");
         setDate("");
         setTime("");
@@ -146,9 +170,10 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       }
     } catch (error) {
       console.error("Failed to save event:", error);
-      alert("Failed to save event. Please try again.");
+      alert(error instanceof Error ? error.message : "Failed to save event. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setStatusMessage("");
     }
   };
 
@@ -243,15 +268,15 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                        <Tag className="h-4 w-4 text-slate-400" />
                      </div>
-                     <select 
+                      <select 
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow bg-white pb-[11px] pt-[11px] appearance-none"
                      >
-                        <option value="sunday">Sunday</option>
-                        <option value="midweek">Midweek</option>
-                        <option value="prayers">Prayers</option>
-                        <option value="special">Special Programs</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Midweek">Midweek</option>
+                        <option value="Prayers">Prayers</option>
+                        <option value="Special Programs">Special Programs</option>
                      </select>
                    </div>
                 </div>
@@ -287,6 +312,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
                         className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow" 
                      />
                    </div>
+                   <p className="text-[11px] text-slate-400 mt-1">Events set for today or a future date appear in "Upcoming Events" on the website.</p>
                 </div>
                 <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Start Time</label>
@@ -407,7 +433,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
              className="px-6 py-2 text-sm font-bold text-white bg-[#1f4b73] shadow-sm rounded-xl hover:bg-[#153450] focus:ring-2 focus:ring-[#1f4b73] focus:ring-offset-2 outline-none transition-all flex items-center gap-2 disabled:bg-slate-400"
            >
              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-             {isSubmitting ? (initialEvent ? "Saving..." : "Creating...") : (initialEvent ? "Save Changes" : "Publish Event")}
+             {isSubmitting ? (statusMessage || (initialEvent ? "Saving..." : "Publishing...")) : (initialEvent ? "Save Changes" : "Publish Event")}
            </button>
         </div>
 

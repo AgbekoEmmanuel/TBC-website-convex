@@ -21,6 +21,7 @@ export default defineSchema({
   })
     .index("by_date", ["date"])
     .index("by_published", ["isPublished"])
+    .index("by_published_and_date", ["isPublished", "date"])
     .index("by_slug", ["slug"]),
 
   sermons: defineTable({

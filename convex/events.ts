@@ -8,10 +8,15 @@ export const getPublishedUpcoming = query({
     const today = new Date().toISOString().split("T")[0];
     const events = await ctx.db
       .query("events")
-      .withIndex("by_published", (q) => q.eq("isPublished", true))
-      .filter((q) => q.gte(q.field("date"), today))
+      .withIndex("by_published_and_date", (q) =>
+        q.eq("isPublished", true).gte("date", today)
+      )
       .order("asc")
       .collect();
+
+    // Sort chronologically by date
+    events.sort((a, b) => a.date.localeCompare(b.date));
+
     return Promise.all(
       events.map(async (event) => ({
         ...event,
@@ -27,7 +32,7 @@ export const getBySlug = query({
     return await ctx.db
       .query("events")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .unique();
+      .first();
   },
 });
 
@@ -35,12 +40,22 @@ export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
     const today = new Date().toISOString().split("T")[0];
-    const event = await ctx.db
+    // First try to find an upcoming published featured event
+    const upcomingFeatured = await ctx.db
+      .query("events")
+      .withIndex("by_published_and_date", (q) =>
+        q.eq("isPublished", true).gte("date", today)
+      )
+      .filter((q) => q.eq(q.field("isFeatured"), true))
+      .first();
+
+    // Fallback to any published featured event if none upcoming
+    const event = upcomingFeatured || (await ctx.db
       .query("events")
       .withIndex("by_published", (q) => q.eq("isPublished", true))
       .filter((q) => q.eq(q.field("isFeatured"), true))
-      .filter((q) => q.gte(q.field("date"), today))
-      .first();
+      .first());
+
     if (!event) return null;
     return {
       ...event,
@@ -113,7 +128,7 @@ export const create = mutation({
     // if (!userId) throw new Error("Not authenticated");
     let imageUrl = args.imageUrl;
     if (args.imageStorageId && !imageUrl) {
-      imageUrl = await ctx.storage.getUrl(args.imageStorageId) ?? undefined;
+      imageUrl = (await ctx.storage.getUrl(args.imageStorageId)) ?? undefined;
     }
     return await ctx.db.insert("events", { ...args, imageUrl });
   },
@@ -138,9 +153,10 @@ export const update = mutation({
   handler: async (ctx, { id, ...args }) => {
     const userId = await getAuthUserId(ctx);
     // if (!userId) throw new Error("Not authenticated");
-    let imageUrl = args.imageUrl;
-    if (args.imageStorageId && !imageUrl) {
-      imageUrl = await ctx.storage.getUrl(args.imageStorageId) ?? undefined;
+    const existing = await ctx.db.get(id);
+    let imageUrl = args.imageUrl || existing?.imageUrl;
+    if (args.imageStorageId && args.imageStorageId !== existing?.imageStorageId) {
+      imageUrl = (await ctx.storage.getUrl(args.imageStorageId)) ?? imageUrl;
     }
     await ctx.db.patch(id, { ...args, imageUrl });
   },

@@ -22,7 +22,11 @@ const CATEGORIES = [
 ];
 
 export function Events() {
-  const events = useQuery(api.events.getPublishedUpcoming);
+  const upcomingEvents = useQuery(api.events.getPublishedUpcoming);
+  const recentPastEvents = useQuery(api.events.getRecentPast);
+  const [viewTab, setViewTab] = useState<"upcoming" | "past">("upcoming");
+
+  const events = viewTab === "upcoming" ? upcomingEvents : recentPastEvents;
   const isLoading = events === undefined;
 
   const subscribe = useAction(api.subscriptions.subscribe);
@@ -36,8 +40,12 @@ export function Events() {
   // Filter events by category and search query
   const filteredEvents = events?.filter(event => {
     // Category filter
-    const matchesCategory = activeCategory === "all" || 
-      event.category?.toLowerCase() === activeCategory;
+    const cat = event.category?.toLowerCase() || "";
+    const active = activeCategory.toLowerCase();
+    const matchesCategory = active === "all" || 
+      cat === active || 
+      (active === "special" && (cat === "special programs" || cat === "special")) ||
+      (active === "special programs" && (cat === "special" || cat === "special programs"));
     
     // Search filter
     const query = searchQuery.toLowerCase().trim();
@@ -55,7 +63,7 @@ export function Events() {
     <div className="w-full bg-[#fcfcfc] min-h-screen pt-16 pb-24 font-sans">
       
       {/* Header */}
-      <div className="pt-8 pb-16 text-center max-w-3xl mx-auto px-6">
+      <div className="pt-8 pb-12 text-center max-w-3xl mx-auto px-6">
         <motion.p 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,16 +77,40 @@ export function Events() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="font-serif text-5xl md:text-7xl font-bold text-brand-900 mb-6 tracking-tight"
         >
-          Upcoming Events
+          {viewTab === "upcoming" ? "Upcoming Events" : "Past Gatherings"}
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-gray-500 text-lg md:text-xl leading-relaxed"
+          className="text-gray-500 text-lg md:text-xl leading-relaxed mb-6"
         >
           Join our vibrant community for moments of worship, fellowship, and personal growth. There's a place for you here in every season.
         </motion.p>
+
+        {/* Upcoming vs Past Toggle */}
+        <div className="inline-flex p-1 bg-[#f0f2f5] rounded-xl border border-gray-200/60 shadow-sm">
+          <button
+            onClick={() => setViewTab("upcoming")}
+            className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
+              viewTab === "upcoming"
+                ? "bg-brand-900 text-white shadow-sm"
+                : "text-gray-600 hover:text-brand-900"
+            }`}
+          >
+            Upcoming Events
+          </button>
+          <button
+            onClick={() => setViewTab("past")}
+            className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
+              viewTab === "past"
+                ? "bg-brand-900 text-white shadow-sm"
+                : "text-gray-600 hover:text-brand-900"
+            }`}
+          >
+            Past Gatherings
+          </button>
+        </div>
       </div>
 
       {/* Filter / Search Bar */}
@@ -129,20 +161,28 @@ export function Events() {
               </div>
               <h3 className="text-xl font-medium text-gray-400">
                 {activeCategory === "all" 
-                  ? (searchQuery ? `No events matching "${searchQuery}"` : "No upcoming events found")
-                  : `No ${activeCategoryLabel} events yet`}
+                  ? (searchQuery ? `No events matching "${searchQuery}"` : (viewTab === "upcoming" ? "No upcoming events scheduled right now" : "No past events found"))
+                  : `No ${activeCategoryLabel} events found`}
               </h3>
               <p className="text-gray-400 text-sm max-w-md">
-                {activeCategory !== "all" 
-                  ? "Check back soon or explore other categories for upcoming gatherings."
-                  : "Stay tuned — new events are coming soon!"}
+                {viewTab === "upcoming"
+                  ? "Check back soon for upcoming gatherings, or view our past events."
+                  : "Explore our other categories for event archives."}
               </p>
+              {viewTab === "upcoming" && (recentPastEvents?.length ?? 0) > 0 && (
+                <button 
+                  onClick={() => setViewTab("past")}
+                  className="mt-2 text-sm font-semibold text-brand-900 hover:text-link-blue transition-colors flex items-center gap-1.5"
+                >
+                  View recent past gatherings <ArrowRight size={14} />
+                </button>
+              )}
               {activeCategory !== "all" && (
                 <button 
                   onClick={() => setActiveCategory("all")}
                   className="mt-2 text-sm font-semibold text-brand-900 hover:text-link-blue transition-colors flex items-center gap-1"
                 >
-                  View all events <ArrowRight size={14} />
+                  View all categories <ArrowRight size={14} />
                 </button>
               )}
             </div>
@@ -165,11 +205,11 @@ export function Events() {
                   referrerPolicy="no-referrer" 
                 />
                 <div className="absolute top-8 left-8 bg-white text-brand-900 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md tracking-wide uppercase">
-                  {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
               </div>
               <div className="px-8 pb-8 pt-4 flex flex-col flex-1">
-                <p className="text-[#3b82f6] text-[10px] font-bold uppercase tracking-[0.15em] mb-2">{event.category ? event.category.charAt(0).toUpperCase() + event.category.slice(1) : "Event"}</p>
+                <p className="text-[#3b82f6] text-[10px] font-bold uppercase tracking-[0.15em] mb-2">{event.category ? (event.category.toLowerCase() === "special" ? "Special Programs" : event.category.charAt(0).toUpperCase() + event.category.slice(1)) : "Event"}</p>
                 <h3 className="font-serif text-[22px] font-bold text-brand-900 mb-3 leading-tight">{event.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">
                   {event.description}

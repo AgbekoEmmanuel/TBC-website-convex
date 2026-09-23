@@ -25,7 +25,10 @@ const fadeIn = {
 export function Home() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const events = useQuery(api.events.getPublishedUpcoming);
+  const upcomingEvents = useQuery(api.events.getPublishedUpcoming);
+  const recentPastEvents = useQuery(api.events.getRecentPast);
+  const events = (upcomingEvents && upcomingEvents.length > 0) ? upcomingEvents : recentPastEvents;
+  const isShowingPast = Boolean(upcomingEvents && upcomingEvents.length === 0 && recentPastEvents && recentPastEvents.length > 0);
   const recentEvents = events ? events.slice(0, 3) : undefined;
   const featuredSermon = useQuery(api.sermons.getFeatured);
   const banners = useQuery(api.siteBanners.getAll);
@@ -313,8 +316,12 @@ export function Home() {
         <div className="max-w-7xl mx-auto px-6">
           
           <div className="text-center mb-16">
-            <p className="text-accent-gold font-bold tracking-[0.15em] uppercase text-xs mb-2">Don't Miss Out</p>
-            <h2 className="font-serif text-5xl font-bold text-brand-900">Upcoming Events</h2>
+            <p className="text-accent-gold font-bold tracking-[0.15em] uppercase text-xs mb-2">
+              {isShowingPast ? "Recent Gatherings" : "Don't Miss Out"}
+            </p>
+            <h2 className="font-serif text-5xl font-bold text-brand-900">
+              {isShowingPast ? "Recent Events" : "Upcoming Events"}
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

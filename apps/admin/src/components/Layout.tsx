@@ -113,6 +113,14 @@ function Topbar({ setIsSidebarOpen }: { setIsSidebarOpen: (val: boolean) => void
   const liveStream = useQuery(api.liveStream.get);
   const isLive = liveStream?.isLive || false;
 
+  useEffect(() => {
+    const handleOpenLiveModal = () => {
+      setIsLiveModalOpen(true);
+    };
+    window.addEventListener("open-live-modal", handleOpenLiveModal);
+    return () => window.removeEventListener("open-live-modal", handleOpenLiveModal);
+  }, []);
+
   const currentNavItem = NAV_ITEMS.find(item => item.path === location.pathname);
   // Default to the first part of the path if not in standard nav (like admin-management)
   const pageTitle = currentNavItem?.name || (location.pathname === '/admin-management' ? 'Admin Management' : 'Dashboard');

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star, Edit, PlayCircle } from "lucide-react";
+import { Plus, Filter, CalendarDays, Clock, MapPin, ArrowRight, UserPlus, MoreHorizontal, Loader2, Trash2, Eye, EyeOff, Star, Edit, PlayCircle, Radio } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { CreateEventModal } from "../components/CreateEventModal";
 import { useQuery, useMutation } from "convex/react";
@@ -191,7 +191,16 @@ function ListEventCard({ ev, onEdit }: { ev: Doc<"events">, onEdit: (ev: Doc<"ev
         </button>
 
         {showActions && (
-          <div className="absolute right-0 top-12 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-2 min-w-[160px] overflow-hidden">
+          <div className="absolute right-0 top-12 z-50 bg-white dark:bg-[#07243c] border border-slate-200 dark:border-[#103a64] rounded-xl shadow-xl py-2 min-w-[170px] overflow-hidden">
+             <button 
+                onClick={() => { 
+                  window.dispatchEvent(new CustomEvent('open-live-modal', { detail: { eventId: ev._id } })); 
+                  setShowActions(false); 
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors border-b border-slate-100 dark:border-white/5"
+             >
+                <Radio className="w-4 h-4 text-red-500 animate-pulse" /> Go Live Now
+             </button>
              <button 
                 onClick={() => { onEdit(ev); setShowActions(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-600 dark:text-[#8ba4b3] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"

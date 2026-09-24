@@ -99,6 +99,7 @@ export default defineSchema({
     isLive: v.boolean(),
     programType: v.optional(v.string()),
     programName: v.optional(v.string()),
+    eventId: v.optional(v.id("events")),
     imageStorageId: v.optional(v.id("_storage")),
     imageUrl: v.optional(v.string()),
   }),

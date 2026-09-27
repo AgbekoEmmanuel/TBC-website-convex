@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Calendar, Video, ShoppingCart, Megaphone, HeartHandshake, Settings, Menu, X, Bell, Search, Sun, Moon, Shield, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth, Role } from "./AuthProvider";

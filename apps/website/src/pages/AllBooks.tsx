@@ -7,7 +7,7 @@ import { api } from "@convex/_generated/api";
 
 const DEFAULT_BOOK_COVER = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800";
 
-function BookCard({ book, idx }: { book: any; idx: number }) {
+function BookCard({ book, idx }: { book: any; idx: number; key?: any }) {
   const storageUrl = useQuery(
     api.storage.getUrl,
     !book.imageUrl && book.imageStorageId

@@ -15,6 +15,7 @@ import { Donations } from "./pages/Donations";
 import { Login } from "./pages/Login";
 import { Loader2 } from "lucide-react";
 import { IdleTimer } from "./components/IdleTimer";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function AppRoutes() {
   const { isLoading } = useAuth();
@@ -107,12 +108,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <ThemeProvider defaultTheme="dark">
-      <AuthProvider>
-        <BrowserRouter basename="/admin">
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark">
+        <AuthProvider>
+          <BrowserRouter basename="/admin">
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

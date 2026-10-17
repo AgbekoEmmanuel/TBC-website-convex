@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Delete } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -25,20 +25,13 @@ export function Login() {
   const [passcode, setPasscode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
 
   const CORRECT_PASSCODE = "1234";
 
   const { login } = useAuth();
 
-  useEffect(() => {
-    hiddenInputRef.current?.focus();
-    
-    // Maintain focus
-    const handleFocus = () => hiddenInputRef.current?.focus();
-    document.addEventListener("click", handleFocus);
-    return () => document.removeEventListener("click", handleFocus);
-  }, []);
+
 
   useEffect(() => {
     if (passcode.length === 4) {
@@ -63,10 +56,6 @@ export function Login() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-    setPasscode(val);
-  };
 
   const handleKeypadPress = (val: string) => {
     if (val === "delete") {
@@ -83,15 +72,7 @@ export function Login() {
       <div className="absolute top-1/4 left-1/4 w-[50%] h-[50%] bg-[#26658C]/20 rounded-full blur-[150px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[50%] h-[50%] bg-[#d4af37]/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
 
-      <input
-        ref={hiddenInputRef}
-        type="text"
-        inputMode="numeric"
-        value={passcode}
-        onChange={handleInputChange}
-        className="absolute opacity-0 pointer-events-none"
-        autoFocus
-      />
+
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-[280px] transform scale-95 sm:scale-100">
         {/* Header */}

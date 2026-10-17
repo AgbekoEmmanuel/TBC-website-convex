@@ -17,7 +17,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Books");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState("100");
   const [inStock, setInStock] = useState(true);
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -42,11 +42,8 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Use URL.createObjectURL for better mobile performance
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -99,7 +96,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
       // Reset form
       setTitle("");
       setCategory("Books");
-      setPrice("");
+      setPrice("100");
       setInStock(true);
       setDescription("");
       setImageFile(null);
@@ -119,10 +116,10 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <div className="absolute inset-0 bg-[#112a46]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+    <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-2 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 bg-[#112a46]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
-      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-2 sm:my-0">
         
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
           <h2 className="text-xl font-serif font-semibold text-[#112a46]">Add New Product</h2>
@@ -162,13 +159,16 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Price (GH₵)</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Price (GH₵) {category === "Books" && <span className="text-[10px] text-blue-500 font-semibold normal-case">(fixed at GH₵100)</span>}</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Banknote className="h-4 w-4 text-slate-400" />
                     </div>
-                    <input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" required className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#85c9d8] focus:ring-1 focus:ring-[#85c9d8] outline-none transition-shadow" />
+                    <input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" required readOnly={category === "Books"} className={`w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#85c9d8] focus:ring-1 focus:ring-[#85c9d8] outline-none transition-shadow ${category === "Books" ? "bg-slate-50 text-slate-600" : ""}`} />
                   </div>
+                  {category === "Books" && (
+                    <p className="text-[11px] text-blue-500 mt-1 font-medium">All books are priced at GH₵100.00</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Category</label>
@@ -176,7 +176,7 @@ export function CreateProductModal({ isOpen, onClose }: CreateProductModalProps)
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Tag className="h-4 w-4 text-slate-400" />
                     </div>
-                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#85c9d8] focus:ring-1 focus:ring-[#85c9d8] outline-none transition-shadow bg-white appearance-none">
+                    <select value={category} onChange={(e) => { setCategory(e.target.value); if (e.target.value === "Books") setPrice("100"); }} className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#85c9d8] focus:ring-1 focus:ring-[#85c9d8] outline-none transition-shadow bg-white appearance-none">
                       <option value="Books">Books</option>
                       <option value="Apparel">Apparel</option>
                       <option value="Media">Media</option>

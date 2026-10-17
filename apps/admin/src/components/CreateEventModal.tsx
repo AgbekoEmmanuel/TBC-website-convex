@@ -19,11 +19,13 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
   const createEvent = useMutation(api.events.create);
   const updateEvent = useMutation(api.events.update);
 
+  const DEFAULT_LOCATION = "Dome of Excellence, Hawa Avenue";
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Sunday");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(DEFAULT_LOCATION);
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState("10:00");
   const [description, setDescription] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -43,7 +45,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       setTitle(initialEvent.title || "");
       const cat = initialEvent.category || "Sunday";
       setCategory(cat.toLowerCase() === "special" ? "Special Programs" : (cat.charAt(0).toUpperCase() + cat.slice(1)));
-      setLocation(initialEvent.location || "");
+      setLocation(initialEvent.location || DEFAULT_LOCATION);
       setDate(initialEvent.date || "");
       setTime(initialEvent.time || "");
       setDescription(initialEvent.description || "");
@@ -53,9 +55,9 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       // Reset form for creation
       setTitle("");
       setCategory("Sunday");
-      setLocation("");
+      setLocation(DEFAULT_LOCATION);
       setDate("");
-      setTime("");
+      setTime("10:00");
       setDescription("");
       setYoutubeUrl("");
       setImageFile(null);
@@ -73,15 +75,26 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
+  // Auto-fill time and location based on category selection (only for new events)
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory);
+    setLocation(DEFAULT_LOCATION);
+    if (newCategory === "Sunday") {
+      setTime("10:00");
+    } else if (newCategory === "Midweek") {
+      setTime("18:00");
+    } else if (!initialEvent) {
+      // For other categories on new events, clear the time so user enters it
+      setTime("");
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Use URL.createObjectURL for better mobile performance
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -160,9 +173,9 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       if (!initialEvent) {
         setTitle("");
         setCategory("Sunday");
-        setLocation("");
+        setLocation(DEFAULT_LOCATION);
         setDate("");
-        setTime("");
+        setTime("10:00");
         setDescription("");
         setYoutubeUrl("");
         setImageFile(null);
@@ -180,15 +193,15 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-2 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-[#112a46]/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-[#112a46]/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-2 sm:my-0">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
@@ -268,9 +281,9 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                        <Tag className="h-4 w-4 text-slate-400" />
                      </div>
-                      <select 
+                    <select 
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
+                        onChange={(e) => handleCategoryChange(e.target.value)}
                         className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow bg-white pb-[11px] pt-[11px] appearance-none"
                      >
                         <option value="Sunday">Sunday</option>
@@ -315,7 +328,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
                    <p className="text-[11px] text-slate-400 mt-1">Events set for today or a future date appear in "Upcoming Events" on the website.</p>
                 </div>
                 <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Start Time</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Start Time {(category === "Sunday" || category === "Midweek") && <span className="text-[10px] text-blue-500 font-semibold normal-case">(auto-filled)</span>}</label>
                      <div className="relative">
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Clock className="h-4 w-4 text-slate-400" />
@@ -325,9 +338,15 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
                           required 
                           value={time}
                           onChange={(e) => setTime(e.target.value)}
-                          className="w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow" 
+                          readOnly={!initialEvent && (category === "Sunday" || category === "Midweek")}
+                          className={`w-full pl-10 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-[#1f4b73] focus:ring-1 focus:ring-[#1f4b73] outline-none transition-shadow ${!initialEvent && (category === "Sunday" || category === "Midweek") ? "bg-slate-50 text-slate-600" : ""}`}
                        />
                      </div>
+                     {!initialEvent && (category === "Sunday" || category === "Midweek") && (
+                       <p className="text-[11px] text-blue-500 mt-1 font-medium">
+                         {category === "Sunday" ? "Sunday service starts at 10:00 AM" : "Midweek service starts at 6:00 PM"}
+                       </p>
+                     )}
                 </div>
               </div>
 

@@ -102,6 +102,8 @@
     color: var(--foreground);
     /* Set a subtle transition on background for theme changes */
     transition: background-color 0.3s ease, color 0.3s ease;
+    /* Mobile: prevent pull-to-refresh interfering with scroll */
+    overscroll-behavior-y: contain;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -117,5 +119,50 @@
   [role="button"]:not(:disabled),
   a:not([aria-disabled="true"]):not([disabled]) {
     cursor: pointer;
+  }
+
+  /* ── Mobile Compatibility Fixes ────────────────────────── */
+
+  /* Prevent iOS zoom on input focus (font-size < 16px causes zoom) */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="url"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="file"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Ensure file inputs are tappable on mobile */
+  input[type="file"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Better touch targets for mobile buttons */
+  @media screen and (max-width: 768px) {
+    button, [role="button"] {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+  }
+
+  /* Modal mobile fixes - ensure proper scrolling inside modals on iOS */
+  @media screen and (max-width: 768px) {
+    .fixed.inset-0 {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* Safe area insets for notched devices */
+  @supports (padding: env(safe-area-inset-bottom)) {
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
   }
 }

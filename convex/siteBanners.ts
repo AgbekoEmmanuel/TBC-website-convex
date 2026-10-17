@@ -37,7 +37,7 @@ export const create = mutation({
 
 export const remove = mutation({
   args: { id: v.id("siteBanners") },
-  handler: async (ctx, { id }) => {
+  handler: async (ctx, { id }) => { 
     const banner = await ctx.db.get(id);
     if (banner?.imageStorageId) {
       await ctx.storage.delete(banner.imageStorageId);

@@ -5,11 +5,13 @@ import { api } from "@convex/_generated/api";
  * Bulletproof mobile-first image optimization and upload utilities.
  * Handles smartphone photos (iOS Safari, Android Chrome, desktop) by:
  * 1. Safely resolving MIME types (handles empty types, HEIC/HEIF camera captures).
- * 2. Compressing and resizing huge 10MB-25MB phone photos to ~100KB-250KB in HD quality.
- * 3. Multi-tier decoding (createImageBitmap with fallback to Image element).
+ * 2. Compressing and resizing huge 10MB-25MB phone photos to ~80KB-150KB in HD quality.
+ * 3. Multi-tier decoding (createImageBitmap with native downscale, fallback to Image element).
  * 4. Safe canvas export (toBlob with iOS Safari toDataURL fallback).
- * 5. Direct WebSocket/client upload via Convex Action (immune to mobile HTTP fetch drops, CORS, and carrier proxy resets).
- * 6. Automatic HTTP fallback with retries.
+ * 5. Triple-redundant upload:
+ *    - Pipeline 1: Direct Convex Client Action via WebSocket (immune to mobile HTTP fetch drops, CORS, carrier proxy resets).
+ *    - Pipeline 2: Universal CORS HTTP action to /api/upload.
+ *    - Pipeline 3: Standard generateUploadUrl fallback.
  */
 
 export function getSafeContentType(file: File): string {
@@ -138,8 +140,8 @@ function exportCanvasToBlob(
 
 export async function optimizeImageForUpload(
   file: File,
-  maxDimension = 1200,
-  quality = 0.78
+  maxDimension = 1000,
+  quality = 0.75
 ): Promise<{ blob: Blob; contentType: string }> {
   const safeType = getSafeContentType(file);
 
@@ -148,9 +150,9 @@ export async function optimizeImageForUpload(
     return { blob: file, contentType: safeType };
   }
 
-  // If already small (< 120KB) and standard web format, skip canvas re-encoding
+  // If already small (< 100KB) and standard web format, skip canvas re-encoding
   if (
-    file.size < 120 * 1024 &&
+    file.size < 100 * 1024 &&
     (safeType === "image/jpeg" || safeType === "image/png" || safeType === "image/webp")
   ) {
     return { blob: file, contentType: safeType };
@@ -159,7 +161,20 @@ export async function optimizeImageForUpload(
   // Strategy 1: Try createImageBitmap (modern, high performance on mobile)
   if (typeof createImageBitmap !== "undefined") {
     try {
-      const bitmap = await createImageBitmap(file);
+      let bitmap: ImageBitmap;
+      try {
+        const probe = await createImageBitmap(file);
+        const { width, height } = calculateDimensions(probe.width, probe.height, maxDimension);
+        probe.close();
+        bitmap = await createImageBitmap(file, {
+          resizeWidth: width,
+          resizeHeight: height,
+          resizeQuality: "medium",
+        });
+      } catch {
+        bitmap = await createImageBitmap(file);
+      }
+
       const { width, height } = calculateDimensions(bitmap.width, bitmap.height, maxDimension);
       const canvas = document.createElement("canvas");
       canvas.width = width;
@@ -259,10 +274,23 @@ export async function optimizeImageForUpload(
   });
 }
 
+function getConvexSiteUrl(): string {
+  const envSite = import.meta.env.VITE_CONVEX_SITE_URL;
+  if (envSite && envSite.includes(".convex.site")) {
+    return envSite;
+  }
+  const cloudUrl = import.meta.env.VITE_CONVEX_URL || "";
+  if (cloudUrl.includes(".convex.cloud")) {
+    return cloudUrl.replace(".convex.cloud", ".convex.site");
+  }
+  return "https://adjoining-lynx-464.convex.site";
+}
+
 /**
- * Uploads an image to Convex storage safely with mobile resilience:
+ * Uploads an image to Convex storage safely with triple redundancy:
  * 1. Direct WebSocket Convex Action upload (Primary): Bypasses cross-origin fetch, mobile carrier proxies, and CORS completely.
- * 2. HTTP POST upload (Fallback): Automatically retries up to 3 times if needed.
+ * 2. Universal CORS HTTP action to /api/upload (Secondary).
+ * 3. Standard generateUploadUrl fallback (Tertiary).
  */
 export async function uploadImageToConvex(
   file: File,
@@ -272,83 +300,76 @@ export async function uploadImageToConvex(
   onStatusChange?.("Optimizing image for mobile...");
   const { blob, contentType } = await optimizeImageForUpload(file);
 
-  // METHOD 1: Direct Convex Client Action (Immune to browser fetch errors and CORS)
+  // METHOD 1: Direct Convex Client Action via WebSocket (Immune to browser fetch errors and CORS)
+  if (blob.size < 750 * 1024) {
+    try {
+      onStatusChange?.("Uploading image directly...");
+      const base64Data = await blobToBase64(blob);
+      const res = await convex.action(api.storage.uploadFromClient, {
+        base64Data,
+        contentType: contentType || "image/jpeg",
+      });
+
+      if (res?.storageId) {
+        onStatusChange?.("Upload complete!");
+        return { storageId: res.storageId, contentType };
+      }
+    } catch (actionErr: any) {
+      console.warn("Direct WebSocket upload failed, trying HTTP upload:", actionErr?.message);
+    }
+  }
+
+  // METHOD 2: Direct HTTP POST to /api/upload on the matching .convex.site domain
   try {
-    onStatusChange?.("Uploading image...");
-    const base64Data = await blobToBase64(blob);
-    const res = await convex.action(api.storage.uploadFromClient, {
-      base64Data,
-      contentType: contentType || "image/jpeg",
+    onStatusChange?.("Uploading image to server...");
+    const siteUrl = getConvexSiteUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+    const response = await fetch(`${siteUrl}/api/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": contentType || "image/jpeg",
+      },
+      body: blob,
+      signal: controller.signal,
     });
 
-    if (res?.storageId) {
-      onStatusChange?.("Upload complete!");
-      return { storageId: res.storageId, contentType };
-    }
-  } catch (actionErr) {
-    console.warn("Direct upload via Convex action failed, falling back to HTTP upload:", actionErr);
-  }
+    clearTimeout(timeoutId);
 
-  // METHOD 2: HTTP Fallback with retry and fresh upload tokens
-  const maxRetries = 3;
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      if (attempt > 1) {
-        onStatusChange?.(`Reconnecting upload (${attempt} of ${maxRetries})...`);
-        await new Promise((r) => setTimeout(r, 1200));
-      } else {
-        onStatusChange?.("Uploading image (fallback)...");
-      }
-
-      const postUrl = await generateUploadUrl();
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 40000);
-
-      try {
-        const response = await fetch(postUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": contentType || "image/jpeg",
-          },
-          body: blob,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => "");
-          throw new Error(`Upload server returned error (${response.status}): ${errorText || response.statusText}`);
-        }
-
-        const data = await response.json();
-        if (!data?.storageId) {
-          throw new Error("No storage identifier returned by server.");
-        }
-
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.storageId) {
         onStatusChange?.("Upload complete!");
         return { storageId: data.storageId, contentType };
-      } catch (fetchErr: any) {
-        clearTimeout(timeoutId);
-        if (fetchErr.name === "AbortError") {
-          throw new Error("Upload timed out over mobile connection.");
-        }
-        throw fetchErr;
       }
-    } catch (err: any) {
-      console.warn(`Upload attempt ${attempt} failed:`, err);
-      lastError = err instanceof Error ? err : new Error(String(err));
     }
+  } catch (httpErr: any) {
+    console.warn("Direct HTTP upload to /api/upload failed, trying fallback:", httpErr?.message);
   }
 
-  const rawMsg = lastError?.message || "";
-  if (rawMsg.includes("Failed to fetch") || rawMsg.includes("Load failed") || rawMsg.includes("NetworkError")) {
-    throw new Error(
-      "Network connection interrupted while uploading flyer. Please check your mobile internet/Wi-Fi and try again."
-    );
+  // METHOD 3: Traditional generateUploadUrl fallback
+  try {
+    onStatusChange?.("Finishing upload...");
+    const postUrl = await generateUploadUrl();
+    const response = await fetch(postUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": contentType || "image/jpeg",
+      },
+      body: blob,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.storageId) {
+        onStatusChange?.("Upload complete!");
+        return { storageId: data.storageId, contentType };
+      }
+    }
+  } catch (genUrlErr: any) {
+    console.warn("generateUploadUrl fallback failed:", genUrlErr?.message);
   }
 
-  throw lastError || new Error("Failed to upload image. Please try again.");
+  throw new Error("Failed to upload image. Please check your connection and try again.");
 }

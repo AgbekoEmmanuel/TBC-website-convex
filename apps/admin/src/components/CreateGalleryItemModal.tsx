@@ -3,6 +3,8 @@ import { X, Tag, Loader2, Image as ImageIcon, Type, Trash2, Plus } from "lucide-
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
+import { uploadImageToConvex } from "../lib/imageUtils";
+import { Id } from "@convex/_generated/dataModel";
 
 interface CreateGalleryItemModalProps {
   isOpen: boolean;
@@ -83,26 +85,15 @@ export function CreateGalleryItemModal({ isOpen, onClose }: CreateGalleryItemMod
         const file = imageFiles[i];
         
         try {
-          const postUrl = await generateUploadUrl();
-          const result = await fetch(postUrl, {
-            method: "POST",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          
-          if (!result.ok) throw new Error(`Upload failed with status ${result.status}`);
-          
-          const { storageId } = await result.json();
+          const { storageId } = await uploadImageToConvex(file, generateUploadUrl);
 
           await createGalleryItem({
             title: title || undefined,
             category,
-            imageStorageId: storageId,
+            imageStorageId: storageId as Id<"_storage">,
           });
         } catch (err) {
           console.error(`Failed to upload image ${i + 1}:`, err);
-          // If one fails, we can either continue or stop. 
-          // For now, let's stop and alert which one failed.
           throw new Error(`Failed on image ${i + 1}: ${file.name}`);
         }
       }
@@ -155,16 +146,18 @@ export function CreateGalleryItemModal({ isOpen, onClose }: CreateGalleryItemMod
                     </button>
                   </div>
                 ))}
-                <button 
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-[#288096] hover:text-[#288096] transition-all bg-slate-50"
-                >
-                  <Plus className="w-6 h-6 mb-1" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Add More</span>
-                </button>
+                <label className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-[#288096] hover:text-[#288096] transition-all bg-slate-50 cursor-pointer block">
+                  <Plus className="w-6 h-6 mb-1 mx-auto" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-center block">Add More</span>
+                  <input 
+                    type="file" 
+                    onChange={handleImageChange} 
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/*" 
+                    multiple 
+                    className="sr-only" 
+                  />
+                </label>
               </div>
-              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" multiple className="hidden" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">

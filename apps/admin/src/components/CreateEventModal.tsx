@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, Clock, MapPin, AlignLeft, Tag, RefreshCw, Loader2, Image as ImageIcon } from "lucide-react";
-import { useMutation, useConvex } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
-import { optimizeImageForUpload } from "../lib/imageUtils";
-
-import { Doc } from "@convex/_generated/dataModel";
+import { uploadImageToConvex } from "../lib/imageUtils";
+import { Doc, Id } from "@convex/_generated/dataModel";
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -14,7 +13,6 @@ interface CreateEventModalProps {
 }
 
 export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventModalProps) {
-  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const createEvent = useMutation(api.events.create);
   const updateEvent = useMutation(api.events.update);
@@ -101,35 +99,18 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setStatusMessage("Preparing upload...");
 
     try {
       let imageStorageId = initialEvent?.imageStorageId;
-      let imageUrl = initialEvent?.imageUrl;
       
       if (imageFile) {
-        setStatusMessage("Optimizing image...");
-        const { blob, contentType } = await optimizeImageForUpload(imageFile);
-
-        setStatusMessage("Uploading flyer...");
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": contentType },
-          body: blob,
-        });
-
-        if (!result.ok) {
-          throw new Error(`Upload failed with status ${result.status}`);
-        }
-
-        const { storageId } = await result.json();
-        imageStorageId = storageId;
-
-        // Query storage URL directly to store the permanent URL
-        const directUrl = await convex.query(api.storage.getUrl, { storageId });
-        if (directUrl) {
-          imageUrl = directUrl;
-        }
+        const { storageId } = await uploadImageToConvex(
+          imageFile,
+          generateUploadUrl,
+          (msg) => setStatusMessage(msg)
+        );
+        imageStorageId = storageId as Id<"_storage">;
       }
 
       setStatusMessage("Saving event...");
@@ -147,7 +128,6 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
           description,
           youtubeUrl: youtubeUrl || undefined,
           imageStorageId,
-          imageUrl,
           isFeatured: initialEvent.isFeatured,
           isPublished: initialEvent.isPublished,
         });
@@ -162,7 +142,6 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
           description,
           youtubeUrl: youtubeUrl || undefined,
           imageStorageId,
-          imageUrl,
           isFeatured: false,
           isPublished: true,
         });
@@ -183,7 +162,7 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
       }
     } catch (error) {
       console.error("Failed to save event:", error);
-      alert(error instanceof Error ? error.message : "Failed to save event. Please try again.");
+      alert(error instanceof Error ? error.message : "Failed to save event. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
       setStatusMessage("");
@@ -220,9 +199,8 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
           <form className="space-y-6" id="create-event-form" onSubmit={handleSubmit}>
             
             {/* Image Preview / Upload */}
-            <div 
-              className="relative aspect-video w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
+            <label 
+              className="relative aspect-video w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer block"
             >
               {imagePreview ? (
                 <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
@@ -237,12 +215,11 @@ export function CreateEventModal({ isOpen, onClose, initialEvent }: CreateEventM
               </div>
               <input 
                 type="file" 
-                ref={fileInputRef} 
                 onChange={handleImageChange} 
-                accept="image/*" 
-                className="hidden" 
+                accept="image/jpeg,image/png,image/webp,image/gif,image/*" 
+                className="sr-only" 
               />
-            </div>
+            </label>
 
             {/* Basic Info */}
             <div className="space-y-4">

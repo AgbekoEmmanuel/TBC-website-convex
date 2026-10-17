@@ -3,8 +3,8 @@ import { X, Calendar, User, AlignLeft, Tag, Loader2, Image as ImageIcon, Video, 
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "../lib/utils";
-
-import { Doc } from "@convex/_generated/dataModel";
+import { uploadImageToConvex } from "../lib/imageUtils";
+import { Doc, Id } from "@convex/_generated/dataModel";
 
 interface CreateSermonModalProps {
   isOpen: boolean;
@@ -80,17 +80,11 @@ export function CreateSermonModal({ isOpen, onClose, initialSermon }: CreateSerm
       let thumbnailStorageId = initialSermon?.thumbnailStorageId;
       
       if (imageFile) {
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": imageFile.type },
-          body: imageFile,
-        });
-        const { storageId } = await result.json();
-        thumbnailStorageId = storageId;
+        const { storageId } = await uploadImageToConvex(imageFile, generateUploadUrl);
+        thumbnailStorageId = storageId as Id<"_storage">;
       }
 
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `sermon-${Date.now()}`;
 
       if (initialSermon) {
         await updateSermon({
@@ -136,7 +130,7 @@ export function CreateSermonModal({ isOpen, onClose, initialSermon }: CreateSerm
       }
     } catch (error) {
       console.error("Failed to save sermon:", error);
-      alert("Failed to save sermon. Please try again.");
+      alert(error instanceof Error ? error.message : "Failed to save sermon. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +154,7 @@ export function CreateSermonModal({ isOpen, onClose, initialSermon }: CreateSerm
         <div className="p-6 overflow-y-auto space-y-6">
           <form className="space-y-6" id="create-sermon-form" onSubmit={handleSubmit}>
             
-            <div className="relative aspect-video w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <label className="relative aspect-video w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer block">
               {imagePreview ? (
                 <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
               ) : (
@@ -172,8 +166,13 @@ export function CreateSermonModal({ isOpen, onClose, initialSermon }: CreateSerm
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                  <span className="text-white text-xs font-bold bg-black/40 px-3 py-1.5 rounded-full">Change Image</span>
               </div>
-              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
-            </div>
+              <input 
+                type="file" 
+                onChange={handleImageChange} 
+                accept="image/jpeg,image/png,image/webp,image/gif,image/*" 
+                className="sr-only" 
+              />
+            </label>
 
             <div className="space-y-4">
               <div>

@@ -4,6 +4,7 @@ import { api } from "@convex/_generated/api";
 import { Card } from "./ui/card";
 import { ImageIcon, Upload, Trash2, Loader2, Plus, Image as LucideImage } from "lucide-react";
 import { Id } from "@convex/_generated/dataModel";
+import { uploadImageToConvex } from "../lib/imageUtils";
 
 const homepicsModules = import.meta.glob('../../../website/src/assets/homepics/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' });
 const staticHomepics = Object.values(homepicsModules).map((src, i) => ({
@@ -73,15 +74,9 @@ export function ManageBanner() {
     if (!selectedFile) return;
     try {
       setIsUploadingPromo(true);
-      const postUrl = await generateUploadUrl();
-      const result = await fetch(postUrl, {
-        method: "POST",
-        headers: { "Content-Type": selectedFile.type },
-        body: selectedFile,
-      });
-      const { storageId } = await result.json();
+      const { storageId } = await uploadImageToConvex(selectedFile, generateUploadUrl);
       await createBanner({
-        imageStorageId: storageId,
+        imageStorageId: storageId as Id<"_storage">,
         description: description.trim() || undefined,
         location: "carousel",
       });
@@ -92,7 +87,7 @@ export function ManageBanner() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Error uploading banner:", error);
-      alert("Failed to upload banner image");
+      alert(error instanceof Error ? error.message : "Failed to upload banner image");
     } finally {
       setIsUploadingPromo(false);
     }
@@ -117,21 +112,15 @@ export function ManageBanner() {
     
     try {
       setIsUploadingHero(true);
-      const postUrl = await generateUploadUrl();
-      const result = await fetch(postUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      const { storageId } = await result.json();
+      const { storageId } = await uploadImageToConvex(file, generateUploadUrl);
       
       await createBanner({
-        imageStorageId: storageId,
+        imageStorageId: storageId as Id<"_storage">,
         location: "homeHero",
       });
     } catch (error) {
       console.error("Error uploading hero banner:", error);
-      alert("Failed to upload hero banner");
+      alert(error instanceof Error ? error.message : "Failed to upload hero banner");
     } finally {
       setIsUploadingHero(false);
       if (heroFileInputRef.current) heroFileInputRef.current.value = "";
@@ -156,16 +145,10 @@ export function ManageBanner() {
     
     try {
       setUploadingFixedLocation(activeFixedLocation.loc);
-      const postUrl = await generateUploadUrl();
-      const result = await fetch(postUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      const { storageId } = await result.json();
+      const { storageId } = await uploadImageToConvex(file, generateUploadUrl);
       
       await createBanner({
-        imageStorageId: storageId,
+        imageStorageId: storageId as Id<"_storage">,
         location: activeFixedLocation.loc,
       });
 

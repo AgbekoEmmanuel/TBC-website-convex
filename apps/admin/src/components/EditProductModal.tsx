@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, AlignLeft, Tag, Loader2, Image as ImageIcon, Banknote, CheckCircle2, XCircle } from "lucide-react";
-import { useMutation, useConvex } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Doc } from "@convex/_generated/dataModel";
+import { Doc, Id } from "@convex/_generated/dataModel";
 import { cn } from "../lib/utils";
-import { optimizeImageForUpload } from "../lib/imageUtils";
+import { uploadImageToConvex } from "../lib/imageUtils";
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -13,7 +13,6 @@ interface EditProductModalProps {
 }
 
 export function EditProductModal({ isOpen, onClose, product }: EditProductModalProps) {
-  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const updateProduct = useMutation(api.products.update);
 
@@ -28,8 +27,6 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const [statusMessage, setStatusMessage] = useState("");
   const [isComingSoon, setIsComingSoon] = useState(product.isComingSoon || false);
   const [isNewRelease, setIsNewRelease] = useState(product.isNewRelease || false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -55,7 +52,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      // Use URL.createObjectURL for better mobile performance
+      // Use URL.createObjectURL for instant mobile performance
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -63,41 +60,32 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setStatusMessage("Uploading...");
+    setStatusMessage("Preparing upload...");
 
     try {
       let imageStorageId = product.imageStorageId;
-      let imageUrl = product.imageUrl;
       
       if (imageFile) {
-        setStatusMessage("Uploading...");
-        const { blob, contentType } = await optimizeImageForUpload(imageFile);
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": contentType },
-          body: blob,
-        });
-        const { storageId } = await result.json();
-        imageStorageId = storageId;
-        const resolvedUrl = await convex.query(api.storage.getUrl, { storageId });
-        if (resolvedUrl) {
-          imageUrl = resolvedUrl;
-        }
+        const { storageId } = await uploadImageToConvex(
+          imageFile,
+          generateUploadUrl,
+          (msg) => setStatusMessage(msg)
+        );
+        imageStorageId = storageId as Id<"_storage">;
       }
 
-      setStatusMessage("Saving...");
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      setStatusMessage("Saving product...");
+      const slug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `product-${Date.now()}`;
+      const numericPrice = parseFloat(price) || (category === "Books" ? 100 : 0);
 
       await updateProduct({
         id: product._id,
         title,
         slug,
         description,
-        price: parseFloat(price),
+        price: numericPrice,
         category,
         imageStorageId,
-        imageUrl, 
         inStock,
         isPublished: product.isPublished,
         isComingSoon,
@@ -107,7 +95,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
       onClose();
     } catch (error) {
       console.error("Failed to update product:", error);
-      alert("Failed to update product. Please try again.");
+      alert(error instanceof Error ? error.message : "Failed to update product. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
       setStatusMessage("");
@@ -132,7 +120,7 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
         <div className="p-6 overflow-y-auto space-y-6">
           <form className="space-y-6" id="edit-product-form" onSubmit={handleSubmit}>
             
-            <div className="relative aspect-square w-48 mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <label className="relative aspect-square w-48 mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden group cursor-pointer block">
               {imagePreview ? (
                 <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
               ) : (
@@ -144,8 +132,13 @@ export function EditProductModal({ isOpen, onClose, product }: EditProductModalP
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                  <span className="text-white text-xs font-bold bg-black/40 px-3 py-1.5 rounded-full">Change</span>
               </div>
-              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
-            </div>
+              <input 
+                type="file" 
+                onChange={handleImageChange} 
+                accept="image/jpeg,image/png,image/webp,image/gif,image/*" 
+                className="sr-only" 
+              />
+            </label>
 
             <div className="space-y-4">
               <div>

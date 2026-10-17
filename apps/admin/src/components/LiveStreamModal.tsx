@@ -16,6 +16,7 @@ import {
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id, Doc } from "@convex/_generated/dataModel";
+import { uploadImageToConvex } from "../lib/imageUtils";
 
 interface LiveStreamModalProps {
   isOpen: boolean;
@@ -142,14 +143,8 @@ export function LiveStreamModal({ isOpen, onClose, initialEventId }: LiveStreamM
         : (selectedEvent ? selectedEvent.imageUrl : (imagePreview || undefined));
 
       if (selectedImage) {
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": selectedImage.type },
-          body: selectedImage,
-        });
-        const { storageId } = await result.json();
-        imageStorageId = storageId;
+        const { storageId } = await uploadImageToConvex(selectedImage, generateUploadUrl);
+        imageStorageId = storageId as Id<"_storage">;
         imageUrl = undefined;
       }
 

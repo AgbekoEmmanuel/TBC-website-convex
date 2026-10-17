@@ -1,3 +1,6 @@
+import { convex } from "./convexClient";
+import { api } from "@convex/_generated/api";
+
 /**
  * Bulletproof mobile-first image optimization and upload utilities.
  * Handles smartphone photos (iOS Safari, Android Chrome, desktop) by:
@@ -5,7 +8,8 @@
  * 2. Compressing and resizing huge 10MB-25MB phone photos to ~100KB-250KB in HD quality.
  * 3. Multi-tier decoding (createImageBitmap with fallback to Image element).
  * 4. Safe canvas export (toBlob with iOS Safari toDataURL fallback).
- * 5. Resilient Convex upload with automatic retry, timeout protection, and friendly error messages.
+ * 5. Direct WebSocket/client upload via Convex Action (immune to mobile HTTP fetch drops, CORS, and carrier proxy resets).
+ * 6. Automatic HTTP fallback with retries.
  */
 
 export function getSafeContentType(file: File): string {
@@ -16,7 +20,7 @@ export function getSafeContentType(file: File): string {
     return file.type;
   }
   // Infer from file extension if file.type is empty (common on mobile)
-  const ext = file.name.split(".").pop()?.toLowerCase();
+  const ext = file.name?.split(".").pop()?.toLowerCase();
   if (ext === "png") return "image/png";
   if (ext === "webp") return "image/webp";
   if (ext === "gif") return "image/gif";
@@ -38,6 +42,23 @@ function dataURItoBlob(dataURI: string): Blob {
     ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], { type: mimeString });
+}
+
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const commaIdx = dataUrl.indexOf(",");
+      if (commaIdx !== -1) {
+        resolve(dataUrl.slice(commaIdx + 1));
+      } else {
+        resolve(dataUrl);
+      }
+    };
+    reader.onerror = () => reject(new Error("Failed to read image data"));
+    reader.readAsDataURL(blob);
+  });
 }
 
 function calculateDimensions(
@@ -240,10 +261,8 @@ export async function optimizeImageForUpload(
 
 /**
  * Uploads an image to Convex storage safely with mobile resilience:
- * - Compresses large phone photos to small HD files (~100KB-200KB)
- * - Automatic retry (up to 3 attempts) for flaky mobile data connections
- * - Timeout guard using AbortController (40s)
- * - User-friendly error messaging on network failure
+ * 1. Direct WebSocket Convex Action upload (Primary): Bypasses cross-origin fetch, mobile carrier proxies, and CORS completely.
+ * 2. HTTP POST upload (Fallback): Automatically retries up to 3 times if needed.
  */
 export async function uploadImageToConvex(
   file: File,
@@ -253,6 +272,24 @@ export async function uploadImageToConvex(
   onStatusChange?.("Optimizing image for mobile...");
   const { blob, contentType } = await optimizeImageForUpload(file);
 
+  // METHOD 1: Direct Convex Client Action (Immune to browser fetch errors and CORS)
+  try {
+    onStatusChange?.("Uploading image...");
+    const base64Data = await blobToBase64(blob);
+    const res = await convex.action(api.storage.uploadFromClient, {
+      base64Data,
+      contentType: contentType || "image/jpeg",
+    });
+
+    if (res?.storageId) {
+      onStatusChange?.("Upload complete!");
+      return { storageId: res.storageId, contentType };
+    }
+  } catch (actionErr) {
+    console.warn("Direct upload via Convex action failed, falling back to HTTP upload:", actionErr);
+  }
+
+  // METHOD 2: HTTP Fallback with retry and fresh upload tokens
   const maxRetries = 3;
   let lastError: Error | null = null;
 
@@ -262,12 +299,10 @@ export async function uploadImageToConvex(
         onStatusChange?.(`Reconnecting upload (${attempt} of ${maxRetries})...`);
         await new Promise((r) => setTimeout(r, 1200));
       } else {
-        onStatusChange?.("Uploading image...");
+        onStatusChange?.("Uploading image (fallback)...");
       }
 
-      // Always generate a fresh upload URL for each attempt
       const postUrl = await generateUploadUrl();
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 40000);
 
@@ -305,7 +340,6 @@ export async function uploadImageToConvex(
     } catch (err: any) {
       console.warn(`Upload attempt ${attempt} failed:`, err);
       lastError = err instanceof Error ? err : new Error(String(err));
-      // Loop will retry if attempt < maxRetries
     }
   }
 
